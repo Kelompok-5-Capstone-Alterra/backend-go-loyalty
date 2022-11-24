@@ -43,6 +43,9 @@ func (ar authRepository) GetUserByEmail(ctx context.Context, email string) (enti
 	user := entity.User{}
 	err := ar.DB.Model(&model.User{}).Preload("Role").Where("email = ?", email).First(&user).Error
 	if err != nil {
+		if err.Error() == "record not found" {
+			err = errors.New("user with such email haven't signed up")
+		}
 		return entity.User{}, err
 	}
 	return user, nil

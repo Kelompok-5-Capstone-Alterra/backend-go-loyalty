@@ -84,6 +84,9 @@ func (as authService) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 
 func (as authService) RequestNewOTP(ctx context.Context, email string) error {
 	user, err := as.ar.GetUserByEmail(ctx, email)
+	if err != nil {
+		return err
+	}
 	if user.IsActive {
 		return errors.New("cannot send new otp to activated user")
 	}
