@@ -50,13 +50,15 @@ func (ar authRepository) GetUserByEmail(ctx context.Context, email string) (enti
 
 func (ar authRepository) Login(ctx context.Context, email string, password string) (entity.User, error) {
 	user := entity.User{}
-	err := ar.DB.Model(&model.User{}).Preload("Role").Where("email = ? AND password = ?", email, password).First(&user).Error
+	err := ar.DB.Model(&model.User{}).Preload("Role").Where("email = ?", email).First(&user).Error
 	if err != nil {
-		var errMessage string
 		if err.Error() == "record not found" {
-			errMessage = fmt.Sprint("wrong username or password")
+			return entity.User{}, errors.New("user with such email isn't found")
 		}
-		return entity.User{}, errors.New(errMessage)
+		return entity.User{}, err
+	}
+	if user.Password != password {
+		return entity.User{}, errors.New("wrong password")
 	}
 	if user.IsActive == false {
 		return entity.User{}, errors.New("user not activated")
