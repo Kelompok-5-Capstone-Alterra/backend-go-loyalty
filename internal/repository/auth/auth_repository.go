@@ -115,5 +115,6 @@ func (ar authRepository) ValidateOTP(ctx context.Context, otp string, email stri
 	if err != nil {
 		return err
 	}
+	ar.DB.Unscoped().Where("email = ? AND otp_code = ?", email, otp).Delete(&model.OTP{})
 	return nil
 }
