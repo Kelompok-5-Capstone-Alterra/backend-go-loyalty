@@ -115,7 +115,7 @@ func (as authService) RegenerateToken(ctx context.Context, rt string) (dto.SignI
 	id, created_at, err := utils.GetDataFromRefreshToken(rt)
 	interval := time.Now().Sub(created_at)
 	if interval.Hours() > float64(tokenEnv.RefreshTokenTTLHour) {
-		return dto.SignInResponse{}, errors.New("refresh token expired")
+		return dto.SignInResponse{}, errors.New("refresh token invalid")
 	}
 	if err != nil {
 		return dto.SignInResponse{}, err
