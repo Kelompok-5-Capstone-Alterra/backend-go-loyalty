@@ -6,6 +6,7 @@ import (
 	userRepository "backend-go-loyalty/internal/repository/user"
 	"backend-go-loyalty/pkg/utils"
 	"context"
+	"errors"
 )
 
 type UserServiceInterface interface {
@@ -23,10 +24,13 @@ func NewUserService(ur userRepository.UserRepositoryInterface) userService {
 }
 
 func (us userService) UpdatePassword(ctx context.Context, req dto.UpdatePasswordRequest, id uint64) error {
+	if req.NewPassword == req.OldPassword {
+		return errors.New("new password must be different from old password")
+	}
 	password := utils.HashPassword(req.OldPassword)
 	err := us.ur.MatchPassword(ctx, password, id)
 	if err != nil {
-		return nil
+		return err
 	}
 	req.NewPassword = utils.HashPassword(req.NewPassword)
 	user := entity.User{
@@ -35,7 +39,7 @@ func (us userService) UpdatePassword(ctx context.Context, req dto.UpdatePassword
 	}
 	_, err = us.ur.UpdateUserData(ctx, user)
 	if err != nil {
-		return nil
+		return err
 	}
 	return nil
 }
