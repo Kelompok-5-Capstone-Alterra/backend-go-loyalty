@@ -10,6 +10,10 @@ type SignUpRequest struct {
 	Email        string `json:"email" validate:"required"`
 	MobileNumber string `json:"mobile_number" validate:"required"`
 }
+type UserUpdate struct {
+	Name         string `json:"name"`
+	MobileNumber string `json:"mobile_number"`
+}
 
 type SignInRequest struct {
 	Email    string `json:"email" validate:"required"`
@@ -59,4 +63,9 @@ type ValidateOTP struct {
 
 type RequestNewOTP struct {
 	Email string `json:"email" validate:"required"`
+}
+
+type UpdatePasswordRequest struct {
+	OldPassword string `json:"old_password" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required"`
 }

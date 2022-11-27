@@ -3,6 +3,7 @@ package routes
 import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	pingController "backend-go-loyalty/internal/controller/ping"
+	userController "backend-go-loyalty/internal/controller/user"
 
 	"github.com/labstack/echo/v4"
 )
@@ -14,6 +15,11 @@ type pingRoutes struct {
 
 type authRoutes struct {
 	ac     authController.AuthController
+	router *echo.Echo
+}
+
+type userRoutes struct {
+	uc     userController.UserControllerInterface
 	router *echo.Echo
 }
 
@@ -31,6 +37,13 @@ func NewAuthRoutes(ac authController.AuthController, router *echo.Echo) authRout
 	}
 }
 
+func NewUserRoutes(uc userController.UserControllerInterface, router *echo.Echo) userRoutes {
+	return userRoutes{
+		uc:     uc,
+		router: router,
+	}
+}
+
 func (prt pingRoutes) InitEndpoints() {
 	ping := prt.router.Group("/ping")
 	ping.GET("", prt.pc.HandlePing)
@@ -43,4 +56,10 @@ func (art authRoutes) InitEndpoints() {
 	auth.POST("/otp/validate", art.ac.HandleValidateOTP)
 	auth.POST("/token/refresh", art.ac.HandleRefreshToken)
 	auth.POST("/otp/resend", art.ac.HandleRequestNewOTP)
+}
+
+func (urt userRoutes) InitEndpoints() {
+	user := urt.router.Group("/user")
+	user.PUT("/change-password", urt.uc.HandleChangePassword)
+	user.PUT("", urt.uc.HandleUpdateData)
 }
