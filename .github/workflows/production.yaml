@@ -2,7 +2,7 @@ name: Build and Test
 on:
   push:
     branches:
-      - "staging"
+      - "main"
 
 jobs:
   build_and_test:
@@ -43,7 +43,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{secrets.DOCKER_REPONAME_STAGING}}:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{secrets.DOCKER_REPONAME}}:latest
 
   deploy:
     needs: push_to_dockerhub
@@ -57,7 +57,7 @@ jobs:
           key: ${{secrets.AWS_KEY}}
           port: ${{secrets.SSH_PORT}}
           script: |
-            docker pull ${{secrets.DOCKER_USERNAME}}/${{secrets.DOCKER_REPONAME_STAGING}}:latest
-            docker stop capstone-staging
-            docker rm capstone-staging
-            docker run -d --name capstone-staging -p ${{secrets.CONTAINER_PORT_STAGING}} --env-file .staging.env ${{secrets.DOCKER_USERNAME}}/${{secrets.DOCKER_REPONAME_STAGING}}:latest
+            docker pull ${{secrets.DOCKER_USERNAME}}/${{secrets.DOCKER_REPONAME}}:latest
+            docker stop capstone-production
+            docker rm capstone-production
+            docker run -d --name capstone-production -p ${{secrets.CONTAINER_PORT}} --env-file .production.env ${{secrets.DOCKER_USERNAME}}/${{secrets.DOCKER_REPONAME}}:latest
