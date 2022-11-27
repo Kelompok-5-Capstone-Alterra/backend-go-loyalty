@@ -10,9 +10,11 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/labstack/echo/v4"
 	"github.com/xlzd/gotp"
 	"gopkg.in/gomail.v2"
 )
@@ -122,4 +124,30 @@ func GetDataFromRefreshToken(rt string) (uint64, time.Time, error) {
 		return idConv, res, nil
 	}
 	return 0, time.Time{}, errors.New("token invalid")
+}
+
+func GetUserIDFromJWT(c echo.Context) (uint64, error) {
+	if c.Request().Header["Authorization"] != nil {
+		claims := jwt.MapClaims{}
+		auth := strings.Split(c.Request().Header["Authorization"][0], " ")
+		token, err := jwt.ParseWithClaims(auth[1], claims, func(t *jwt.Token) (interface{}, error) {
+			_, ok := t.Method.(*jwt.SigningMethodHMAC)
+			if !ok {
+				return nil, errors.New("unauthorized")
+			}
+			return []byte(config.GetJWTKey()), nil
+		})
+		if err != nil {
+			return 0, err
+		}
+
+		if token.Valid {
+			idStr := fmt.Sprintf("%v", claims["sub"])
+			idConv, _ := strconv.ParseUint(idStr, 10, 64)
+			return idConv, nil
+		}
+		return 0, errors.New("unauthorized")
+	} else {
+		return 0, errors.New("unauthorized")
+	}
 }
