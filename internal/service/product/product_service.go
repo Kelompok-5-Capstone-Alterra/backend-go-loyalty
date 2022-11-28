@@ -4,8 +4,8 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"errors"
-	"dto/product/product_response"
-	"repository/IProductRepository"
+	"backend-go-loyalty/internal/dto"
+	"backend-go-loyalty/internal/repository/product"
 )
 
 type ProductService interface {
