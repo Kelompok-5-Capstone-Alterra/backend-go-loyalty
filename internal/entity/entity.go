@@ -39,3 +39,10 @@ type OTP struct {
 // Array of structs
 type Users []User
 type Roles []Role
+
+type Reward struct {
+	RewardID      int    `db:"id"`
+	Name          string `db:"name"`
+	Description   string `db:"description"`
+	RequiredPoint int    `db:"required_points"`
+}
