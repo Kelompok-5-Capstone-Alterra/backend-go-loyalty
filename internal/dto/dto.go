@@ -69,3 +69,18 @@ type UpdatePasswordRequest struct {
 	OldPassword string `json:"old_password" validate:"required"`
 	NewPassword string `json:"new_password" validate:"required"`
 }
+
+type ProductRequest struct {
+	Name        string `json:"name"`
+	Price       int    `json:"price"`
+	Description int    `json:"description"`
+	Point       int    `json:"point"`
+}
+
+type ProductResponse struct {
+	ProductID   int    `json:"id"`
+	Name        string `json:"name"`
+	Price       int    `json:"price"`
+	Description int    `json:"description"`
+	Point       int    `json:"point"`
+}

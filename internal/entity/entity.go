@@ -39,3 +39,11 @@ type OTP struct {
 // Array of structs
 type Users []User
 type Roles []Role
+
+type Product struct {
+	ProductID   int    `db:"id"`
+	Name        string `db:"name"`
+	Price       int    `db:"price"`
+	Description int    `db:"description"`
+	Point       int    `db:"points"`
+}
