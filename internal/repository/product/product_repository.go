@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"entity/entity"
+	"backend-go-loyalty/entity"
 	"gorm.io/gorm"
 )
 
@@ -31,6 +31,7 @@ func (pr *productRepository) GetAll(p []*entity.Product) ([]*entity.Product, err
 func (pr *productRepository) GetProductByID(id int) (*entity.Product, error) {
 	var product entity.Product
 	err := pr.Db.Where("id = ?", id).First(&product).Error
+	
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +40,8 @@ func (pr *productRepository) GetProductByID(id int) (*entity.Product, error) {
 
 func (pr *productRepository) InsertProduct(product *entity.Product) (*entity.Product, error) {
 	err := pr.Db.Where("name =? AND price =? AND description =? AND points =?", product.Name, product.Price, product.Description, product.Point).First(&product).Error
-
 	err = pr.Db.Create(&product).Error
+	
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (pr *productRepository) InsertProduct(product *entity.Product) (*entity.Pro
 
 func (pr *productRepository) UpdateProduct(p *entity.Product, id int) (*entity.Product, error) {
 	var product entity.Product
-	var err = pr.Db.Find(&product, id).Error
+	err := pr.Db.Find(&product, id).Error
 	product.Name = p.UserName
 	product.Price = p.Price
 	product.Description = p.Description
