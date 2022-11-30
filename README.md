@@ -1,1 +1,1 @@
-# backend-go-loyalty
+# Loyalty Application (Backend - Go)
