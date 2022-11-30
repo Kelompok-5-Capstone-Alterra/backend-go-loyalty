@@ -84,3 +84,25 @@ type RewardResponse struct {
 }
 
 type RewardsResponse []RewardResponse
+type ProductRequest struct {
+	Name        string `json:"name" validate:"required"`
+	Price       int    `json:"price" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Point       int    `json:"point" validate:"required"`
+}
+type ProductUpdateRequest struct {
+	Name        string `json:"name"`
+	Price       int    `json:"price"`
+	Description string `json:"description"`
+	Point       int    `json:"point"`
+}
+
+type ProductResponse struct {
+	ProductID   uint64 `json:"id"`
+	Name        string `json:"name"`
+	Price       int    `json:"price"`
+	Description string `json:"description"`
+	Point       int    `json:"point"`
+}
+
+type ProductsResponse []ProductResponse

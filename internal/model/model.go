@@ -48,3 +48,12 @@ type Reward struct {
 	CreatedAt     time.Time `db:"created_at"`
 	UpdatedAt     time.Time `db:"updated_at"`
 }
+type Product struct {
+	ProductID   uint64    `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	Name        string    `db:"name"`
+	Price       int       `db:"price"`
+	Description string    `db:"description"`
+	Point       int       `db:"points"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
+}

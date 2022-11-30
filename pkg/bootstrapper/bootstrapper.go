@@ -3,14 +3,17 @@ package bootstrapper
 import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	pingController "backend-go-loyalty/internal/controller/ping"
+	productController "backend-go-loyalty/internal/controller/product"
 	rewardController "backend-go-loyalty/internal/controller/reward"
 	userController "backend-go-loyalty/internal/controller/user"
 	authRepository "backend-go-loyalty/internal/repository/auth"
+	productRepository "backend-go-loyalty/internal/repository/product"
 	rewardRepository "backend-go-loyalty/internal/repository/reward"
 	userRepository "backend-go-loyalty/internal/repository/user"
 	"backend-go-loyalty/internal/routes"
 	authService "backend-go-loyalty/internal/service/auth"
 	pingService "backend-go-loyalty/internal/service/ping"
+	productService "backend-go-loyalty/internal/service/product"
 	rewardService "backend-go-loyalty/internal/service/reward"
 	userService "backend-go-loyalty/internal/service/user"
 
@@ -41,4 +44,10 @@ func InitEndpoints(router *echo.Echo, db *gorm.DB) {
 	rewardController := rewardController.NewRewardController(rewardService)
 	rewardRoutes := routes.NewRewardRoutes(rewardController, router)
 	rewardRoutes.InitEndpoints()
+
+	productRepository := productRepository.NewProductRepository(db)
+	productService := productService.NewProductService(productRepository)
+	productController := productController.NewProductController(productService)
+	productRoutes := routes.NewProductRoutes(productController, router)
+	productRoutes.InitEndpoints()
 }
