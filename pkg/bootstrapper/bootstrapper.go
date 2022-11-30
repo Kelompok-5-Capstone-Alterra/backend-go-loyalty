@@ -3,12 +3,15 @@ package bootstrapper
 import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	pingController "backend-go-loyalty/internal/controller/ping"
+	rewardController "backend-go-loyalty/internal/controller/reward"
 	userController "backend-go-loyalty/internal/controller/user"
 	authRepository "backend-go-loyalty/internal/repository/auth"
+	rewardRepository "backend-go-loyalty/internal/repository/reward"
 	userRepository "backend-go-loyalty/internal/repository/user"
 	"backend-go-loyalty/internal/routes"
 	authService "backend-go-loyalty/internal/service/auth"
 	pingService "backend-go-loyalty/internal/service/ping"
+	rewardService "backend-go-loyalty/internal/service/reward"
 	userService "backend-go-loyalty/internal/service/user"
 
 	"github.com/labstack/echo/v4"
@@ -32,4 +35,10 @@ func InitEndpoints(router *echo.Echo, db *gorm.DB) {
 	userController := userController.NewUserController(userService)
 	userRoutes := routes.NewUserRoutes(userController, router)
 	userRoutes.InitEndpoints()
+
+	rewardRepository := rewardRepository.NewRewardRepository(db)
+	rewardService := rewardService.NewRewardService(rewardRepository)
+	rewardController := rewardController.NewRewardController(rewardService)
+	rewardRoutes := routes.NewRewardRoutes(rewardController, router)
+	rewardRoutes.InitEndpoints()
 }

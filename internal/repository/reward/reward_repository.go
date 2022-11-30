@@ -10,7 +10,7 @@ import (
 
 type IRewardRepository interface {
 	CreateReward(ctx context.Context, reward *entity.Reward) error
-	FindAllReward(ctx context.Context) (*entity.Reward, error)
+	FindAllReward(ctx context.Context) (*entity.Rewards, error)
 	FindRewardByID(ctx context.Context, id uint64) (*entity.Reward, error)
 	UpdateReward(ctx context.Context, r *entity.Reward, id uint64) error
 	DeleteReward(ctx context.Context, id uint64) error
@@ -24,8 +24,8 @@ func NewRewardRepository(db *gorm.DB) IRewardRepository {
 	return &rewardRepository{db}
 }
 
-func (rr *rewardRepository) FindAllReward(ctx context.Context) (*entity.Reward, error) {
-	var rewards entity.Reward
+func (rr *rewardRepository) FindAllReward(ctx context.Context) (*entity.Rewards, error) {
+	var rewards entity.Rewards
 	err := rr.DB.Find(&rewards).Error
 	if err != nil {
 		return nil, err
