@@ -1,82 +1,64 @@
-package repository
+package rewardRepository
 
 import (
 	"backend-go-loyalty/internal/entity"
-	"log"
+	"backend-go-loyalty/internal/model"
+	"context"
 
 	"gorm.io/gorm"
 )
 
 type IRewardRepository interface {
-	CreateReward(reward *entity.Reward) (*entity.Reward, error)
-	FindAll(r []*entity.Reward) ([]*entity.Reward, error)
-	FindRewardByID(id int) (*entity.Reward, error)
-	UpdateReward(r *entity.Reward, id int) (*entity.Reward, error)
-	DeleteReward(id int) error
 }
 type rewardRepository struct {
-	Db *gorm.DB
+	DB *gorm.DB
 }
 
 func NewRewardRepository(db *gorm.DB) IRewardRepository {
 	return &rewardRepository{db}
 }
 
-func (rw *rewardRepository) FindAll(r []*entity.Reward) ([]*entity.Reward, error) {
-	err := rw.Db.Find(&r).Error
+func (rr *rewardRepository) FindAllReward(ctx context.Context) (*entity.Reward, error) {
+	var rewards entity.Reward
+	err := rr.DB.Find(&rewards).Error
 	if err != nil {
 		return nil, err
 	}
-	return r, nil
+	return &rewards, nil
 }
 
-func (rw *rewardRepository) FindRewardByID(id int) (*entity.Reward, error) {
+func (rr *rewardRepository) FindRewardByID(ctx context.Context, id uint64) (*entity.Reward, error) {
 	var reward entity.Reward
-	err := rw.Db.Where("id = ?", id).First(&reward).Error
+	err := rr.DB.First(&reward, id).Error
 	if err != nil {
 		return nil, err
 	}
 	return &reward, err
 }
 
-func (rw *rewardRepository) CreateReward(reward *entity.Reward) (*entity.Reward, error) {
-	err := rw.Db.Where("name =? AND descriptions =? AND required_points =?", reward.Name, reward.Description, reward.RequiredPoint).First(&reward).Error
-
+func (rr *rewardRepository) CreateReward(ctx context.Context, reward *entity.Reward) error {
+	err := rr.DB.Create(&reward).Error
 	if err != nil {
-		log.Fatalf("error when inserting data: %s", err)
+		return err
 	}
-
-	err = rw.Db.Create(&reward).Error
-	if err != nil {
-		return nil, err
-	}
-	return reward, err
+	return nil
 }
 
-func (rw *rewardRepository) UpdateReward(r *entity.Reward, id int) (*entity.Reward, error) {
-	var reward entity.Reward
-	var err = rw.Db.Find(&reward, id).Error
-	reward.Name = r.Name
-	reward.Description = r.Description
-	reward.RequiredPoint = r.RequiredPoint
-
-	err = rw.Db.Save(&reward).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return r, err
-}
-
-func (rw *rewardRepository) DeleteReward(id int) error {
-	var reward entity.Reward
-	err := rw.Db.Delete(&reward, id).Error
+func (rr *rewardRepository) UpdateReward(ctx context.Context, r *entity.Reward, id uint64) error {
+	err := rr.DB.Model(&model.Reward{}).Where("id = ?", id).Updates(r).Error
 
 	if err != nil {
 		return err
 	}
-
 	return nil
+}
 
+func (rr *rewardRepository) DeleteReward(ctx context.Context, id uint64) error {
+	var reward entity.Reward
+	err := rr.DB.Delete(&reward, id).Error
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
