@@ -1,4 +1,4 @@
-package controller
+package rewardController
 
 import (
 	"backend-go-loyalty/internal/dto"
@@ -11,7 +11,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type IRewardController interface{}
+type IRewardController interface {
+	FindAllReward(c echo.Context) error
+	FindRewardById(c echo.Context) error
+	CreateReward(c echo.Context) error
+	UpdateReward(c echo.Context) error
+	DeleteReward(c echo.Context) error
+}
 
 type rewardController struct {
 	rs rewardService.IRewardService
