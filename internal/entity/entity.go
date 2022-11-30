@@ -41,8 +41,10 @@ type Users []User
 type Roles []Role
 
 type Reward struct {
-	RewardID      int    `db:"id"`
+	RewardID      uint64 `db:"id" gorm:"column:id"`
 	Name          string `db:"name"`
 	Description   string `db:"description"`
 	RequiredPoint int    `db:"required_points"`
 }
+
+type Rewards []Reward

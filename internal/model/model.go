@@ -41,10 +41,10 @@ type Users []User
 type Roles []Role
 
 type Reward struct {
-	RewardID      int       `db:"id"`
+	RewardID      uint64    `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	Name          string    `db:"name"`
 	Description   string    `db:"description"`
-	RequiredPoint int       `db:"required_points"`
+	RequiredPoint uint64    `db:"required_points"`
 	CreatedAt     time.Time `db:"created_at"`
 	UpdatedAt     time.Time `db:"updated_at"`
 }

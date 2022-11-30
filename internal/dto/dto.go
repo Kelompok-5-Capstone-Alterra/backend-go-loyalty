@@ -71,14 +71,16 @@ type UpdatePasswordRequest struct {
 }
 
 type RewardRequest struct {
-	Name          string `json:"name"`
-	Description   string `json:"description"`
-	RequiredPoint int    `json:"required_points"`
+	Name          string `json:"name" validate:"required"`
+	Description   string `json:"description" validate:"required"`
+	RequiredPoint int    `json:"requiredPoint" validate:"required"`
 }
 
 type RewardResponse struct {
-	RewardID      int    `json:"id"`
+	RewardID      uint64 `json:"id"`
 	Name          string `json:"name"`
 	Description   string `json:"description"`
-	RequiredPoint int    `json:"requiredPoint"`
+	RequiredPoint uint64 `json:"requiredPoint"`
 }
+
+type RewardsResponse []RewardResponse
