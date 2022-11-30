@@ -41,10 +41,10 @@ type Users []User
 type Roles []Role
 
 type Product struct {
-	ProductID   int       `db:"id"`
+	ProductID   uint64    `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	Name        string    `db:"name"`
 	Price       int       `db:"price"`
-	Description int       `db:"description"`
+	Description string    `db:"description"`
 	Point       int       `db:"points"`
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at"`

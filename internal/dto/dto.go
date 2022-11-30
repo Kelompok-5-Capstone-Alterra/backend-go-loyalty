@@ -71,16 +71,24 @@ type UpdatePasswordRequest struct {
 }
 
 type ProductRequest struct {
+	Name        string `json:"name" validate:"required"`
+	Price       int    `json:"price" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Point       int    `json:"point" validate:"required"`
+}
+type ProductUpdateRequest struct {
 	Name        string `json:"name"`
 	Price       int    `json:"price"`
-	Description int    `json:"description"`
+	Description string `json:"description"`
 	Point       int    `json:"point"`
 }
 
 type ProductResponse struct {
-	ProductID   int    `json:"id"`
+	ProductID   uint64 `json:"id"`
 	Name        string `json:"name"`
 	Price       int    `json:"price"`
-	Description int    `json:"description"`
+	Description string `json:"description"`
 	Point       int    `json:"point"`
 }
+
+type ProductsResponse []ProductResponse
