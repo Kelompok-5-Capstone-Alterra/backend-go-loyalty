@@ -73,7 +73,7 @@ type UpdatePasswordRequest struct {
 type RewardRequest struct {
 	Name          string `json:"name" validate:"required"`
 	Description   string `json:"description" validate:"required"`
-	RequiredPoint int    `json:"requiredPoint" validate:"required"`
+	RequiredPoint uint64 `json:"requiredPoint" validate:"required"`
 }
 
 type RewardResponse struct {

@@ -44,7 +44,7 @@ type Reward struct {
 	RewardID      uint64 `db:"id" gorm:"column:id"`
 	Name          string `db:"name"`
 	Description   string `db:"description"`
-	RequiredPoint int    `db:"required_points"`
+	RequiredPoint uint64 `db:"required_points"`
 }
 
 type Rewards []Reward
