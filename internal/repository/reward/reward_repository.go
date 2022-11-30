@@ -9,7 +9,13 @@ import (
 )
 
 type IRewardRepository interface {
+	CreateReward(ctx context.Context, reward *entity.Reward) error
+	FindAllReward(ctx context.Context) (*entity.Reward, error)
+	FindRewardByID(ctx context.Context, id uint64) (*entity.Reward, error)
+	UpdateReward(ctx context.Context, r *entity.Reward, id uint64) error
+	DeleteReward(ctx context.Context, id uint64) error
 }
+
 type rewardRepository struct {
 	DB *gorm.DB
 }

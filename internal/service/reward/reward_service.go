@@ -1,90 +1,94 @@
-package service
+package rewardService
 
 import (
-	"backend-go-loyalty/internal/repository/reward"
 	"backend-go-loyalty/internal/dto"
+	"backend-go-loyalty/internal/entity"
+	rewardRepository "backend-go-loyalty/internal/repository/reward"
 
-	"gorm.io/gorm"
 	"context"
 )
 
-type RewardService interface {
-	CreateReward(ctx context.Context, name string, description string, requiredPoint int) error
-	FindAll(ctx context.Context) (*dto.RewardResponse, error)
-	FindRewardByID(ctx context.Context, rewardID int) (dto dto.RewardResponse, error)
-	UpdateReward(ctx context.Context) error
-	DeleteReward(ctx context.Context, rewardID int) error
+type IRewardService interface {
+	CreateReward(ctx context.Context, req dto.RewardRequest) error
+	FindAllReward(ctx context.Context) (dto.RewardsResponse, error)
+	FindRewardByID(ctx context.Context, rewardID uint64) (dto.RewardResponse, error)
+	UpdateReward(ctx context.Context, req dto.RewardRequest, id uint64) error
+	DeleteReward(ctx context.Context, rewardID uint64) error
 }
 
 type rewardServiceImpl struct {
-	rw repository.IRewardRepository
-	db *gorm.DB
-	dto dto.RewardResponse
+	rr rewardRepository.IRewardRepository
 }
 
-func ProvideRewardService(rw repository.IRewardRepository, db *gorm.DB, dto dto.RewardResponse) *rewardServiceImpl {
-	return &rewardServiceImpl{
-		db: db,
-		rw: rw,
-		dto: dto,
+func NewRewardService(rr rewardRepository.IRewardRepository) rewardServiceImpl {
+	return rewardServiceImpl{
+		rr: rr,
 	}
 }
 
-func (rs rewardServiceImpl) FindAll(ctx context.Context) (*dto.RewardResponse, error) {
-	rewards, err := rs.rw.FindAll(ctx)
+func (rs rewardServiceImpl) FindAllReward(ctx context.Context) (dto.RewardsResponse, error) {
+	rewards, err := rs.rr.FindAllReward(ctx)
 	if err != nil {
 		return nil, err
 	}
-	rewardResponse := dto.RewardResponse{}
-	for _, reward := range rewards {
+
+	var rewardResponses dto.RewardsResponse
+	for _, reward := range *rewards {
 		var item dto.RewardResponse
 		item.RewardID = reward.RewardID
 		item.Name = reward.Name
 		item.Description = reward.Description
 		item.RequiredPoint = reward.RequiredPoint
-		rewardResponse = append(rewardResponse, &item)
+		rewardResponses = append(rewardResponses, item)
 	}
-	return rewardResponse, nil
+	return rewardResponses, nil
 }
 
-func (rs rewardServiceImpl) FindRewardByID(ctx context.Context, rewardID int) (dto dto.RewardResponse, error) {
-	rwrd, err := rs.rw.FindRewardByID(ctx, rewardID)
+func (rs rewardServiceImpl) FindRewardByID(ctx context.Context, rewardID uint64) (dto.RewardResponse, error) {
+	reward, err := rs.rr.FindRewardByID(ctx, rewardID)
 	if err != nil {
 		return dto.RewardResponse{}, err
 	}
-	if len(rwrd) < 1 {
-		return nil, errors.New("no reward found")
-	}
 
-	rewardResponse := dto.RewardResponse{}
-	for _, reward := range rwrd {
-		var item dto.RewardResponse
-		item.RewardID = reward.RewardID
-		item.Name = reward.Name
-		item.Description = reward.Description
-		item.RequiredPoint = reward.RequiredPoint
+	rewardResponse := dto.RewardResponse{
+		RewardID:      reward.RewardID,
+		Name:          reward.Name,
+		Description:   reward.Description,
+		RequiredPoint: reward.RequiredPoint,
 	}
 	return rewardResponse, nil
 }
 
-func (rs rewardServiceImpl) CreateReward(ctx context.Context, name string, description string, requiredPoint int) error {
-	err := rs.rw.CreateReward(ctx, reward.Name, reward.Description, reward.RequiredPoint)
-	if err != nil {
-		return 0, err
+func (rs rewardServiceImpl) CreateReward(ctx context.Context, req dto.RewardRequest) error {
+	reward := entity.Reward{
+		Name:          req.Name,
+		Description:   req.Description,
+		RequiredPoint: req.RequiredPoint,
 	}
-	return nil
-}
 
-func (rs rewardServiceImpl) UpdateReward(ctx context.Context) error {
-	err := rs.rw.UpdateReward(ctx)
+	err := rs.rr.CreateReward(ctx, &reward)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (rs rewardServiceImpl) DeleteReward(ctx context.Context, rewardID int) error {
-	err := rs.rw.DeleteReward(ctx, rewardID)
+func (rs rewardServiceImpl) UpdateReward(ctx context.Context, req dto.RewardRequest, id uint64) error {
+	reward := entity.Reward{
+		Name:          req.Name,
+		Description:   req.Description,
+		RequiredPoint: req.RequiredPoint,
+	}
+
+	err := rs.rr.UpdateReward(ctx, &reward, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rs rewardServiceImpl) DeleteReward(ctx context.Context, rewardID uint64) error {
+	err := rs.rr.DeleteReward(ctx, rewardID)
 	if err != nil {
 		return err
 	}
