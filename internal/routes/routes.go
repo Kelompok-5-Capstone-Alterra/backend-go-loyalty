@@ -4,6 +4,7 @@ import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	pingController "backend-go-loyalty/internal/controller/ping"
 	productController "backend-go-loyalty/internal/controller/product"
+	rewardController "backend-go-loyalty/internal/controller/reward"
 	userController "backend-go-loyalty/internal/controller/user"
 
 	"github.com/labstack/echo/v4"
@@ -22,6 +23,18 @@ type authRoutes struct {
 type userRoutes struct {
 	uc     userController.UserControllerInterface
 	router *echo.Echo
+}
+
+type rewardRoutes struct {
+	rc     rewardController.IRewardController
+	router *echo.Echo
+}
+
+func NewRewardRoutes(rc rewardController.IRewardController, router *echo.Echo) rewardRoutes {
+	return rewardRoutes{
+		rc:     rc,
+		router: router,
+	}
 }
 
 type productRoutes struct {
@@ -55,6 +68,15 @@ func NewUserRoutes(uc userController.UserControllerInterface, router *echo.Echo)
 		uc:     uc,
 		router: router,
 	}
+}
+
+func (rrt rewardRoutes) InitEndpoints() {
+	reward := rrt.router.Group("/rewards")
+	reward.GET("", rrt.rc.FindAllReward)
+	reward.GET("/:id", rrt.rc.FindRewardById)
+	reward.POST("", rrt.rc.CreateReward)
+	reward.PUT("/:id", rrt.rc.UpdateReward)
+	reward.DELETE("/:id", rrt.rc.DeleteReward)
 }
 
 func (prt pingRoutes) InitEndpoints() {

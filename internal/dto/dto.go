@@ -70,6 +70,20 @@ type UpdatePasswordRequest struct {
 	NewPassword string `json:"new_password" validate:"required"`
 }
 
+type RewardRequest struct {
+	Name          string `json:"name" validate:"required"`
+	Description   string `json:"description" validate:"required"`
+	RequiredPoint uint64 `json:"requiredPoint" validate:"required"`
+}
+
+type RewardResponse struct {
+	RewardID      uint64 `json:"id"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	RequiredPoint uint64 `json:"requiredPoint"`
+}
+
+type RewardsResponse []RewardResponse
 type ProductRequest struct {
 	Name        string `json:"name" validate:"required"`
 	Price       int    `json:"price" validate:"required"`
