@@ -11,6 +11,7 @@ import (
 type UserServiceInterface interface {
 	UpdatePassword(ctx context.Context, req dto.UpdatePasswordRequest, id uint64) error
 	UpdateUserData(ctx context.Context, req dto.UserUpdate, id uint64) (dto.SignInResponse, error)
+	DeleteUserData(ctx context.Context, id uint64) error
 }
 type userService struct {
 	ur userRepository.UserRepositoryInterface
@@ -20,6 +21,11 @@ func NewUserService(ur userRepository.UserRepositoryInterface) userService {
 	return userService{
 		ur: ur,
 	}
+}
+
+func (us userService) DeleteUserData(ctx context.Context, id uint64) error {
+	err := us.ur.DeleteUserData(ctx, id)
+	return err
 }
 
 func (us userService) UpdatePassword(ctx context.Context, req dto.UpdatePasswordRequest, id uint64) error {

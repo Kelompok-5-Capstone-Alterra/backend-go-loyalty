@@ -6,6 +6,7 @@ import (
 	"backend-go-loyalty/pkg/response"
 	"backend-go-loyalty/pkg/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
@@ -14,6 +15,8 @@ import (
 type UserControllerInterface interface {
 	HandleChangePassword(c echo.Context) error
 	HandleUpdateData(c echo.Context) error
+	HandleUpdateCustomerData(c echo.Context) error
+	HandleDeleteCustomerData(c echo.Context) error
 }
 
 type userController struct {
@@ -24,6 +27,41 @@ func NewUserController(us userService.UserServiceInterface) userController {
 	return userController{
 		us: us,
 	}
+}
+
+func (uc userController) HandleUpdateCustomerData(c echo.Context) error {
+	req := dto.UserUpdate{}
+	c.Bind(&req)
+	param := c.Param("id")
+	id, err := strconv.ParseUint(param, 10, 64)
+	if err != nil {
+		return responseErrorSingle(err, http.StatusBadRequest)
+	}
+	_, err = uc.us.UpdateUserData(c.Request().Context(), req, id)
+	if err != nil {
+		if err.Error() == "record not found" {
+			return responseErrorSingle(err, http.StatusNoContent)
+		}
+		return responseErrorSingle(err, http.StatusInternalServerError)
+	}
+	return responseSuccess(c, http.StatusOK, echo.Map{
+		"status": "SUCCESS_UPDATED_USER",
+	})
+}
+
+func (uc userController) HandleDeleteCustomerData(c echo.Context) error {
+	param := c.Param("id")
+	id, err := strconv.ParseUint(param, 10, 64)
+	if err != nil {
+		return responseErrorSingle(err, http.StatusBadRequest)
+	}
+	err = uc.us.DeleteUserData(c.Request().Context(), id)
+	if err != nil {
+		return responseErrorSingle(err, http.StatusInternalServerError)
+	}
+	return responseSuccess(c, http.StatusOK, echo.Map{
+		"status": "SUCCESS_DELETED_USER",
+	})
 }
 
 func (uc userController) HandleChangePassword(c echo.Context) error {
@@ -122,4 +160,21 @@ func (uc userController) HandleUpdateData(c echo.Context) error {
 				nil))
 	}
 	return c.JSON(http.StatusOK, response.NewBaseResponse(http.StatusOK, http.StatusText(http.StatusOK), nil, data))
+}
+
+func responseErrorSingle(err error, code int) error {
+	return echo.NewHTTPError(code,
+		response.NewBaseResponse(code,
+			http.StatusText(code),
+			response.NewErrorResponseData(
+				response.NewErrorResponseValue(
+					"error",
+					err.Error(),
+				),
+			),
+			nil))
+}
+
+func responseSuccess(c echo.Context, code int, data interface{}) error {
+	return c.JSON(code, response.NewBaseResponse(code, http.StatusText(code), nil, data))
 }

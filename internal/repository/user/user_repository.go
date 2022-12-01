@@ -12,6 +12,7 @@ import (
 type UserRepositoryInterface interface {
 	UpdateUserData(ctx context.Context, req entity.User) (entity.User, error)
 	MatchPassword(ctx context.Context, password string, id uint64) error
+	DeleteUserData(ctx context.Context, id uint64) error
 }
 
 type userRepository struct {
@@ -22,6 +23,11 @@ func NewUserRepository(dbConn *gorm.DB) userRepository {
 	return userRepository{
 		DB: dbConn,
 	}
+}
+
+func (ur userRepository) DeleteUserData(ctx context.Context, id uint64) error {
+	err := ur.DB.Delete(&entity.User{}, id).Error
+	return err
 }
 
 func (ur userRepository) UpdateUserData(ctx context.Context, req entity.User) (entity.User, error) {
