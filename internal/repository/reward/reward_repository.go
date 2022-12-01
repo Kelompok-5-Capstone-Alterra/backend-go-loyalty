@@ -26,7 +26,7 @@ func NewRewardRepository(db *gorm.DB) IRewardRepository {
 
 func (rr *rewardRepository) FindAllReward(ctx context.Context) (*entity.Rewards, error) {
 	var rewards entity.Rewards
-	err := rr.DB.Find(&rewards).Error
+	err := rr.DB.Model(&model.Category{}).Preload("CategoryID").Find(&rewards).Error
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (rr *rewardRepository) FindAllReward(ctx context.Context) (*entity.Rewards,
 
 func (rr *rewardRepository) FindRewardByID(ctx context.Context, id uint64) (*entity.Reward, error) {
 	var reward entity.Reward
-	err := rr.DB.First(&reward, id).Error
+	err := rr.DB.Model(&model.Category{}).Preload("CategoryID").First(&reward, id).Error
 	if err != nil {
 		return nil, err
 	}

@@ -35,10 +35,14 @@ func (rs rewardServiceImpl) FindAllReward(ctx context.Context) (dto.RewardsRespo
 	var rewardResponses dto.RewardsResponse
 	for _, reward := range *rewards {
 		var item dto.RewardResponse
-		item.RewardID = reward.RewardID
+		item.ID = reward.ID
 		item.Name = reward.Name
 		item.Description = reward.Description
 		item.RequiredPoint = reward.RequiredPoint
+		item.ValidUntil = reward.ValidUntil
+		item.CreatedAt = reward.CreatedAt
+		item.UpdatedAt = reward.UpdatedAt
+		item.DeletedAt = reward.DeletedAt
 		rewardResponses = append(rewardResponses, item)
 	}
 	return rewardResponses, nil
@@ -51,10 +55,14 @@ func (rs rewardServiceImpl) FindRewardByID(ctx context.Context, rewardID uint64)
 	}
 
 	rewardResponse := dto.RewardResponse{
-		RewardID:      reward.RewardID,
+		ID:            reward.ID,
 		Name:          reward.Name,
 		Description:   reward.Description,
 		RequiredPoint: reward.RequiredPoint,
+		ValidUntil:    reward.ValidUntil,
+		CreatedAt:     reward.CreatedAt,
+		UpdatedAt:     reward.UpdatedAt,
+		DeletedAt:     reward.DeletedAt,
 	}
 	return rewardResponse, nil
 }
@@ -64,6 +72,7 @@ func (rs rewardServiceImpl) CreateReward(ctx context.Context, req dto.RewardRequ
 		Name:          req.Name,
 		Description:   req.Description,
 		RequiredPoint: req.RequiredPoint,
+		ValidUntil:    req.ValidUntil,
 	}
 
 	err := rs.rr.CreateReward(ctx, &reward)
@@ -78,6 +87,7 @@ func (rs rewardServiceImpl) UpdateReward(ctx context.Context, req dto.RewardRequ
 		Name:          req.Name,
 		Description:   req.Description,
 		RequiredPoint: req.RequiredPoint,
+		ValidUntil:    req.ValidUntil,
 	}
 
 	err := rs.rr.UpdateReward(ctx, &reward, id)
