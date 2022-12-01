@@ -31,12 +31,16 @@ func (ur userRepository) DeleteUserData(ctx context.Context, id uint64) error {
 }
 
 func (ur userRepository) UpdateUserData(ctx context.Context, req entity.User) (entity.User, error) {
-	err := ur.DB.Model(&model.User{}).Where("id = ?", req.ID).Updates(req).Error
-	if err != nil {
-		return entity.User{}, err
+	result := ur.DB.Model(&model.User{}).Where("id = ?", req.ID).Updates(req)
+	var errMessage string
+	if result.RowsAffected == 0 {
+		errMessage = "old password not match"
+	}
+	if result.Error != nil {
+		return entity.User{}, errors.New(errMessage)
 	}
 	res := entity.User{}
-	err = ur.DB.Model(&model.User{}).Preload("Role").First(&res, req.ID).Error
+	err := ur.DB.Model(&model.User{}).Preload("Role").First(&res, req.ID).Error
 	if err != nil {
 		return entity.User{}, err
 	}

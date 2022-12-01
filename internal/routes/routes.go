@@ -6,6 +6,7 @@ import (
 	productController "backend-go-loyalty/internal/controller/product"
 	rewardController "backend-go-loyalty/internal/controller/reward"
 	userController "backend-go-loyalty/internal/controller/user"
+	"backend-go-loyalty/internal/middleware"
 
 	"github.com/labstack/echo/v4"
 )
@@ -94,7 +95,7 @@ func (art authRoutes) InitEndpoints() {
 }
 
 func (urt userRoutes) InitEndpoints() {
-	user := urt.router.Group("/user")
+	user := urt.router.Group("/user", middleware.ValidateJWT)
 	user.PUT("/change-password", urt.uc.HandleChangePassword)
 	user.PUT("", urt.uc.HandleUpdateData)
 }
