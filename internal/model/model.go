@@ -23,6 +23,15 @@ type User struct {
 	Role         Role         `gorm:"foreignKey:RoleID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
+type UserCoin struct {
+	ID     uint64    `db:"id" gorm:"primaryKey;autoIncrement"`
+	UserID uuid.UUID `db:"user_id"`
+	Amount uint64    `db:"amount"`
+	User   User      `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+}
+
+type UserCoins []UserCoin
+
 type Role struct {
 	ID        uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
 	Name      string       `db:"name"`
