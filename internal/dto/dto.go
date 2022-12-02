@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -73,38 +74,64 @@ type UpdatePasswordRequest struct {
 }
 
 type RewardRequest struct {
-	Name          string `json:"name" validate:"required"`
-	Description   string `json:"description" validate:"required"`
-	RequiredPoint uint64 `json:"requiredPoint" validate:"required"`
+	Name          string    `json:"name" validate:"required"`
+	Description   string    `json:"description" validate:"required"`
+	RequiredPoint uint64    `json:"requiredPoint" validate:"required"`
+	ValidUntil    time.Time `json:"valid_until" validate:"required"`
+	CategoryID    uint64    `json:"category_id" validate:"category_id"`
+}
+
+type RewardUpdateRequest struct {
+	Name          string    `json:"name"`
+	Description   string    `json:"description"`
+	RequiredPoint uint64    `json:"requiredPoint"`
+	ValidUntil    time.Time `json:"valid_until"`
+	CategoryID    uint64    `json:"category_id"`
 }
 
 type RewardResponse struct {
-	RewardID      uint64 `json:"id"`
-	Name          string `json:"name"`
-	Description   string `json:"description"`
-	RequiredPoint uint64 `json:"requiredPoint"`
+	ID            uint64       `json:"id"`
+	Name          string       `json:"name"`
+	Description   string       `json:"description"`
+	RequiredPoint uint64       `json:"required_points"`
+	ValidUntil    time.Time    `json:"valid_until"`
+	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
+	DeletedAt     sql.NullTime `json:"deleted_at"`
 }
 
 type RewardsResponse []RewardResponse
 type ProductRequest struct {
-	Name        string `json:"name" validate:"required"`
-	Price       int    `json:"price" validate:"required"`
-	Description string `json:"description" validate:"required"`
-	Point       int    `json:"point" validate:"required"`
+	Name               string `json:"name" validate:"required"`
+	CategoryID         uint64 `json:"category_id" validate:"required"`
+	MinimumTransaction uint32 `json:"minimum_transaction" validate:"required"`
+	Points             int    `json:"points" validate:"required"`
 }
 type ProductUpdateRequest struct {
-	Name        string `json:"name"`
-	Price       int    `json:"price"`
-	Description string `json:"description"`
-	Point       int    `json:"point"`
+	Name               string `json:"name"`
+	CategoryID         uint64 `json:"category_id"`
+	MinimumTransaction uint32 `json:"minimum_transaction"`
+	Points             int    `json:"points"`
+}
+
+type CategoryResponse struct {
+	ID        uint64       `json:"id"`
+	Name      string       `json:"name"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
 }
 
 type ProductResponse struct {
-	ProductID   uint64 `json:"id"`
-	Name        string `json:"name"`
-	Price       int    `json:"price"`
-	Description string `json:"description"`
-	Point       int    `json:"point"`
+	ID                 uint64           `json:"id"`
+	Name               string           `json:"name"`
+	CategoryID         uint64           `json:"category_id"`
+	MinimumTransaction uint32           `json:"minimum_transaction"`
+	Points             int              `json:"points"`
+	CreatedAt          time.Time        `json:"created_at"`
+	UpdatedAt          time.Time        `json:"updated_at"`
+	DeletedAt          sql.NullTime     `json:"deleted_at"`
+	Category           CategoryResponse `json:"category"`
 }
 
 type ProductsResponse []ProductResponse

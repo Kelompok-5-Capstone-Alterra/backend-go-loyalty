@@ -33,11 +33,21 @@ func (ps productServiceImpl) GetAll(ctx context.Context) (dto.ProductsResponse, 
 	var productResponses dto.ProductsResponse
 	for _, product := range *products {
 		var item dto.ProductResponse
-		item.ProductID = product.ProductID
+		item.ID = product.ID
 		item.Name = product.Name
-		item.Price = product.Price
-		item.Description = product.Description
-		item.Point = product.Point
+		item.CategoryID = product.CategoryID
+		item.MinimumTransaction = product.MinimumTransaction
+		item.Points = product.Points
+		item.CreatedAt = product.CreatedAt
+		item.UpdatedAt = product.UpdatedAt
+		item.DeletedAt = product.DeletedAt
+		item.Category = dto.CategoryResponse{
+			ID:        product.Category.ID,
+			Name:      product.Category.Name,
+			CreatedAt: product.Category.CreatedAt,
+			UpdatedAt: product.Category.UpdatedAt,
+			DeletedAt: product.Category.DeletedAt,
+		}
 		productResponses = append(productResponses, item)
 	}
 	return productResponses, nil
@@ -49,21 +59,31 @@ func (ps productServiceImpl) GetProductByID(ctx context.Context, productID uint6
 		return dto.ProductResponse{}, err
 	}
 	productResponse := dto.ProductResponse{
-		ProductID:   product.ProductID,
-		Name:        product.Name,
-		Price:       product.Price,
-		Description: product.Description,
-		Point:       product.Point,
+		ID:                 product.ID,
+		Name:               product.Name,
+		CategoryID:         product.CategoryID,
+		MinimumTransaction: product.MinimumTransaction,
+		Points:             product.Points,
+		CreatedAt:          product.CreatedAt,
+		UpdatedAt:          product.UpdatedAt,
+		DeletedAt:          product.DeletedAt,
+		Category: dto.CategoryResponse{
+			ID:        product.Category.ID,
+			Name:      product.Category.Name,
+			CreatedAt: product.Category.CreatedAt,
+			UpdatedAt: product.Category.UpdatedAt,
+			DeletedAt: product.Category.DeletedAt,
+		},
 	}
 	return productResponse, nil
 }
 
 func (ps productServiceImpl) InsertProduct(ctx context.Context, req dto.ProductRequest) error {
 	product := entity.Product{
-		Name:        req.Name,
-		Price:       req.Price,
-		Description: req.Description,
-		Point:       req.Point,
+		Name:               req.Name,
+		CategoryID:         req.CategoryID,
+		MinimumTransaction: req.MinimumTransaction,
+		Points:             req.Points,
 	}
 	err := ps.pr.InsertProduct(ctx, &product)
 	if err != nil {
@@ -74,10 +94,10 @@ func (ps productServiceImpl) InsertProduct(ctx context.Context, req dto.ProductR
 
 func (ps productServiceImpl) UpdateProduct(ctx context.Context, req dto.ProductUpdateRequest, id uint64) error {
 	product := entity.Product{
-		Name:        req.Name,
-		Price:       req.Price,
-		Description: req.Description,
-		Point:       req.Point,
+		Name:               req.Name,
+		CategoryID:         req.CategoryID,
+		MinimumTransaction: req.MinimumTransaction,
+		Points:             req.Points,
 	}
 	err := ps.pr.UpdateProduct(ctx, &product, id)
 	if err != nil {
