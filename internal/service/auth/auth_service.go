@@ -9,6 +9,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type AuthService interface {
@@ -56,7 +58,9 @@ func (as authService) Login(ctx context.Context, req dto.SignInRequest) (dto.Sig
 
 func (as authService) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 	hashPass := utils.HashPassword(req.Password)
+	id := uuid.New()
 	user := entity.User{
+		ID:           id,
 		Name:         req.Name,
 		Email:        req.Email,
 		Password:     hashPass,

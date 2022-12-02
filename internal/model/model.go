@@ -3,12 +3,14 @@ package model
 import (
 	"database/sql"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Structs
 
 type User struct {
-	ID           uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
+	ID           uuid.UUID    `db:"id" gorm:"primaryKey;type:varchar(36)"`
 	Name         string       `db:"name"`
 	Email        string       `db:"email"`
 	Password     string       `db:"password"`

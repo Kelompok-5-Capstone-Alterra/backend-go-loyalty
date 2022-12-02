@@ -3,6 +3,8 @@ package dto
 import (
 	"database/sql"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type SignUpRequest struct {
@@ -31,7 +33,7 @@ type SignInResponse struct {
 }
 
 type UserResponse struct {
-	ID           uint64       `json:"id"`
+	ID           uuid.UUID    `json:"id"`
 	Name         string       `json:"name"`
 	Email        string       `json:"email"`
 	MobileNumber string       `json:"mobile_number"`
