@@ -151,3 +151,12 @@ type PaymentInvoice struct {
 }
 
 type PaymentInvoices []PaymentInvoice
+
+type UserCoin struct {
+	ID     uint64    `db:"id" gorm:"primaryKey;autoIncrement"`
+	UserID uuid.UUID `db:"user_id"`
+	Amount uint64    `db:"amount"`
+	User   User      `db:"user"`
+}
+
+type UserCoins []UserCoin
