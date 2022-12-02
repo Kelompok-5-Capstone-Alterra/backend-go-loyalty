@@ -100,6 +100,8 @@ func (urt userRoutes) InitEndpoints() {
 	user.PUT("", urt.uc.HandleUpdateData)
 
 	admin := urt.router.Group("/user", middleware.ValidateAdminJWT)
+	admin.GET("", urt.uc.HandleGetAllUser)
+	admin.GET("/:id", urt.uc.HandleGetUserByID)
 	admin.PUT("/:id", urt.uc.HandleUpdateCustomerData)
 	admin.DELETE("/:id", urt.uc.HandleDeleteCustomerData)
 }

@@ -8,12 +8,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type AuthRepository interface {
 	// GetUsers(ctx context.Context) (entity.Users, error)
-	GetUserByID(ctx context.Context, id uint64) (entity.User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (entity.User, error)
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
 	Login(ctx context.Context, email string, password string) (entity.User, error)
 	SignUp(ctx context.Context, req entity.User) error
@@ -31,7 +32,7 @@ func NewAuthRepository(db *gorm.DB) authRepository {
 	}
 }
 
-func (ar authRepository) GetUserByID(ctx context.Context, id uint64) (entity.User, error) {
+func (ar authRepository) GetUserByID(ctx context.Context, id uuid.UUID) (entity.User, error) {
 	user := entity.User{}
 	err := ar.DB.Model(&model.User{}).Preload("Role").First(&user, id).Error
 	if err != nil {

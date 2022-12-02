@@ -6,9 +6,9 @@ import (
 	"backend-go-loyalty/pkg/response"
 	"backend-go-loyalty/pkg/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/go-playground/validator"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,6 +17,8 @@ type UserControllerInterface interface {
 	HandleUpdateData(c echo.Context) error
 	HandleUpdateCustomerData(c echo.Context) error
 	HandleDeleteCustomerData(c echo.Context) error
+	HandleGetAllUser(c echo.Context) error
+	HandleGetUserByID(c echo.Context) error
 }
 
 type userController struct {
@@ -29,11 +31,32 @@ func NewUserController(us userService.UserServiceInterface) userController {
 	}
 }
 
+func (uc userController) HandleGetAllUser(c echo.Context) error {
+	query := c.QueryParam("name")
+	data, err := uc.us.GetUsers(c.Request().Context(), query)
+	if err != nil {
+		return responseErrorSingle(err, http.StatusInternalServerError)
+	}
+	return responseSuccess(c, http.StatusOK, data)
+}
+func (uc userController) HandleGetUserByID(c echo.Context) error {
+	param := c.Param("id")
+	id, err := uuid.Parse(param)
+	if err != nil {
+		return responseErrorSingle(err, http.StatusBadRequest)
+	}
+	data, err := uc.us.GetUserByID(c.Request().Context(), id)
+	if err != nil {
+		return responseErrorSingle(err, http.StatusInternalServerError)
+	}
+	return responseSuccess(c, http.StatusOK, data)
+}
+
 func (uc userController) HandleUpdateCustomerData(c echo.Context) error {
 	req := dto.UserUpdate{}
 	c.Bind(&req)
 	param := c.Param("id")
-	id, err := strconv.ParseUint(param, 10, 64)
+	id, err := uuid.Parse(param)
 	if err != nil {
 		return responseErrorSingle(err, http.StatusBadRequest)
 	}
@@ -51,7 +74,7 @@ func (uc userController) HandleUpdateCustomerData(c echo.Context) error {
 
 func (uc userController) HandleDeleteCustomerData(c echo.Context) error {
 	param := c.Param("id")
-	id, err := strconv.ParseUint(param, 10, 64)
+	id, err := uuid.Parse(param)
 	if err != nil {
 		return responseErrorSingle(err, http.StatusBadRequest)
 	}

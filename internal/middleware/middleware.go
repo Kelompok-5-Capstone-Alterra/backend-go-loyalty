@@ -35,7 +35,7 @@ func ValidateAdminJWT(next echo.HandlerFunc) echo.HandlerFunc {
 
 			if token.Valid {
 				data := claims["data"].(map[string]interface{})
-				if data["sub"].(float64) == float64(config.ADMIN_ROLE_ID) {
+				if data["role"].(map[string]interface{})["id"].(float64) == float64(config.ADMIN_ROLE_ID) {
 					return next(c)
 				}
 				return echo.NewHTTPError(http.StatusUnauthorized,
