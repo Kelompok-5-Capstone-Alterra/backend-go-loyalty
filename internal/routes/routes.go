@@ -98,6 +98,10 @@ func (urt userRoutes) InitEndpoints() {
 	user := urt.router.Group("/user", middleware.ValidateJWT)
 	user.PUT("/change-password", urt.uc.HandleChangePassword)
 	user.PUT("", urt.uc.HandleUpdateData)
+
+	admin := urt.router.Group("/user", middleware.ValidateAdminJWT)
+	admin.PUT("/:id", urt.uc.HandleUpdateCustomerData)
+	admin.DELETE("/:id", urt.uc.HandleDeleteCustomerData)
 }
 
 func (prt productRoutes) InitEndpoints() {
