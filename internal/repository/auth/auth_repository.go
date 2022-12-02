@@ -72,12 +72,20 @@ func (ar authRepository) Login(ctx context.Context, email string, password strin
 
 func (ar authRepository) SignUp(ctx context.Context, req entity.User) error {
 	user := entity.User{}
+	coin := entity.UserCoin{
+		UserID: req.ID,
+		Amount: 0,
+	}
 	err := ar.DB.Model(&model.User{}).Preload("Role").Where("email = ?", req.Email).First(&user).Error
 	if err != nil {
 		if err.Error() == "record not found" {
 			result := ar.DB.Create(&req)
 			if result.Error != nil {
 				return result.Error
+			}
+			err := ar.DB.Create(&coin).Error
+			if err != nil {
+				return err
 			}
 		}
 	}
