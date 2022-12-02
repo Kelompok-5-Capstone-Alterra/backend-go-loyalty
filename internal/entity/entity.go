@@ -51,7 +51,7 @@ type Reward struct {
 	CategoryID    uint64       `db:"category_id"`
 	CreatedAt     time.Time    `db:"created_at"`
 	UpdatedAt     time.Time    `db:"updated_at"`
-	DeletedAt     sql.NullTime `db:"deleted_at"`
+	DeletedAt     sql.NullTime `db:"deleted_at" gorm:"index"`
 	Category      Category     `db:"category"`
 }
 
@@ -62,7 +62,7 @@ type Redeem struct {
 	PointSpent uint64       `db:"point_spent"`
 	CreatedAt  time.Time    `db:"created_at"`
 	UpdatedAt  time.Time    `db:"updated_at"`
-	DeletedAt  sql.NullTime `db:"deleted_at"`
+	DeletedAt  sql.NullTime `db:"deleted_at" gorm:"index"`
 }
 
 type Rewards []Reward
@@ -88,7 +88,7 @@ type FAQ struct {
 	Answer    string       `db:"answer"`
 	CreatedAt time.Time    `db:"created_at"`
 	UpdatedAt time.Time    `db:"updated_at"`
-	DeletedAt sql.NullTime `db:"deleted_at"`
+	DeletedAt sql.NullTime `db:"deleted_at" gorm:"index"`
 }
 
 type FAQs []FAQ
@@ -100,7 +100,7 @@ type Transaction struct {
 	Amount    uint64       `db:"amount"`
 	CreatedAt time.Time    `db:"created_at"`
 	UpdatedAt time.Time    `db:"updated_at"`
-	DeletedAt sql.NullTime `db:"deleted_at"`
+	DeletedAt sql.NullTime `db:"deleted_at" gorm:"index"`
 }
 
 type Transactions []Transaction
@@ -111,7 +111,7 @@ type TransactionDetail struct {
 	ProductID     uint64       `db:"product_id"`
 	CreatedAt     time.Time    `db:"created_at"`
 	UpdatedAt     time.Time    `db:"updated_at"`
-	DeletedAt     sql.NullTime `db:"deleted_at"`
+	DeletedAt     sql.NullTime `db:"deleted_at" gorm:"index"`
 }
 
 type TransactionDetails []TransactionDetail
@@ -124,7 +124,7 @@ type Product struct {
 	Points             int          `db:"points"`
 	CreatedAt          time.Time    `db:"created_at"`
 	UpdatedAt          time.Time    `db:"updated_at"`
-	DeletedAt          sql.NullTime `db:"deleted_at"`
+	DeletedAt          sql.NullTime `db:"deleted_at" gorm:"index"`
 	Category           Category     `db:"category"`
 }
 
@@ -135,7 +135,7 @@ type Category struct {
 	Name      string       `db:"name"`
 	CreatedAt time.Time    `db:"created_at"`
 	UpdatedAt time.Time    `db:"updated_at"`
-	DeletedAt sql.NullTime `db:"deleted_at"`
+	DeletedAt sql.NullTime `db:"deleted_at" gorm:"index"`
 }
 
 type Categories []Category
@@ -147,7 +147,7 @@ type PaymentInvoice struct {
 	Amount        uint64       `db:"amount"`
 	CreatedAt     time.Time    `db:"created_at"`
 	UpdatedAt     time.Time    `db:"updated_at"`
-	DeletedAt     sql.NullTime `db:"deleted_at"`
+	DeletedAt     sql.NullTime `db:"deleted_at" gorm:"index"`
 }
 
 type PaymentInvoices []PaymentInvoice
