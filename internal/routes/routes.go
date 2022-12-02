@@ -95,11 +95,11 @@ func (art authRoutes) InitEndpoints() {
 }
 
 func (urt userRoutes) InitEndpoints() {
-	user := urt.router.Group("/user", middleware.ValidateJWT)
+	user := urt.router.Group("/users", middleware.ValidateJWT)
 	user.PUT("/change-password", urt.uc.HandleChangePassword)
 	user.PUT("", urt.uc.HandleUpdateData)
 
-	admin := urt.router.Group("/user", middleware.ValidateAdminJWT)
+	admin := urt.router.Group("/users", middleware.ValidateAdminJWT)
 	admin.GET("", urt.uc.HandleGetAllUser)
 	admin.GET("/:id", urt.uc.HandleGetUserByID)
 	admin.PUT("/:id", urt.uc.HandleUpdateCustomerData)
@@ -107,7 +107,7 @@ func (urt userRoutes) InitEndpoints() {
 }
 
 func (prt productRoutes) InitEndpoints() {
-	product := prt.router.Group("/product")
+	product := prt.router.Group("/products")
 	product.GET("", prt.pc.GetAll)
 	product.GET("/:id", prt.pc.GetProductById)
 	product.POST("", prt.pc.InsertProduct)
