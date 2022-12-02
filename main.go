@@ -2,7 +2,6 @@ package main
 
 import (
 	"backend-go-loyalty/internal/middleware"
-	"backend-go-loyalty/internal/model"
 	"backend-go-loyalty/pkg/bootstrapper"
 	"backend-go-loyalty/pkg/config"
 	"backend-go-loyalty/pkg/server"
@@ -17,7 +16,7 @@ func main() {
 	router.Use(middleware.CorsMiddleware(whitelist))
 	env := config.GetEnvVariables()
 	db := config.GetDatabase(env.DBAddress, env.DBUsername, env.DBPassword, env.DBName)
-	config.InitialMigration(db, &model.Role{}, &model.User{}, &model.OTP{}, &model.Product{}, &model.Reward{})
+	// config.InitialMigration(db, &model.Role{}, &model.User{}, &model.OTP{}, &model.Product{}, &model.Reward{}) // Disabled because the app will use go migrate to declare DDL and other initial migration stuffs
 	bootstrapper.InitEndpoints(router, db)
 	server := server.NewServer(env.ServerAddress, router)
 	server.ListenAndServe()
