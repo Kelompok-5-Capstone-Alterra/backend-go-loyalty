@@ -3,12 +3,14 @@ package entity
 import (
 	"database/sql"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Structs
 
 type User struct {
-	ID           uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
+	ID           uuid.UUID    `db:"id" gorm:"primaryKey;type:varchar(36)"`
 	Name         string       `db:"name"`
 	Email        string       `db:"email"`
 	Password     string       `db:"password"`
@@ -41,19 +43,111 @@ type Users []User
 type Roles []Role
 
 type Reward struct {
-	RewardID      uint64 `db:"id" gorm:"column:id"`
-	Name          string `db:"name"`
-	Description   string `db:"description"`
-	RequiredPoint uint64 `db:"required_points"`
+	ID            uint64       `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	Name          string       `db:"name"`
+	Description   string       `db:"description"`
+	RequiredPoint uint64       `db:"required_points"`
+	ValidUntil    time.Time    `db:"valid_until"`
+	CategoryID    uint64       `db:"category_id"`
+	CreatedAt     time.Time    `db:"created_at"`
+	UpdatedAt     time.Time    `db:"updated_at"`
+	DeletedAt     sql.NullTime `db:"deleted_at"`
+	Category      Category     `db:"category"`
+}
+
+type Redeem struct {
+	ID         uint64       `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	RewardID   uint64       `db:"reward_id"`
+	UserID     uint64       `db:"user_id"`
+	PointSpent uint64       `db:"point_spent"`
+	CreatedAt  time.Time    `db:"created_at"`
+	UpdatedAt  time.Time    `db:"updated_at"`
+	DeletedAt  sql.NullTime `db:"deleted_at"`
 }
 
 type Rewards []Reward
+
+type Credit struct {
+	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	UserID uint64 `db:"user_id"`
+	Amount uint64 `db:"amount"`
+}
+
+type Point struct {
+	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	UserID uint64 `db:"user_id"`
+	Amount uint64 `db:"amount"`
+}
+
+type Credits []Credit
+type Points []Point
+
+type FAQ struct {
+	ID        uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
+	Question  string       `db:"question"`
+	Answer    string       `db:"answer"`
+	CreatedAt time.Time    `db:"created_at"`
+	UpdatedAt time.Time    `db:"updated_at"`
+	DeletedAt sql.NullTime `db:"deleted_at"`
+}
+
+type FAQs []FAQ
+
+type Transaction struct {
+	ID        uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
+	UserID    uint64       `db:"user_id"`
+	Status    string       `db:"status"`
+	Amount    uint64       `db:"amount"`
+	CreatedAt time.Time    `db:"created_at"`
+	UpdatedAt time.Time    `db:"updated_at"`
+	DeletedAt sql.NullTime `db:"deleted_at"`
+}
+
+type Transactions []Transaction
+
+type TransactionDetail struct {
+	ID            uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
+	TransactionID uint64       `db:"transaction_id"`
+	ProductID     uint64       `db:"product_id"`
+	CreatedAt     time.Time    `db:"created_at"`
+	UpdatedAt     time.Time    `db:"updated_at"`
+	DeletedAt     sql.NullTime `db:"deleted_at"`
+}
+
+type TransactionDetails []TransactionDetail
+
 type Product struct {
-	ProductID   uint64 `db:"id" gorm:"column:id"`
-	Name        string `db:"name"`
-	Price       int    `db:"price"`
-	Description string `db:"description"`
-	Point       int    `db:"points"`
+	ID                 uint64       `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	Name               string       `db:"name"`
+	CategoryID         uint64       `db:"category_id"`
+	MinimumTransaction uint32       `db:"minimum_transaction"`
+	Points             int          `db:"points"`
+	CreatedAt          time.Time    `db:"created_at"`
+	UpdatedAt          time.Time    `db:"updated_at"`
+	DeletedAt          sql.NullTime `db:"deleted_at"`
+	Category           Category     `db:"category"`
 }
 
 type Products []Product
+
+type Category struct {
+	ID        uint64       `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	Name      string       `db:"name"`
+	CreatedAt time.Time    `db:"created_at"`
+	UpdatedAt time.Time    `db:"updated_at"`
+	DeletedAt sql.NullTime `db:"deleted_at"`
+}
+
+type Categories []Category
+
+type PaymentInvoice struct {
+	ID            uint64       `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	TransactionID uint64       `db:"transaction_id"`
+	URL           string       `db:"url"`
+	Amount        uint64       `db:"amount"`
+	CreatedAt     time.Time    `db:"created_at"`
+	UpdatedAt     time.Time    `db:"updated_at"`
+	DeletedAt     sql.NullTime `db:"deleted_at"`
+}
+
+type PaymentInvoices []PaymentInvoice

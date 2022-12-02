@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	godotenv.Load(".env")
+	godotenv.Load(".migration.env")
 	env := config.GetEnvVariables()
 	dsn := fmt.Sprintf("mysql://%s:%s@tcp(%s)/%s", env.DBUsername, env.DBPassword, env.DBAddress, env.DBName)
 	m, err := migrate.New("file://./database/migration", dsn)
@@ -23,6 +23,12 @@ func main() {
 		return
 	}
 
+	defer func() {
+		recover := recover()
+		if recover != nil {
+			fmt.Println(recover.(error).Error())
+		}
+	}()
 	switch os.Args[1] {
 	case "up":
 		{

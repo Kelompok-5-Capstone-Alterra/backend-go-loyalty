@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/xlzd/gotp"
 	"gopkg.in/gomail.v2"
@@ -27,7 +28,7 @@ func HashPassword(password string) string {
 	return passHash
 }
 
-func CreateLoginToken(userID uint64, data dto.JWTData) (string, string) {
+func CreateLoginToken(userID uuid.UUID, data dto.JWTData) (string, string) {
 	claims := jwt.MapClaims{}
 	claims["sub"] = userID
 	claims["data"] = data
@@ -97,7 +98,7 @@ func SendOTPToEmail(otp string, target string) error {
 	return nil
 }
 
-func GetDataFromRefreshToken(rt string) (uint64, time.Time, error) {
+func GetDataFromRefreshToken(rt string) (uuid.UUID, time.Time, error) {
 	jwtKey := config.GetJWTKey()
 	claims := jwt.MapClaims{}
 	token, err := jwt.ParseWithClaims(rt, claims, func(t *jwt.Token) (interface{}, error) {
@@ -108,25 +109,29 @@ func GetDataFromRefreshToken(rt string) (uint64, time.Time, error) {
 		return []byte(jwtKey), nil
 	})
 	if err != nil {
-		return 0, time.Time{}, err
+		return uuid.UUID{}, time.Time{}, err
 	}
 
 	if token.Valid {
-		idStr := fmt.Sprintf("%v", claims["sub"])
-		idConv, err := strconv.ParseUint(idStr, 10, 64)
-		if err != nil {
-			return 0, time.Time{}, err
-		}
 		res, err := time.Parse(time.RFC3339, claims["created_at"].(string))
 		if err != nil {
-			return 0, time.Time{}, err
+			return uuid.UUID{}, time.Time{}, err
+		}
+		env := config.GetTokenEnv()
+		if time.Now().Sub(res).Hours() > float64(env.RefreshTokenTTLHour) {
+			return uuid.UUID{}, time.Time{}, errors.New("token expired")
+		}
+		idStr := fmt.Sprintf("%v", claims["sub"])
+		idConv, err := uuid.Parse(idStr)
+		if err != nil {
+			return uuid.UUID{}, time.Time{}, err
 		}
 		return idConv, res, nil
 	}
-	return 0, time.Time{}, errors.New("token invalid")
+	return uuid.UUID{}, time.Time{}, errors.New("token invalid")
 }
 
-func GetUserIDFromJWT(c echo.Context) (uint64, error) {
+func GetUserIDFromJWT(c echo.Context) (uuid.UUID, error) {
 	if c.Request().Header["Authorization"] != nil {
 		claims := jwt.MapClaims{}
 		auth := strings.Split(c.Request().Header["Authorization"][0], " ")
@@ -138,16 +143,16 @@ func GetUserIDFromJWT(c echo.Context) (uint64, error) {
 			return []byte(config.GetJWTKey()), nil
 		})
 		if err != nil {
-			return 0, err
+			return uuid.UUID{}, err
 		}
 
 		if token.Valid {
 			idStr := fmt.Sprintf("%v", claims["sub"])
-			idConv, _ := strconv.ParseUint(idStr, 10, 64)
-			return idConv, nil
+			idConv, err := uuid.Parse(idStr)
+			return idConv, err
 		}
-		return 0, errors.New("unauthorized")
+		return uuid.UUID{}, errors.New("unauthorized")
 	} else {
-		return 0, errors.New("unauthorized")
+		return uuid.UUID{}, errors.New("unauthorized")
 	}
 }
