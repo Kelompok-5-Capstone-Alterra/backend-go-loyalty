@@ -4,6 +4,7 @@ import (
 	"backend-go-loyalty/pkg/config"
 	"backend-go-loyalty/pkg/response"
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -89,6 +90,28 @@ func ValidateJWT(next echo.HandlerFunc) echo.HandlerFunc {
 					response.NewErrorResponseData(
 						response.NewErrorResponseValue("error", "unauthorized"),
 					), nil))
+		}
+	}
+}
+
+func CorsMiddleware(whitelistedUrls map[string]bool) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			requestOriginUrl := c.Request().Header.Get("Origin")
+			if whitelistedUrls[requestOriginUrl] {
+				c.Response().Header().Set("Access-Control-Allow-Origin", requestOriginUrl)
+			} else {
+				return echo.NewHTTPError(http.StatusForbidden, response.NewBaseResponse(http.StatusForbidden, http.StatusText(http.StatusForbidden), response.NewErrorResponseData(response.NewErrorResponseValue("msg", "origin not allowed")), nil))
+			}
+			c.Response().Header().Set("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE, PATCH")
+			c.Response().Header().Set("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token, Authorization")
+			c.Response().Header().Set("Access-Control-Allow-Credentials", "true")
+
+			log.Printf("INFO CorsMiddleware: received request from %s %v", requestOriginUrl, whitelistedUrls[requestOriginUrl])
+			if c.Request().Method != http.MethodOptions {
+				return next(c)
+			}
+			return nil
 		}
 	}
 }

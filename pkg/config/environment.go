@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Env struct {
@@ -46,4 +47,14 @@ func GetTokenEnv() TokenEnv {
 		AccessTokenTTLHour:  tokenTTL,
 		RefreshTokenTTLHour: refreshTTL,
 	}
+}
+
+func GetWhitelistedURLS() map[string]bool {
+	whitelist := os.Getenv("WHITELISTED_URLS")
+	whitelistArray := strings.Split(whitelist, ",")
+	urls := make(map[string]bool)
+	for _, value := range whitelistArray {
+		urls[value] = true
+	}
+	return urls
 }
