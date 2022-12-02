@@ -1,11 +1,13 @@
 package main
 
 import (
+	"backend-go-loyalty/internal/model"
 	"backend-go-loyalty/pkg/config"
 	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -15,11 +17,7 @@ func main() {
 	switch os.Args[1] {
 	case "coins":
 		{
-			// db.Model(&model.)
-			err := db.Raw(`
-			UPDATE user_coins 
-			SET amount = amount + 10000
-			`).Error
+			err := db.Model(&model.UserCoin{}).Where("amount < ?", 10000).Update("amount", gorm.Expr("amount + ?", 10000)).Error
 			if err != nil {
 				return
 			}
