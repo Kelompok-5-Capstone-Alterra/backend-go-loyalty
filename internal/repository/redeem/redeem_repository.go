@@ -9,7 +9,7 @@ import (
 )
 
 type IRedeemRepository interface {
-	InsertReedem(ctx context.Context, redeem *entity.Redeem) error
+	CreateRedeem(ctx context.Context, redeem *entity.Redeem) error
 	GetAllRedeem(ctx context.Context) (*entity.Redeems, error)
 	GetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error)
 	UpdateRedeem(ctx context.Context, d *entity.Redeem, id uint64) error
@@ -42,7 +42,7 @@ func (dr *redeemRepository) GetRedeemByID(ctx context.Context, id uint64) (*enti
 	return &redeem, err
 }
 
-func (dr *redeemRepository) InsertReedem(ctx context.Context, redeem *entity.Redeem) error {
+func (dr *redeemRepository) CreateRedeem(ctx context.Context, redeem *entity.Redeem) error {
 	err := dr.DB.Create(&redeem).Error
 	if err != nil {
 		return err

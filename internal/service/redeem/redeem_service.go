@@ -8,7 +8,7 @@ import (
 )
 
 type IRedeemService interface {
-	InsertRedeem(ctx context.Context, req dto.RedeemRequest) error
+	CreateRedeem(ctx context.Context, req dto.RedeemRequest) error
 	GetAllRedeem(ctx context.Context) (dto.RedeemResponses, error)
 	GetRedeemByID(ctx context.Context, redeemID uint64) (dto.RedeemResponse, error)
 	UpdateRedeem(ctx context.Context, req dto.RedeemRequest, id uint64) error
@@ -78,11 +78,11 @@ func (ds redeemServiceImpl) GetRedeemByID(ctx context.Context, redeemID uint64) 
 	return redeemResponse, nil
 }
 
-func (ds redeemServiceImpl) InsertRedeem(ctx context.Context, req dto.RedeemRequest) error {
+func (ds redeemServiceImpl) CreateRedeem(ctx context.Context, req dto.RedeemRequest) error {
 	redeem := entity.Redeem{
 		RewardID: req.RewardID,
 	}
-	err := ds.dr.InsertReedem(ctx, &redeem)
+	err := ds.dr.CreateRedeem(ctx, &redeem)
 	if err != nil {
 		return err
 	}

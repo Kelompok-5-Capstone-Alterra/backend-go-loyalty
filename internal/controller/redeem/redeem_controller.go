@@ -12,7 +12,7 @@ import (
 )
 
 type IRedeemController interface {
-	InsertRedeem(c echo.Context) error
+	CreateRedeem(c echo.Context) error
 	GetAllRedeem(c echo.Context) error
 	GetRedeemByID(c echo.Context) error
 	UpdateRedeem(c echo.Context) error
@@ -50,7 +50,7 @@ func (dc redeemController) GetRedeemByID(c echo.Context) error {
 	return responseSuccess(data, c)
 }
 
-func (dc redeemController) InsertRedeem(c echo.Context) error {
+func (dc redeemController) CreateRedeem(c echo.Context) error {
 	var req dto.RedeemRequest
 	c.Bind(&req)
 
@@ -59,7 +59,7 @@ func (dc redeemController) InsertRedeem(c echo.Context) error {
 	if err != nil {
 		return responseErrorValidator(err, c)
 	}
-	err = dc.ds.InsertRedeem(c.Request().Context(), req)
+	err = dc.ds.CreateRedeem(c.Request().Context(), req)
 	if err != nil {
 		return responseErrorInternal(err, c)
 	}
