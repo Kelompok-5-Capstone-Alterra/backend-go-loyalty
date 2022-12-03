@@ -63,7 +63,11 @@ type Redeem struct {
 	CreatedAt  time.Time    `db:"created_at"`
 	UpdatedAt  time.Time    `db:"updated_at"`
 	DeletedAt  sql.NullTime `db:"deleted_at" gorm:"index"`
+	Reward     Reward       `db:"reward"`
+	User       User         `db:"user"`
 }
+
+type Redeems []Redeem
 
 type Rewards []Reward
 

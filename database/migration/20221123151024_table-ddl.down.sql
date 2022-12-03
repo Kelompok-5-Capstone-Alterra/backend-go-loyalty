@@ -1,4 +1,5 @@
 DROP TABLE otps;
+DROP TABLE redeems;
 DROP TABLE roles;
 DROP TABLE user_coins;
 DROP TABLE users;

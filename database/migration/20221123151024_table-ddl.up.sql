@@ -84,3 +84,19 @@ CREATE TABLE otps(
 	created_at DATETIME(3),
 	PRIMARY KEY (id)
 );
+
+CREATE TABLE redeems(
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	reward_id BIGINT UNSIGNED,
+	user_id VARCHAR(36),
+	point_spent BIGINT UNSIGNED,
+	created_at DATETIME(3),
+	updated_at DATETIME(3),
+	deleted_at DATETIME(3),
+	PRIMARY KEY (id),
+	KEY (deleted_at,user_id,reward_id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+	ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (reward_id) REFERENCES rewards(id)
+	ON UPDATE CASCADE ON DELETE CASCADE
+);
