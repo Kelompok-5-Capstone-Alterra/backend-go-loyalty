@@ -100,8 +100,6 @@ func CorsMiddleware(whitelistedUrls map[string]bool) echo.MiddlewareFunc {
 			requestOriginUrl := c.Request().Header.Get("Origin")
 			if whitelistedUrls[requestOriginUrl] {
 				c.Response().Header().Set("Access-Control-Allow-Origin", requestOriginUrl)
-			} else {
-				return echo.NewHTTPError(http.StatusForbidden, response.NewBaseResponse(http.StatusForbidden, http.StatusText(http.StatusForbidden), response.NewErrorResponseData(response.NewErrorResponseValue("msg", "origin not allowed")), nil))
 			}
 			c.Response().Header().Set("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE, PATCH")
 			c.Response().Header().Set("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token, Authorization")
