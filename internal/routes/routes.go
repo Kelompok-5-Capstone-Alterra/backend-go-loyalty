@@ -132,7 +132,7 @@ func (drt redeemRoutes) InitEndpoints() {
 	redeem := drt.router.Group("/redeems")
 	redeem.GET("", drt.dc.GetAllRedeem)
 	redeem.GET("/:id", drt.dc.GetRedeemByID)
-	redeem.POST("", drt.dc.InsertRedeem)
+	redeem.POST("", drt.dc.CreateRedeem)
 	redeem.PUT("/:id", drt.dc.UpdateRedeem)
 	redeem.DELETE("/:id", drt.dc.DeleteRedeem)
 }
