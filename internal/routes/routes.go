@@ -4,6 +4,7 @@ import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	pingController "backend-go-loyalty/internal/controller/ping"
 	productController "backend-go-loyalty/internal/controller/product"
+	redeemController "backend-go-loyalty/internal/controller/redeem"
 	rewardController "backend-go-loyalty/internal/controller/reward"
 	userController "backend-go-loyalty/internal/controller/user"
 	"backend-go-loyalty/internal/middleware"
@@ -71,6 +72,18 @@ func NewUserRoutes(uc userController.UserControllerInterface, router *echo.Echo)
 	}
 }
 
+type redeemRoutes struct {
+	dc     redeemController.IRedeemController
+	router *echo.Echo
+}
+
+func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) redeemRoutes {
+	return redeemRoutes{
+		dc:     dc,
+		router: router,
+	}
+}
+
 func (rrt rewardRoutes) InitEndpoints() {
 	reward := rrt.router.Group("/rewards")
 	reward.GET("", rrt.rc.FindAllReward)
@@ -113,4 +126,13 @@ func (prt productRoutes) InitEndpoints() {
 	product.POST("", prt.pc.InsertProduct)
 	product.PUT("/:id", prt.pc.UpdateProduct)
 	product.DELETE("/:id", prt.pc.DeleteProduct)
+}
+
+func (drt redeemRoutes) InitEndpoints() {
+	redeem := drt.router.Group("/redeems")
+	redeem.GET("", drt.dc.GetAllRedeem)
+	redeem.GET("/:id", drt.dc.GetRedeemByID)
+	redeem.POST("", drt.dc.InsertRedeem)
+	redeem.PUT("/:id", drt.dc.UpdateRedeem)
+	redeem.DELETE("/:id", drt.dc.DeleteRedeem)
 }
