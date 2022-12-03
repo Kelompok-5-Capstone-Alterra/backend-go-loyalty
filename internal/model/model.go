@@ -72,6 +72,8 @@ type Redeem struct {
 	CreatedAt  time.Time    `db:"created_at"`
 	UpdatedAt  time.Time    `db:"updated_at"`
 	DeletedAt  sql.NullTime `db:"deleted_at"`
+	Reward     Reward       `gorm:"foreignKey:RewardID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	User       User         `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type Redeems []Redeem

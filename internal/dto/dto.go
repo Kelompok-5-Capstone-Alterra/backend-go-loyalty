@@ -135,3 +135,20 @@ type ProductResponse struct {
 }
 
 type ProductsResponse []ProductResponse
+
+type RedeemRequest struct {
+	ID       uint64 `json:"id"`
+	RewardID uint64 `json:"reward_id"`
+}
+
+type RedeemResponse struct {
+	ID         uint64         `json:"id"`
+	UserID     uint64         `json:"user_id"`
+	PointSpent uint64         `json:"point_spent"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  sql.NullTime   `json:"deleted_at"`
+	Reward     RewardResponse `json:"reward"`
+}
+
+type RedeemResponses []RedeemResponse
