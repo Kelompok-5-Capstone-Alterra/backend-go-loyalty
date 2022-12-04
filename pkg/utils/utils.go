@@ -48,9 +48,10 @@ func CreateLoginToken(userID uuid.UUID, data dto.JWTData) (string, string) {
 }
 
 func GenerateOTP() string {
-	length := 4
+	otpLength := 4
+	length := otpLength
 	str := gotp.RandomSecret(length)
-	str = str[:len(str)-1]
+	str = str[:otpLength]
 	return str
 }
 
