@@ -3,6 +3,7 @@ package routes
 import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	pingController "backend-go-loyalty/internal/controller/ping"
+	pointController "backend-go-loyalty/internal/controller/point"
 	productController "backend-go-loyalty/internal/controller/product"
 	redeemController "backend-go-loyalty/internal/controller/redeem"
 	rewardController "backend-go-loyalty/internal/controller/reward"
@@ -30,6 +31,18 @@ type userRoutes struct {
 type rewardRoutes struct {
 	rc     rewardController.IRewardController
 	router *echo.Echo
+}
+
+type pointRoutes struct {
+	pc     pointController.IPointController
+	router *echo.Echo
+}
+
+func NewPointRoutes(pc pointController.IPointController, router *echo.Echo) pointRoutes {
+	return pointRoutes{
+		pc:     pc,
+		router: router,
+	}
 }
 
 func NewRewardRoutes(rc rewardController.IRewardController, router *echo.Echo) rewardRoutes {
@@ -84,13 +97,23 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 	}
 }
 
+func (prt pointRoutes) InitEndpoints() {
+	point := prt.router.Group("/points")
+	adminPoints := prt.router.Group("/admin/points", middleware.ValidateAdminJWT)
+
+	adminPoints.GET("", prt.pc.HandleGetAllPoint)
+	point.GET("/:id", prt.pc.HandleGetPointByID)
+}
+
 func (rrt rewardRoutes) InitEndpoints() {
 	reward := rrt.router.Group("/rewards")
 	reward.GET("", rrt.rc.FindAllReward)
 	reward.GET("/:id", rrt.rc.FindRewardById)
 	reward.POST("", rrt.rc.CreateReward)
-	reward.PUT("/:id", rrt.rc.UpdateReward)
-	reward.DELETE("/:id", rrt.rc.DeleteReward)
+
+	adminReward := rrt.router.Group("/admin/rewards", middleware.ValidateAdminJWT)
+	adminReward.PUT("/:id", rrt.rc.UpdateReward)
+	adminReward.DELETE("/:id", rrt.rc.DeleteReward)
 }
 
 func (prt pingRoutes) InitEndpoints() {
@@ -102,9 +125,13 @@ func (art authRoutes) InitEndpoints() {
 	auth := art.router.Group("/auth")
 	auth.POST("/signin", art.ac.HandleLogin)
 	auth.POST("/signup", art.ac.HandleSignUp)
-	auth.POST("/otp/validate", art.ac.HandleValidateOTP)
-	auth.POST("/token/refresh", art.ac.HandleRefreshToken)
-	auth.POST("/otp/resend", art.ac.HandleRequestNewOTP)
+
+	token := auth.Group("/token")
+	token.POST("/refresh", art.ac.HandleRefreshToken)
+
+	otp := auth.Group("/otp")
+	otp.POST("/otp/validate", art.ac.HandleValidateOTP)
+	otp.POST("/otp/resend", art.ac.HandleRequestNewOTP)
 }
 
 func (urt userRoutes) InitEndpoints() {

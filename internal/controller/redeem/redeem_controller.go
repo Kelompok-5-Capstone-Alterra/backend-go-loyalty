@@ -4,6 +4,7 @@ import (
 	"backend-go-loyalty/internal/dto"
 	redeemService "backend-go-loyalty/internal/service/redeem"
 	"backend-go-loyalty/pkg/response"
+	"backend-go-loyalty/pkg/utils"
 	"net/http"
 	"strconv"
 
@@ -59,7 +60,8 @@ func (dc redeemController) CreateRedeem(c echo.Context) error {
 	if err != nil {
 		return responseErrorValidator(err, c)
 	}
-	err = dc.ds.CreateRedeem(c.Request().Context(), req)
+	userId, err := utils.GetUserIDFromJWT(c)
+	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId)
 	if err != nil {
 		return responseErrorInternal(err, c)
 	}

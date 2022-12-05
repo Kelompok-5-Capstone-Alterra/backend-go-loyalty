@@ -81,6 +81,7 @@ type Point struct {
 	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	UserID uint64 `db:"user_id"`
 	Amount uint64 `db:"amount"`
+	User   User   `db:"user"`
 }
 
 type Credits []Credit

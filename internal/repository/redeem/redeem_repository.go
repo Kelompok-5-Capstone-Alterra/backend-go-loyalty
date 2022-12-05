@@ -26,7 +26,7 @@ func NewRedeemRepository(db *gorm.DB) IRedeemRepository {
 
 func (dr *redeemRepository) GetAllRedeem(ctx context.Context) (*entity.Redeems, error) {
 	var redeems entity.Redeems
-	err := dr.DB.Model(&model.Reward{}).Preload("RewardID").Find(&redeems).Error
+	err := dr.DB.Model(&model.Redeem{}).Preload("RewardID").Preload("UserID").Find(&redeems).Error
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (dr *redeemRepository) GetAllRedeem(ctx context.Context) (*entity.Redeems, 
 
 func (dr *redeemRepository) GetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error) {
 	var redeem entity.Redeem
-	err := dr.DB.Model(&model.Reward{}).Preload("RewardID").First(&redeem, id).Error
+	err := dr.DB.Model(&model.Redeem{}).Preload("RewardID").Preload("UserID").First(&redeem, id).Error
 	if err != nil {
 		return nil, err
 	}

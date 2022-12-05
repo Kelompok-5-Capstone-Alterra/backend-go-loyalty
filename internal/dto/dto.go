@@ -137,7 +137,6 @@ type ProductResponse struct {
 type ProductsResponse []ProductResponse
 
 type RedeemRequest struct {
-	ID       uint64 `json:"id"`
 	RewardID uint64 `json:"reward_id"`
 }
 
@@ -152,3 +151,11 @@ type RedeemResponse struct {
 }
 
 type RedeemResponses []RedeemResponse
+
+type PointResponse struct {
+	ID     uint64       `json:"id"`
+	Amount uint64       `json:"amount"`
+	User   UserResponse `json:"user"`
+}
+
+type PointResponses []PointResponse
