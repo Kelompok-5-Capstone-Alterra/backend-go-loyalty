@@ -43,7 +43,7 @@ func ValidateAdminJWT(next echo.HandlerFunc) echo.HandlerFunc {
 					response.NewBaseResponse(http.StatusUnauthorized,
 						http.StatusText(http.StatusUnauthorized),
 						response.NewErrorResponseData(
-							response.NewErrorResponseValue("error", err.Error()),
+							response.NewErrorResponseValue("error", "unauthorized"),
 						), nil))
 			}
 			return nil

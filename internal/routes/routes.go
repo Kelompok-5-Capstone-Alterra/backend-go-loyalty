@@ -3,7 +3,9 @@ package routes
 import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	pingController "backend-go-loyalty/internal/controller/ping"
+	pointController "backend-go-loyalty/internal/controller/point"
 	productController "backend-go-loyalty/internal/controller/product"
+	redeemController "backend-go-loyalty/internal/controller/redeem"
 	rewardController "backend-go-loyalty/internal/controller/reward"
 	userController "backend-go-loyalty/internal/controller/user"
 	"backend-go-loyalty/internal/middleware"
@@ -29,6 +31,18 @@ type userRoutes struct {
 type rewardRoutes struct {
 	rc     rewardController.IRewardController
 	router *echo.Echo
+}
+
+type pointRoutes struct {
+	pc     pointController.IPointController
+	router *echo.Echo
+}
+
+func NewPointRoutes(pc pointController.IPointController, router *echo.Echo) pointRoutes {
+	return pointRoutes{
+		pc:     pc,
+		router: router,
+	}
 }
 
 func NewRewardRoutes(rc rewardController.IRewardController, router *echo.Echo) rewardRoutes {
@@ -71,13 +85,35 @@ func NewUserRoutes(uc userController.UserControllerInterface, router *echo.Echo)
 	}
 }
 
+type redeemRoutes struct {
+	dc     redeemController.IRedeemController
+	router *echo.Echo
+}
+
+func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) redeemRoutes {
+	return redeemRoutes{
+		dc:     dc,
+		router: router,
+	}
+}
+
+func (prt pointRoutes) InitEndpoints() {
+	point := prt.router.Group("/points")
+	adminPoints := prt.router.Group("/admin/points", middleware.ValidateAdminJWT)
+
+	adminPoints.GET("", prt.pc.HandleGetAllPoint)
+	point.GET("/:id", prt.pc.HandleGetPointByID)
+}
+
 func (rrt rewardRoutes) InitEndpoints() {
 	reward := rrt.router.Group("/rewards")
 	reward.GET("", rrt.rc.FindAllReward)
 	reward.GET("/:id", rrt.rc.FindRewardById)
-	reward.POST("", rrt.rc.CreateReward)
-	reward.PUT("/:id", rrt.rc.UpdateReward)
-	reward.DELETE("/:id", rrt.rc.DeleteReward)
+
+	adminReward := rrt.router.Group("/admin/rewards", middleware.ValidateAdminJWT)
+	adminReward.POST("", rrt.rc.CreateReward)
+	adminReward.PUT("/:id", rrt.rc.UpdateReward)
+	adminReward.DELETE("/:id", rrt.rc.DeleteReward)
 }
 
 func (prt pingRoutes) InitEndpoints() {
@@ -89,9 +125,13 @@ func (art authRoutes) InitEndpoints() {
 	auth := art.router.Group("/auth")
 	auth.POST("/signin", art.ac.HandleLogin)
 	auth.POST("/signup", art.ac.HandleSignUp)
-	auth.POST("/otp/validate", art.ac.HandleValidateOTP)
-	auth.POST("/token/refresh", art.ac.HandleRefreshToken)
-	auth.POST("/otp/resend", art.ac.HandleRequestNewOTP)
+
+	token := auth.Group("/token")
+	token.POST("/refresh", art.ac.HandleRefreshToken)
+
+	otp := auth.Group("/otp")
+	otp.POST("/validate", art.ac.HandleValidateOTP)
+	otp.POST("/resend", art.ac.HandleRequestNewOTP)
 }
 
 func (urt userRoutes) InitEndpoints() {
@@ -110,7 +150,21 @@ func (prt productRoutes) InitEndpoints() {
 	product := prt.router.Group("/products")
 	product.GET("", prt.pc.GetAll)
 	product.GET("/:id", prt.pc.GetProductById)
-	product.POST("", prt.pc.InsertProduct)
-	product.PUT("/:id", prt.pc.UpdateProduct)
-	product.DELETE("/:id", prt.pc.DeleteProduct)
+
+	adminProduct := prt.router.Group("/admin/products", middleware.ValidateAdminJWT)
+	adminProduct.POST("", prt.pc.InsertProduct)
+	adminProduct.PUT("/:id", prt.pc.UpdateProduct)
+	adminProduct.DELETE("/:id", prt.pc.DeleteProduct)
+}
+
+func (drt redeemRoutes) InitEndpoints() {
+	adminRedeem := drt.router.Group("admin/redeems", middleware.ValidateAdminJWT)
+	adminRedeem.GET("", drt.dc.GetAllRedeem)
+	adminRedeem.PUT("/:id", drt.dc.UpdateRedeem)
+	adminRedeem.DELETE("/:id", drt.dc.DeleteRedeem)
+
+	redeem := drt.router.Group("/redeems", middleware.ValidateJWT)
+	redeem.GET("", drt.dc.GetAllRedeemByUserID)
+	redeem.GET("/:id", drt.dc.GetRedeemByID)
+	redeem.POST("", drt.dc.CreateRedeem)
 }

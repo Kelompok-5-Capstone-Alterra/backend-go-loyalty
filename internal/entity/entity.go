@@ -58,29 +58,26 @@ type Reward struct {
 type Redeem struct {
 	ID         uint64       `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	RewardID   uint64       `db:"reward_id"`
-	UserID     uint64       `db:"user_id"`
+	UserID     uuid.UUID    `db:"user_id"`
 	PointSpent uint64       `db:"point_spent"`
 	CreatedAt  time.Time    `db:"created_at"`
 	UpdatedAt  time.Time    `db:"updated_at"`
 	DeletedAt  sql.NullTime `db:"deleted_at" gorm:"index"`
+	Reward     Reward       `db:"reward"`
+	User       User         `db:"user"`
 }
+
+type Redeems []Redeem
 
 type Rewards []Reward
 
 type Credit struct {
-	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
-	UserID uint64 `db:"user_id"`
-	Amount uint64 `db:"amount"`
-}
-
-type Point struct {
-	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
-	UserID uint64 `db:"user_id"`
-	Amount uint64 `db:"amount"`
+	ID     uint64    `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	UserID uuid.UUID `db:"user_id"`
+	Amount uint64    `db:"amount"`
 }
 
 type Credits []Credit
-type Points []Point
 
 type FAQ struct {
 	ID        uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
@@ -95,7 +92,7 @@ type FAQs []FAQ
 
 type Transaction struct {
 	ID        uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
-	UserID    uint64       `db:"user_id"`
+	UserID    uuid.UUID    `db:"user_id"`
 	Status    string       `db:"status"`
 	Amount    uint64       `db:"amount"`
 	CreatedAt time.Time    `db:"created_at"`
