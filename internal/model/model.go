@@ -84,14 +84,15 @@ type Credit struct {
 	Amount uint64 `db:"amount"`
 }
 
-type Point struct {
-	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
-	UserID uint64 `db:"user_id"`
-	Amount uint64 `db:"amount"`
-}
+// type Point struct {
+// 	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+// 	UserID uint64 `db:"user_id"`
+// 	Amount uint64 `db:"amount"`
+// }
 
 type Credits []Credit
-type Points []Point
+
+// type Points []Point
 
 type FAQ struct {
 	ID        uint64       `db:"id" gorm:"primaryKey;autoIncrement"`
