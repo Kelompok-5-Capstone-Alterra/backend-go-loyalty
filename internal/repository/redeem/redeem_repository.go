@@ -5,12 +5,14 @@ import (
 	"backend-go-loyalty/internal/model"
 	"context"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type IRedeemRepository interface {
 	CreateRedeem(ctx context.Context, redeem *entity.Redeem) error
-	GetAllRedeem(ctx context.Context) (*entity.Redeems, error)
+	GetAllRedeems(ctx context.Context) (*entity.Redeems, error)
+	GetAllRedeemByUserID(ctx context.Context, userID uuid.UUID) (*entity.Redeems, error)
 	GetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error)
 	UpdateRedeem(ctx context.Context, d *entity.Redeem, id uint64) error
 	DeleteRedeem(ctx context.Context, id uint64) error
@@ -24,9 +26,18 @@ func NewRedeemRepository(db *gorm.DB) IRedeemRepository {
 	return &redeemRepository{db}
 }
 
-func (dr *redeemRepository) GetAllRedeem(ctx context.Context) (*entity.Redeems, error) {
+func (dr *redeemRepository) GetAllRedeems(ctx context.Context) (*entity.Redeems, error) {
 	var redeems entity.Redeems
-	err := dr.DB.Model(&model.Redeem{}).Preload("RewardID").Preload("UserID").Find(&redeems).Error
+	err := dr.DB.Model(&model.Redeem{}).Preload("Reward").Preload("User").Find(&redeems).Error
+	if err != nil {
+		return nil, err
+	}
+	return &redeems, nil
+}
+
+func (dr *redeemRepository) GetAllRedeemByUserID(ctx context.Context, userID uuid.UUID) (*entity.Redeems, error) {
+	var redeems entity.Redeems
+	err := dr.DB.Model(&model.Redeem{}).Preload("Reward").Preload("User").Where("user_id = ?", userID).Find(&redeems).Error
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +46,7 @@ func (dr *redeemRepository) GetAllRedeem(ctx context.Context) (*entity.Redeems, 
 
 func (dr *redeemRepository) GetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error) {
 	var redeem entity.Redeem
-	err := dr.DB.Model(&model.Redeem{}).Preload("RewardID").Preload("UserID").First(&redeem, id).Error
+	err := dr.DB.Model(&model.Redeem{}).Preload("Reward").Preload("User").First(&redeem, id).Error
 	if err != nil {
 		return nil, err
 	}

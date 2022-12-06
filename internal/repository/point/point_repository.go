@@ -10,9 +10,9 @@ import (
 )
 
 type IPointRepository interface {
-	GetAllPoints(ctx context.Context) (entity.Points, error)
-	GetPoint(ctx context.Context, id uuid.UUID) (entity.Point, error)
-	UpdatePoint(ctx context.Context, id uuid.UUID, req entity.Point) error
+	GetAllPoints(ctx context.Context) (entity.UserCoins, error)
+	GetPoint(ctx context.Context, id uuid.UUID) (entity.UserCoin, error)
+	UpdatePoint(ctx context.Context, id uuid.UUID, req entity.UserCoin) error
 }
 
 type pointRepository struct {
@@ -25,18 +25,18 @@ func NewPointRepository(db *gorm.DB) pointRepository {
 	}
 }
 
-func (pr pointRepository) GetAllPoints(ctx context.Context) (entity.Points, error) {
-	points := entity.Points{}
-	err := pr.DB.Model(&model.Point{}).Preload("UserID").Preload("RoleID").Find(&points).Error
+func (pr pointRepository) GetAllPoints(ctx context.Context) (entity.UserCoins, error) {
+	points := entity.UserCoins{}
+	err := pr.DB.Model(&model.UserCoin{}).Preload("User").Find(&points).Error
 	return points, err
 }
 
-func (pr pointRepository) GetPoint(ctx context.Context, id uuid.UUID) (entity.Point, error) {
-	point := entity.Point{}
-	err := pr.DB.Model(&model.Point{}).Preload("UserID").Preload("RoleID").First(&point, id).Error
+func (pr pointRepository) GetPoint(ctx context.Context, id uuid.UUID) (entity.UserCoin, error) {
+	point := entity.UserCoin{}
+	err := pr.DB.Model(&model.UserCoin{}).Preload("User").Where("user_id = ?", id).First(&point).Error
 	return point, err
 }
-func (pr pointRepository) UpdatePoint(ctx context.Context, id uuid.UUID, req entity.Point) error {
-	err := pr.DB.Model(&model.Point{}).Where("id = ?", id).Updates(req).Error
+func (pr pointRepository) UpdatePoint(ctx context.Context, id uuid.UUID, req entity.UserCoin) error {
+	err := pr.DB.Model(&model.UserCoin{}).Where("user_id = ?", id).Updates(req).Error
 	return err
 }

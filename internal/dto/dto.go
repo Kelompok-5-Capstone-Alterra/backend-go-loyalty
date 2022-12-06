@@ -78,7 +78,7 @@ type RewardRequest struct {
 	Description   string    `json:"description" validate:"required"`
 	RequiredPoint uint64    `json:"requiredPoint" validate:"required"`
 	ValidUntil    time.Time `json:"valid_until" validate:"required"`
-	CategoryID    uint64    `json:"category_id" validate:"category_id"`
+	CategoryID    uint64    `json:"category_id" validate:"required"`
 }
 
 type RewardUpdateRequest struct {
@@ -142,11 +142,9 @@ type RedeemRequest struct {
 
 type RedeemResponse struct {
 	ID         uint64         `json:"id"`
-	UserID     uint64         `json:"user_id"`
 	PointSpent uint64         `json:"point_spent"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
-	DeletedAt  sql.NullTime   `json:"deleted_at"`
 	Reward     RewardResponse `json:"reward"`
 }
 
