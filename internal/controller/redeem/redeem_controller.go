@@ -4,6 +4,7 @@ import (
 	"backend-go-loyalty/internal/dto"
 	redeemService "backend-go-loyalty/internal/service/redeem"
 	"backend-go-loyalty/pkg/response"
+	"backend-go-loyalty/pkg/utils"
 	"net/http"
 	"strconv"
 
@@ -13,6 +14,7 @@ import (
 
 type IRedeemController interface {
 	CreateRedeem(c echo.Context) error
+	GetAllRedeemByUserID(c echo.Context) error
 	GetAllRedeem(c echo.Context) error
 	GetRedeemByID(c echo.Context) error
 	UpdateRedeem(c echo.Context) error
@@ -30,7 +32,19 @@ func NewRedeemController(ds redeemService.IRedeemService) redeemController {
 }
 
 func (dc redeemController) GetAllRedeem(c echo.Context) error {
-	data, err := dc.ds.GetAllRedeem(c.Request().Context())
+	data, err := dc.ds.GetAllRedeems(c.Request().Context())
+	if err != nil {
+		return responseErrorInternal(err, c)
+	}
+	return responseSuccess(data, c)
+}
+
+func (dc redeemController) GetAllRedeemByUserID(c echo.Context) error {
+	userID, err := utils.GetUserIDFromJWT(c)
+	if err != nil {
+		return responseErrorParams(err, c)
+	}
+	data, err := dc.ds.GetAllRedeemByUserID(c.Request().Context(), userID)
 	if err != nil {
 		return responseErrorInternal(err, c)
 	}
@@ -59,7 +73,8 @@ func (dc redeemController) CreateRedeem(c echo.Context) error {
 	if err != nil {
 		return responseErrorValidator(err, c)
 	}
-	err = dc.ds.CreateRedeem(c.Request().Context(), req)
+	userId, err := utils.GetUserIDFromJWT(c)
+	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId)
 	if err != nil {
 		return responseErrorInternal(err, c)
 	}
