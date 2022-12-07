@@ -16,6 +16,7 @@ type IRedeemController interface {
 	CreateRedeem(c echo.Context) error
 	GetAllRedeemByUserID(c echo.Context) error
 	GetAllRedeem(c echo.Context) error
+	GetAllRedeemIncludeSoftDeleted(c echo.Context) error
 	GetRedeemByID(c echo.Context) error
 	UpdateRedeem(c echo.Context) error
 	DeleteRedeem(c echo.Context) error
@@ -33,6 +34,14 @@ func NewRedeemController(ds redeemService.IRedeemService) redeemController {
 
 func (dc redeemController) GetAllRedeem(c echo.Context) error {
 	data, err := dc.ds.GetAllRedeems(c.Request().Context())
+	if err != nil {
+		return responseErrorInternal(err, c)
+	}
+	return responseSuccess(data, c)
+}
+
+func (dc redeemController) GetAllRedeemIncludeSoftDeleted(c echo.Context) error {
+	data, err := dc.ds.GetAllIncludeSoftDeleted(c.Request().Context())
 	if err != nil {
 		return responseErrorInternal(err, c)
 	}
