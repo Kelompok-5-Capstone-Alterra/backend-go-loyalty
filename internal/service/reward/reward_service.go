@@ -4,6 +4,7 @@ import (
 	"backend-go-loyalty/internal/dto"
 	"backend-go-loyalty/internal/entity"
 	rewardRepository "backend-go-loyalty/internal/repository/reward"
+	"time"
 
 	"context"
 )
@@ -43,6 +44,12 @@ func (rs rewardServiceImpl) FindAllReward(ctx context.Context) (dto.RewardsRespo
 		item.CreatedAt = reward.CreatedAt
 		item.UpdatedAt = reward.UpdatedAt
 		item.DeletedAt = reward.DeletedAt
+		item.Category = dto.CategoryResponse{
+			ID:        reward.CategoryID,
+			Name:      reward.Category.Name,
+			CreatedAt: reward.Category.CreatedAt,
+			UpdatedAt: reward.Category.UpdatedAt,
+		}
 		rewardResponses = append(rewardResponses, item)
 	}
 	return rewardResponses, nil
@@ -63,19 +70,30 @@ func (rs rewardServiceImpl) FindRewardByID(ctx context.Context, rewardID uint64)
 		CreatedAt:     reward.CreatedAt,
 		UpdatedAt:     reward.UpdatedAt,
 		DeletedAt:     reward.DeletedAt,
+		Category: dto.CategoryResponse{
+			ID:        reward.CategoryID,
+			Name:      reward.Category.Name,
+			CreatedAt: reward.Category.CreatedAt,
+			UpdatedAt: reward.Category.UpdatedAt,
+		},
 	}
 	return rewardResponse, nil
 }
 
 func (rs rewardServiceImpl) CreateReward(ctx context.Context, req dto.RewardRequest) error {
+	valid, err := time.Parse(time.RFC3339, req.ValidUntil)
+	if err != nil {
+		return err
+	}
 	reward := entity.Reward{
 		Name:          req.Name,
 		Description:   req.Description,
 		RequiredPoint: req.RequiredPoint,
-		ValidUntil:    req.ValidUntil,
+		ValidUntil:    valid,
+		CategoryID:    req.CategoryID,
 	}
 
-	err := rs.rr.CreateReward(ctx, &reward)
+	err = rs.rr.CreateReward(ctx, &reward)
 	if err != nil {
 		return err
 	}
@@ -87,7 +105,15 @@ func (rs rewardServiceImpl) UpdateReward(ctx context.Context, req dto.RewardRequ
 		Name:          req.Name,
 		Description:   req.Description,
 		RequiredPoint: req.RequiredPoint,
-		ValidUntil:    req.ValidUntil,
+		CategoryID:    req.CategoryID,
+	}
+
+	if req.ValidUntil != "" {
+		valid, err := time.Parse(time.RFC3339, req.ValidUntil)
+		if err != nil {
+			return err
+		}
+		reward.ValidUntil = valid
 	}
 
 	err := rs.rr.UpdateReward(ctx, &reward, id)

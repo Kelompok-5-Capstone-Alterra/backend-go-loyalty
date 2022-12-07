@@ -1,10 +1,10 @@
 package dto
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type SignUpRequest struct {
@@ -74,30 +74,31 @@ type UpdatePasswordRequest struct {
 }
 
 type RewardRequest struct {
-	Name          string    `json:"name" validate:"required"`
-	Description   string    `json:"description" validate:"required"`
-	RequiredPoint uint64    `json:"requiredPoint" validate:"required"`
-	ValidUntil    time.Time `json:"valid_until" validate:"required"`
-	CategoryID    uint64    `json:"category_id" validate:"required"`
+	Name          string `json:"name" validate:"required"`
+	Description   string `json:"description" validate:"required"`
+	RequiredPoint uint64 `json:"required_point" validate:"required"`
+	ValidUntil    string `json:"valid_until" validate:"required"`
+	CategoryID    uint64 `json:"category_id" validate:"required"`
 }
 
 type RewardUpdateRequest struct {
-	Name          string    `json:"name"`
-	Description   string    `json:"description"`
-	RequiredPoint uint64    `json:"requiredPoint"`
-	ValidUntil    time.Time `json:"valid_until"`
-	CategoryID    uint64    `json:"category_id"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	RequiredPoint uint64 `json:"required_point"`
+	ValidUntil    string `json:"valid_until"`
+	CategoryID    uint64 `json:"category_id"`
 }
 
 type RewardResponse struct {
-	ID            uint64       `json:"id"`
-	Name          string       `json:"name"`
-	Description   string       `json:"description"`
-	RequiredPoint uint64       `json:"required_points"`
-	ValidUntil    time.Time    `json:"valid_until"`
-	CreatedAt     time.Time    `json:"created_at"`
-	UpdatedAt     time.Time    `json:"updated_at"`
-	DeletedAt     sql.NullTime `json:"deleted_at"`
+	ID            uint64           `json:"id"`
+	Name          string           `json:"name"`
+	Description   string           `json:"description"`
+	RequiredPoint uint64           `json:"required_points"`
+	ValidUntil    time.Time        `json:"valid_until"`
+	CreatedAt     time.Time        `json:"created_at"`
+	UpdatedAt     time.Time        `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt   `json:"deleted_at"`
+	Category      CategoryResponse `json:"category"`
 }
 
 type RewardsResponse []RewardResponse
@@ -115,11 +116,11 @@ type ProductUpdateRequest struct {
 }
 
 type CategoryResponse struct {
-	ID        uint64       `json:"id"`
-	Name      string       `json:"name"`
-	CreatedAt time.Time    `json:"created_at"`
-	UpdatedAt time.Time    `json:"updated_at"`
-	DeletedAt sql.NullTime `json:"deleted_at"`
+	ID        uint64         `json:"id"`
+	Name      string         `json:"name"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }
 
 type ProductResponse struct {
@@ -130,7 +131,7 @@ type ProductResponse struct {
 	Points             int              `json:"points"`
 	CreatedAt          time.Time        `json:"created_at"`
 	UpdatedAt          time.Time        `json:"updated_at"`
-	DeletedAt          sql.NullTime     `json:"deleted_at"`
+	DeletedAt          gorm.DeletedAt   `json:"deleted_at"`
 	Category           CategoryResponse `json:"category"`
 }
 
