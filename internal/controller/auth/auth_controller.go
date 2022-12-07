@@ -34,33 +34,19 @@ func (ac authController) HandleLogin(c echo.Context) error {
 	validate := validator.New()
 	err := validate.Struct(&req)
 	if err != nil {
-		errRes := response.ErrorResponseData{}
-		for _, val := range err.(validator.ValidationErrors) {
-			var errVal response.ErrorResponseValue
-			errVal.Key = val.StructField()
-			errVal.Value = val.Tag()
-			errRes = append(errRes, errVal)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				errRes,
-				nil))
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
 	data, err := ac.as.Login(c.Request().Context(), req)
 	if err != nil {
-		errVal := response.ErrorResponseValue{
-			Key:   "error",
-			Value: err.Error(),
+		var code int
+		if err.Error() == "record not found" || err.Error() == "wrong password" || err.Error() == "user not activated" {
+			code = http.StatusUnauthorized
+		} else {
+			code = http.StatusInternalServerError
 		}
-		errRes := response.ErrorResponseData{errVal}
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			response.NewBaseResponse(http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError),
-				errRes,
-				nil))
+		return response.ResponseError(code, err)
 	}
-	return c.JSON(http.StatusOK, response.NewBaseResponse(http.StatusOK, http.StatusText(http.StatusOK), nil, data))
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 func (ac authController) HandleSignUp(c echo.Context) error {
 	req := dto.SignUpRequest{}
@@ -68,35 +54,19 @@ func (ac authController) HandleSignUp(c echo.Context) error {
 	validate := validator.New()
 	err := validate.Struct(&req)
 	if err != nil {
-		errRes := response.ErrorResponseData{}
-		for _, val := range err.(validator.ValidationErrors) {
-			var errVal response.ErrorResponseValue
-			errVal.Key = val.StructField()
-			errVal.Value = val.Tag()
-			errRes = append(errRes, errVal)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				errRes,
-				nil))
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
 	err = ac.as.SignUp(c.Request().Context(), req)
 	if err != nil {
-		errVal := response.ErrorResponseValue{
-			Key:   "error",
-			Value: err.Error(),
+		var code int
+		if err.Error() == "email alreasy used" {
+			code = http.StatusConflict
+		} else {
+			code = http.StatusInternalServerError
 		}
-		errRes := response.ErrorResponseData{errVal}
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			response.NewBaseResponse(http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError),
-				errRes,
-				nil))
+		return response.ResponseError(code, err)
 	}
-	return c.JSON(http.StatusOK, response.NewBaseResponse(http.StatusOK, http.StatusText(http.StatusOK), nil, echo.Map{
-		"status": "PENDING_VERIFICATION",
-	}))
+	return response.ResponseSuccess(http.StatusCreated, echo.Map{"status": "PENDING_VERIFICATION"}, c)
 }
 
 func (ac authController) HandleValidateOTP(c echo.Context) error {
@@ -105,35 +75,19 @@ func (ac authController) HandleValidateOTP(c echo.Context) error {
 	validate := validator.New()
 	err := validate.Struct(&req)
 	if err != nil {
-		errRes := response.ErrorResponseData{}
-		for _, val := range err.(validator.ValidationErrors) {
-			var errVal response.ErrorResponseValue
-			errVal.Key = val.StructField()
-			errVal.Value = val.Tag()
-			errRes = append(errRes, errVal)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				errRes,
-				nil))
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
 	err = ac.as.ValidateOTP(c.Request().Context(), req)
 	if err != nil {
-		errVal := response.ErrorResponseValue{
-			Key:   "error",
-			Value: err.Error(),
+		var code int
+		if err.Error() == "invalid otp code" {
+			code = http.StatusUnauthorized
+		} else {
+			code = http.StatusInternalServerError
 		}
-		errRes := response.ErrorResponseData{errVal}
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			response.NewBaseResponse(http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError),
-				errRes,
-				nil))
+		return response.ResponseError(code, err)
 	}
-	return c.JSON(http.StatusOK, response.NewBaseResponse(http.StatusOK, http.StatusText(http.StatusOK), nil, echo.Map{
-		"status": "SUCCESS_ACTIVATED_USER",
-	}))
+	return response.ResponseSuccess(http.StatusOK, echo.Map{"status": "SUCCESS_ACTIVATED_USER"}, c)
 }
 
 func (ac authController) HandleRefreshToken(c echo.Context) error {
@@ -142,33 +96,19 @@ func (ac authController) HandleRefreshToken(c echo.Context) error {
 	validate := validator.New()
 	err := validate.Struct(&rt)
 	if err != nil {
-		errRes := response.ErrorResponseData{}
-		for _, val := range err.(validator.ValidationErrors) {
-			var errVal response.ErrorResponseValue
-			errVal.Key = val.StructField()
-			errVal.Value = val.Tag()
-			errRes = append(errRes, errVal)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				errRes,
-				nil))
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
 	data, err := ac.as.RegenerateToken(c.Request().Context(), rt.RefreshToken)
 	if err != nil {
-		errVal := response.ErrorResponseValue{
-			Key:   "error",
-			Value: err.Error(),
+		var code int
+		if err.Error() == "refresh token invalid" {
+			code = http.StatusUnauthorized
+		} else {
+			code = http.StatusInternalServerError
 		}
-		errRes := response.ErrorResponseData{errVal}
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			response.NewBaseResponse(http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError),
-				errRes,
-				nil))
+		return response.ResponseError(code, err)
 	}
-	return c.JSON(http.StatusOK, response.NewBaseResponse(http.StatusOK, http.StatusText(http.StatusOK), nil, data))
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (ac authController) HandleRequestNewOTP(c echo.Context) error {
@@ -177,33 +117,17 @@ func (ac authController) HandleRequestNewOTP(c echo.Context) error {
 	validate := validator.New()
 	err := validate.Struct(&req)
 	if err != nil {
-		errRes := response.ErrorResponseData{}
-		for _, val := range err.(validator.ValidationErrors) {
-			var errVal response.ErrorResponseValue
-			errVal.Key = val.StructField()
-			errVal.Value = val.Tag()
-			errRes = append(errRes, errVal)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				errRes,
-				nil))
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
 	err = ac.as.RequestNewOTP(c.Request().Context(), req.Email)
 	if err != nil {
-		errVal := response.ErrorResponseValue{
-			Key:   "error",
-			Value: err.Error(),
+		var code int
+		if err.Error() == "cannot send new otp to activated user" {
+			code = http.StatusForbidden
+		} else {
+			code = http.StatusInternalServerError
 		}
-		errRes := response.ErrorResponseData{errVal}
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			response.NewBaseResponse(http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError),
-				errRes,
-				nil))
+		return response.ResponseError(code, err)
 	}
-	return c.JSON(http.StatusOK, response.NewBaseResponse(http.StatusOK, http.StatusText(http.StatusOK), nil, echo.Map{
-		"status": "SUCCESS_SENT_OTP",
-	}))
+	return response.ResponseSuccess(http.StatusCreated, echo.Map{"status": "SUCCESS_SENT_OTP"}, c)
 }
