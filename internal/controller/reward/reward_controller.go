@@ -32,22 +32,28 @@ func NewRewardController(rs rewardService.IRewardService) rewardController {
 func (rc rewardController) FindAllReward(c echo.Context) error {
 	data, err := rc.rs.FindAllReward(c.Request().Context())
 	if err != nil {
-		return responseErrorInternal(err)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(data, c)
+	if len(data) == 0 {
+		return response.ResponseSuccess(http.StatusNoContent, nil, c)
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (rc rewardController) FindRewardById(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := rc.rs.FindRewardByID(c.Request().Context(), id)
 	if err != nil {
-		return responseErrorInternal(err)
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusNoContent, nil, c)
+		}
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(data, c)
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (rc rewardController) CreateReward(c echo.Context) error {
@@ -56,13 +62,13 @@ func (rc rewardController) CreateReward(c echo.Context) error {
 	validate := validator.New()
 	err := validate.Struct(req)
 	if err != nil {
-		return responseErrorValidator(err)
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
 	err = rc.rs.CreateReward(c.Request().Context(), req)
 	if err != nil {
-		return responseErrorInternal(err)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(echo.Map{
+	return response.ResponseSuccess(http.StatusCreated, echo.Map{
 		"status": "SUCCESS_INSERT_PRODUCT",
 	}, c)
 }
@@ -70,15 +76,15 @@ func (rc rewardController) UpdateReward(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	var req dto.RewardRequest
 	c.Bind(&req)
 	err = rc.rs.UpdateReward(c.Request().Context(), req, id)
 	if err != nil {
-		return responseErrorInternal(err)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	return responseSuccess(echo.Map{
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
 		"status": "SUCCESS_UPDATE_PRODUCT",
 	}, c)
 }
@@ -87,63 +93,14 @@ func (rc rewardController) DeleteReward(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 
 	err = rc.rs.DeleteReward(c.Request().Context(), id)
 	if err != nil {
-		return responseErrorInternal(err)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(echo.Map{
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
 		"status": "SUCCESS_DELETE_PRODUCT",
 	}, c)
-}
-
-func responseErrorInternal(err error) error {
-	errVal := response.ErrorResponseValue{
-		Key:   "error",
-		Value: err.Error(),
-	}
-	errRes := response.ErrorResponseData{errVal}
-	return echo.NewHTTPError(http.StatusInternalServerError,
-		response.NewBaseResponse(http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			errRes,
-			nil))
-}
-
-func responseSuccess(result interface{}, c echo.Context) error {
-	return c.JSON(http.StatusOK, response.NewBaseResponse(
-		http.StatusOK,
-		http.StatusText(http.StatusOK),
-		nil,
-		result,
-	))
-}
-
-func responseErrorValidator(err error) error {
-	errRes := response.ErrorResponseData{}
-	for _, val := range err.(validator.ValidationErrors) {
-		var errVal response.ErrorResponseValue
-		errVal.Key = val.StructField()
-		errVal.Value = val.Tag()
-		errRes = append(errRes, errVal)
-	}
-	return echo.NewHTTPError(http.StatusBadRequest,
-		response.NewBaseResponse(http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			errRes,
-			nil))
-}
-
-func responseErrorParams(err error) error {
-	var errVal response.ErrorResponseValue
-	errVal.Key = "error"
-	errVal.Value = err.Error()
-
-	return echo.NewHTTPError(http.StatusBadRequest,
-		response.NewBaseResponse(http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			response.NewErrorResponseData(errVal),
-			nil))
 }

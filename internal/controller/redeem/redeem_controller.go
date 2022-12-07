@@ -35,42 +35,58 @@ func NewRedeemController(ds redeemService.IRedeemService) redeemController {
 func (dc redeemController) GetAllRedeem(c echo.Context) error {
 	data, err := dc.ds.GetAllRedeems(c.Request().Context())
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(data, c)
+	if len(data) == 0 {
+		return response.ResponseSuccess(http.StatusNoContent, data, c)
+	} else {
+		return response.ResponseSuccess(http.StatusOK, data, c)
+	}
 }
 
 func (dc redeemController) GetAllRedeemIncludeSoftDeleted(c echo.Context) error {
 	data, err := dc.ds.GetAllIncludeSoftDeleted(c.Request().Context())
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(data, c)
+	if len(data) == 0 {
+		return response.ResponseSuccess(http.StatusNoContent, data, c)
+	} else {
+		return response.ResponseSuccess(http.StatusOK, data, c)
+	}
 }
 
 func (dc redeemController) GetAllRedeemByUserID(c echo.Context) error {
 	userID, err := utils.GetUserIDFromJWT(c)
 	if err != nil {
-		return responseErrorParams(err, c)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := dc.ds.GetAllRedeemByUserID(c.Request().Context(), userID)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(data, c)
+	if len(data) == 0 {
+		return response.ResponseSuccess(http.StatusNoContent, nil, c)
+	} else {
+		return response.ResponseSuccess(http.StatusOK, data, c)
+	}
 }
 
 func (dc redeemController) GetRedeemByID(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err, c)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := dc.ds.GetRedeemByID(c.Request().Context(), id)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusNoContent, nil, c)
+		} else {
+			return response.ResponseError(http.StatusInternalServerError, err)
+		}
 	}
-	return responseSuccess(data, c)
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (dc redeemController) CreateRedeem(c echo.Context) error {
@@ -80,14 +96,17 @@ func (dc redeemController) CreateRedeem(c echo.Context) error {
 	validate := validator.New()
 	err := validate.Struct(req)
 	if err != nil {
-		return responseErrorValidator(err, c)
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
 	userId, err := utils.GetUserIDFromJWT(c)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
 	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(echo.Map{
+	return response.ResponseSuccess(http.StatusCreated, echo.Map{
 		"status": "SUCCESS_INSERT_REDEEM",
 	}, c)
 }
@@ -96,16 +115,16 @@ func (dc redeemController) UpdateRedeem(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err, c)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	var req dto.RedeemRequest
 	c.Bind(&req)
 
 	err = dc.ds.UpdateRedeem(c.Request().Context(), req, id)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(echo.Map{
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
 		"status": "SUCCESS_UPDATE_PRODUCT",
 	}, c)
 }
@@ -114,62 +133,13 @@ func (dc redeemController) DeleteRedeem(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err, c)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	err = dc.ds.DeleteRedeem(c.Request().Context(), id)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(echo.Map{
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
 		"status": "SUCCESS_DELETE_REDEEM",
 	}, c)
-}
-
-func responseErrorInternal(err error, c echo.Context) error {
-	errVal := response.ErrorResponseValue{
-		Key:   "error",
-		Value: err.Error(),
-	}
-	errRes := response.ErrorResponseData{errVal}
-	return echo.NewHTTPError(http.StatusInternalServerError,
-		response.NewBaseResponse(http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			errRes,
-			nil))
-}
-
-func responseSuccess(result interface{}, c echo.Context) error {
-	return c.JSON(http.StatusOK, response.NewBaseResponse(
-		http.StatusOK,
-		http.StatusText(http.StatusOK),
-		nil,
-		result,
-	))
-}
-
-func responseErrorValidator(err error, c echo.Context) error {
-	errRes := response.ErrorResponseData{}
-	for _, val := range err.(validator.ValidationErrors) {
-		var errVal response.ErrorResponseValue
-		errVal.Key = val.StructField()
-		errVal.Value = val.Tag()
-		errRes = append(errRes, errVal)
-	}
-	return echo.NewHTTPError(http.StatusBadRequest,
-		response.NewBaseResponse(http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			errRes,
-			nil))
-}
-
-func responseErrorParams(err error, c echo.Context) error {
-	var errVal response.ErrorResponseValue
-	errVal.Key = "error"
-	errVal.Value = err.Error()
-
-	return echo.NewHTTPError(http.StatusBadRequest,
-		response.NewBaseResponse(http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			response.NewErrorResponseData(errVal),
-			nil))
 }

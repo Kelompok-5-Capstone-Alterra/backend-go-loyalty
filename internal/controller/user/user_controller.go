@@ -35,21 +35,27 @@ func (uc userController) HandleGetAllUser(c echo.Context) error {
 	query := c.QueryParam("name")
 	data, err := uc.us.GetUsers(c.Request().Context(), query)
 	if err != nil {
-		return responseErrorSingle(err, http.StatusInternalServerError)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(c, http.StatusOK, data)
+	if len(data) == 0 {
+		return response.ResponseSuccess(http.StatusNoContent, nil, c)
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 func (uc userController) HandleGetUserByID(c echo.Context) error {
 	param := c.Param("id")
 	id, err := uuid.Parse(param)
 	if err != nil {
-		return responseErrorSingle(err, http.StatusBadRequest)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := uc.us.GetUserByID(c.Request().Context(), id)
 	if err != nil {
-		return responseErrorSingle(err, http.StatusInternalServerError)
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusNoContent, nil, c)
+		}
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(c, http.StatusOK, data)
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (uc userController) HandleUpdateCustomerData(c echo.Context) error {
@@ -58,33 +64,30 @@ func (uc userController) HandleUpdateCustomerData(c echo.Context) error {
 	param := c.Param("id")
 	id, err := uuid.Parse(param)
 	if err != nil {
-		return responseErrorSingle(err, http.StatusBadRequest)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	_, err = uc.us.UpdateUserData(c.Request().Context(), req, id)
 	if err != nil {
-		if err.Error() == "record not found" {
-			return responseErrorSingle(err, http.StatusNoContent)
-		}
-		return responseErrorSingle(err, http.StatusInternalServerError)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(c, http.StatusOK, echo.Map{
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
 		"status": "SUCCESS_UPDATED_USER",
-	})
+	}, c)
 }
 
 func (uc userController) HandleDeleteCustomerData(c echo.Context) error {
 	param := c.Param("id")
 	id, err := uuid.Parse(param)
 	if err != nil {
-		return responseErrorSingle(err, http.StatusBadRequest)
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	err = uc.us.DeleteUserData(c.Request().Context(), id)
 	if err != nil {
-		return responseErrorSingle(err, http.StatusInternalServerError)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return responseSuccess(c, http.StatusOK, echo.Map{
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
 		"status": "SUCCESS_DELETED_USER",
-	})
+	}, c)
 }
 
 func (uc userController) HandleChangePassword(c echo.Context) error {
@@ -92,49 +95,28 @@ func (uc userController) HandleChangePassword(c echo.Context) error {
 	c.Bind(&req)
 	id, err := utils.GetUserIDFromJWT(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				response.NewErrorResponseData(
-					response.NewErrorResponseValue(
-						"error",
-						err.Error(),
-					),
-				),
-				nil))
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	validate := validator.New()
 	err = validate.Struct(&req)
 	if err != nil {
-		errRes := response.ErrorResponseData{}
-		for _, val := range err.(validator.ValidationErrors) {
-			var errVal response.ErrorResponseValue
-			errVal.Key = val.StructField()
-			errVal.Value = val.Tag()
-			errRes = append(errRes, errVal)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				errRes,
-				nil))
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
 	errs := uc.us.UpdatePassword(c.Request().Context(), req, id)
 	if errs != nil {
-		errVal := response.ErrorResponseValue{
-			Key:   "error",
-			Value: errs.Error(),
+		var code int
+		if err.Error() == "new password must be different from old password" {
+			code = http.StatusBadRequest
+		} else if err.Error() == "password not match" {
+			code = http.StatusUnauthorized
+		} else {
+			code = http.StatusInternalServerError
 		}
-		errRes := response.ErrorResponseData{errVal}
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			response.NewBaseResponse(http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError),
-				errRes,
-				nil))
+		return response.ResponseError(code, err)
 	}
-	return c.JSON(http.StatusOK, response.NewBaseResponse(http.StatusOK, http.StatusText(http.StatusOK), nil, echo.Map{
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
 		"status": "SUCCESS_UPDATE_PASSWORD",
-	}))
+	}, c)
 }
 
 func (uc userController) HandleUpdateData(c echo.Context) error {
@@ -142,62 +124,18 @@ func (uc userController) HandleUpdateData(c echo.Context) error {
 	c.Bind(&req)
 	id, err := utils.GetUserIDFromJWT(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				response.NewErrorResponseData(
-					response.NewErrorResponseValue(
-						"error",
-						err.Error(),
-					),
-				),
-				nil))
+		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	validate := validator.New()
 	err = validate.Struct(&req)
 	if err != nil {
-		errRes := response.ErrorResponseData{}
-		for _, val := range err.(validator.ValidationErrors) {
-			var errVal response.ErrorResponseValue
-			errVal.Key = val.StructField()
-			errVal.Value = val.Tag()
-			errRes = append(errRes, errVal)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest,
-			response.NewBaseResponse(http.StatusBadRequest,
-				http.StatusText(http.StatusBadRequest),
-				errRes,
-				nil))
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
-	data, err := uc.us.UpdateUserData(c.Request().Context(), req, id)
+	_, err = uc.us.UpdateUserData(c.Request().Context(), req, id)
 	if err != nil {
-		errVal := response.ErrorResponseValue{
-			Key:   "error",
-			Value: err.Error(),
-		}
-		errRes := response.ErrorResponseData{errVal}
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			response.NewBaseResponse(http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError),
-				errRes,
-				nil))
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return c.JSON(http.StatusOK, response.NewBaseResponse(http.StatusOK, http.StatusText(http.StatusOK), nil, data))
-}
-
-func responseErrorSingle(err error, code int) error {
-	return echo.NewHTTPError(code,
-		response.NewBaseResponse(code,
-			http.StatusText(code),
-			response.NewErrorResponseData(
-				response.NewErrorResponseValue(
-					"error",
-					err.Error(),
-				),
-			),
-			nil))
-}
-
-func responseSuccess(c echo.Context, code int, data interface{}) error {
-	return c.JSON(code, response.NewBaseResponse(code, http.StatusText(code), nil, data))
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
+		"status": "SUCCESS_UPDATED_USER_DATA",
+	}, c)
 }

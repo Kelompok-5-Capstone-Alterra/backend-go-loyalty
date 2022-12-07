@@ -47,12 +47,8 @@ func (ur userRepository) DeleteUserData(ctx context.Context, id uuid.UUID) error
 
 func (ur userRepository) UpdateUserData(ctx context.Context, req entity.User) (entity.User, error) {
 	result := ur.DB.Model(&model.User{}).Where("id = ?", req.ID).Updates(req)
-	var errMessage string
-	if result.RowsAffected == 0 {
-		errMessage = "old password not match"
-	}
 	if result.Error != nil {
-		return entity.User{}, errors.New(errMessage)
+		return entity.User{}, result.Error
 	}
 	res := entity.User{}
 	err := ur.DB.Model(&model.User{}).Preload("Role").First(&res, req.ID).Error
