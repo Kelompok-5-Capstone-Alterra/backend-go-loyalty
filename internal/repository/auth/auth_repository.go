@@ -56,9 +56,6 @@ func (ar authRepository) Login(ctx context.Context, email string, password strin
 	user := entity.User{}
 	err := ar.DB.Model(&model.User{}).Preload("Role").Where("email = ?", email).First(&user).Error
 	if err != nil {
-		if err.Error() == "record not found" {
-			return entity.User{}, errors.New("user with such email isn't found")
-		}
 		return entity.User{}, err
 	}
 	if user.Password != password {
@@ -114,11 +111,13 @@ func (ar authRepository) InsertOTP(ctx context.Context, otp string, email string
 func (ar authRepository) ValidateOTP(ctx context.Context, otp string, email string) error {
 	err := ar.DB.Where("otp_code = ? AND email = ?", otp, email).First(&entity.OTP{}).Error
 	if err != nil {
-		errMessage := fmt.Sprint("invalid otp code")
-		if err.Error() == "record not found" {
-			return errors.New(errMessage)
+		var errMessage string
+		if err.Error() == "record not found"{
+			errMessage = fmt.Sprint("invalid otp code")
+		} else{
+			errMessage = fmt.Sprint(err.Error())
 		}
-		return err
+		return errors.New(errMessage)
 	}
 	err = ar.DB.Model(&model.User{}).Where("email = ?", email).Update("is_active", true).Error
 	if err != nil {

@@ -13,6 +13,7 @@ type IRedeemRepository interface {
 	CreateRedeem(ctx context.Context, redeem *entity.Redeem) error
 	GetAllRedeems(ctx context.Context) (*entity.Redeems, error)
 	GetAllRedeemByUserID(ctx context.Context, userID uuid.UUID) (*entity.Redeems, error)
+	GetAllIncludeSoftDelete(ctx context.Context) (*entity.Redeems, error)
 	GetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error)
 	UpdateRedeem(ctx context.Context, d *entity.Redeem, id uint64) error
 	DeleteRedeem(ctx context.Context, id uint64) error
@@ -24,6 +25,15 @@ type redeemRepository struct {
 
 func NewRedeemRepository(db *gorm.DB) IRedeemRepository {
 	return &redeemRepository{db}
+}
+
+func (dr *redeemRepository) GetAllIncludeSoftDelete(ctx context.Context) (*entity.Redeems, error) {
+	var redeems entity.Redeems
+	err := dr.DB.Model(&model.Redeem{}).Preload("Reward").Preload("User").Unscoped().Find(&redeems).Error
+	if err != nil {
+		return nil, err
+	}
+	return &redeems, nil
 }
 
 func (dr *redeemRepository) GetAllRedeems(ctx context.Context) (*entity.Redeems, error) {
