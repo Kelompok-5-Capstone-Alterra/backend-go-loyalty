@@ -32,7 +32,7 @@ func NewRewardController(rs rewardService.IRewardService) rewardController {
 func (rc rewardController) FindAllReward(c echo.Context) error {
 	data, err := rc.rs.FindAllReward(c.Request().Context())
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return responseErrorInternal(err)
 	}
 	return responseSuccess(data, c)
 }
@@ -41,11 +41,11 @@ func (rc rewardController) FindRewardById(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err, c)
+		return responseErrorParams(err)
 	}
 	data, err := rc.rs.FindRewardByID(c.Request().Context(), id)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return responseErrorInternal(err)
 	}
 	return responseSuccess(data, c)
 }
@@ -56,11 +56,11 @@ func (rc rewardController) CreateReward(c echo.Context) error {
 	validate := validator.New()
 	err := validate.Struct(req)
 	if err != nil {
-		return responseErrorValidator(err, c)
+		return responseErrorValidator(err)
 	}
 	err = rc.rs.CreateReward(c.Request().Context(), req)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return responseErrorInternal(err)
 	}
 	return responseSuccess(echo.Map{
 		"status": "SUCCESS_INSERT_PRODUCT",
@@ -70,13 +70,13 @@ func (rc rewardController) UpdateReward(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err, c)
+		return responseErrorParams(err)
 	}
 	var req dto.RewardRequest
 	c.Bind(&req)
 	err = rc.rs.UpdateReward(c.Request().Context(), req, id)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return responseErrorInternal(err)
 	}
 	return responseSuccess(echo.Map{
 		"status": "SUCCESS_UPDATE_PRODUCT",
@@ -87,19 +87,19 @@ func (rc rewardController) DeleteReward(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
-		return responseErrorParams(err, c)
+		return responseErrorParams(err)
 	}
 
 	err = rc.rs.DeleteReward(c.Request().Context(), id)
 	if err != nil {
-		return responseErrorInternal(err, c)
+		return responseErrorInternal(err)
 	}
 	return responseSuccess(echo.Map{
 		"status": "SUCCESS_DELETE_PRODUCT",
 	}, c)
 }
 
-func responseErrorInternal(err error, c echo.Context) error {
+func responseErrorInternal(err error) error {
 	errVal := response.ErrorResponseValue{
 		Key:   "error",
 		Value: err.Error(),
@@ -121,7 +121,7 @@ func responseSuccess(result interface{}, c echo.Context) error {
 	))
 }
 
-func responseErrorValidator(err error, c echo.Context) error {
+func responseErrorValidator(err error) error {
 	errRes := response.ErrorResponseData{}
 	for _, val := range err.(validator.ValidationErrors) {
 		var errVal response.ErrorResponseValue
@@ -136,7 +136,7 @@ func responseErrorValidator(err error, c echo.Context) error {
 			nil))
 }
 
-func responseErrorParams(err error, c echo.Context) error {
+func responseErrorParams(err error) error {
 	var errVal response.ErrorResponseValue
 	errVal.Key = "error"
 	errVal.Value = err.Error()
