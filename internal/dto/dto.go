@@ -146,6 +146,7 @@ type RedeemResponse struct {
 	PointSpent uint64         `json:"point_spent"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `json:"deleted_at"`
 	Reward     RewardResponse `json:"reward"`
 }
 

@@ -160,6 +160,7 @@ func (prt productRoutes) InitEndpoints() {
 func (drt redeemRoutes) InitEndpoints() {
 	adminRedeem := drt.router.Group("admin/redeems", middleware.ValidateAdminJWT)
 	adminRedeem.GET("", drt.dc.GetAllRedeem)
+	adminRedeem.GET("/all", drt.dc.GetAllRedeemIncludeSoftDeleted)
 	adminRedeem.PUT("/:id", drt.dc.UpdateRedeem)
 	adminRedeem.DELETE("/:id", drt.dc.DeleteRedeem)
 

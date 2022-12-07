@@ -16,6 +16,7 @@ type IRedeemService interface {
 	CreateRedeem(ctx context.Context, req dto.RedeemRequest, userID uuid.UUID) error
 	GetAllRedeemByUserID(ctx context.Context, userID uuid.UUID) (dto.RedeemResponses, error)
 	GetAllRedeems(ctx context.Context) (dto.RedeemResponses, error)
+	GetAllIncludeSoftDeleted(ctx context.Context) (dto.RedeemResponses, error)
 	GetRedeemByID(ctx context.Context, redeemID uint64) (dto.RedeemResponse, error)
 	UpdateRedeem(ctx context.Context, req dto.RedeemRequest, id uint64) error
 	DeleteRedeem(ctx context.Context, redeemID uint64) error
@@ -35,6 +36,32 @@ func NewRedeemService(dr redeemRepository.IRedeemRepository, pr pointRepository.
 	}
 }
 
+func (ds redeemServiceImpl) GetAllIncludeSoftDeleted(ctx context.Context) (dto.RedeemResponses, error) {
+	redeems, err := ds.dr.GetAllIncludeSoftDelete(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var redeemResponses dto.RedeemResponses
+	for _, redeem := range *redeems {
+		var item dto.RedeemResponse
+		item.ID = redeem.ID
+		item.PointSpent = redeem.PointSpent
+		item.CreatedAt = redeem.CreatedAt
+		item.DeletedAt = redeem.DeletedAt
+		item.Reward = dto.RewardResponse{
+			ID:            redeem.Reward.ID,
+			Name:          redeem.Reward.Name,
+			Description:   redeem.Reward.Description,
+			RequiredPoint: redeem.Reward.RequiredPoint,
+			ValidUntil:    redeem.Reward.ValidUntil,
+			CreatedAt:     redeem.Reward.CreatedAt,
+			UpdatedAt:     redeem.Reward.UpdatedAt,
+			DeletedAt:     redeem.Reward.DeletedAt,
+		}
+		redeemResponses = append(redeemResponses, item)
+	}
+	return redeemResponses, nil
+}
 func (ds redeemServiceImpl) GetAllRedeems(ctx context.Context) (dto.RedeemResponses, error) {
 	redeems, err := ds.dr.GetAllRedeems(ctx)
 	if err != nil {
@@ -46,7 +73,7 @@ func (ds redeemServiceImpl) GetAllRedeems(ctx context.Context) (dto.RedeemRespon
 		item.ID = redeem.ID
 		item.PointSpent = redeem.PointSpent
 		item.CreatedAt = redeem.CreatedAt
-		// item.DeletedAt = redeem.DeletedAt
+		item.DeletedAt = redeem.DeletedAt
 		item.Reward = dto.RewardResponse{
 			ID:            redeem.Reward.ID,
 			Name:          redeem.Reward.Name,
@@ -73,7 +100,7 @@ func (ds redeemServiceImpl) GetAllRedeemByUserID(ctx context.Context, userID uui
 		item.ID = redeem.ID
 		item.PointSpent = redeem.PointSpent
 		item.CreatedAt = redeem.CreatedAt
-		// item.DeletedAt = redeem.DeletedAt
+		item.DeletedAt = redeem.DeletedAt
 		item.Reward = dto.RewardResponse{
 			ID:            redeem.Reward.ID,
 			Name:          redeem.Reward.Name,
@@ -98,7 +125,7 @@ func (ds redeemServiceImpl) GetRedeemByID(ctx context.Context, redeemID uint64) 
 		ID:         redeem.ID,
 		PointSpent: redeem.PointSpent,
 		CreatedAt:  redeem.CreatedAt,
-		// DeletedAt:  redeem.DeletedAt,
+		DeletedAt:  redeem.DeletedAt,
 		Reward: dto.RewardResponse{
 			ID:            redeem.Reward.ID,
 			Name:          redeem.Reward.Name,
