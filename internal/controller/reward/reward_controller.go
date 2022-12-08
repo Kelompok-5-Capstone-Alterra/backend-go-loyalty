@@ -69,7 +69,7 @@ func (rc rewardController) CreateReward(c echo.Context) error {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusCreated, echo.Map{
-		"status": "SUCCESS_INSERT_PRODUCT",
+		"status": "SUCCESS_INSERT_REWARD",
 	}, c)
 }
 func (rc rewardController) UpdateReward(c echo.Context) error {
@@ -82,10 +82,10 @@ func (rc rewardController) UpdateReward(c echo.Context) error {
 	c.Bind(&req)
 	err = rc.rs.UpdateReward(c.Request().Context(), req, id)
 	if err != nil {
-		return response.ResponseError(http.StatusBadRequest, err)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status": "SUCCESS_UPDATE_PRODUCT",
+		"status": "SUCCESS_UPDATE_REWARD",
 	}, c)
 }
 
@@ -101,6 +101,6 @@ func (rc rewardController) DeleteReward(c echo.Context) error {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status": "SUCCESS_DELETE_PRODUCT",
+		"status": "SUCCESS_DELETE_REWARD",
 	}, c)
 }

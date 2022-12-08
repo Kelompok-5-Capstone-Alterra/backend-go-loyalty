@@ -11,6 +11,7 @@ import (
 
 type IPointController interface {
 	HandleGetAllPoint(c echo.Context) error
+	HandleGetUserPoint(c echo.Context) error
 	HandleGetPointByID(c echo.Context) error
 }
 
@@ -39,20 +40,36 @@ func (pc pointController) HandleGetAllPoint(c echo.Context) error {
 }
 
 func (pc pointController) HandleGetPointByID(c echo.Context) error {
+	id, err := utils.GetUserIDFromJWT(c)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
+	data, err := pc.ps.GetPoint(c.Request().Context(), id)
+	if err != nil {
+		var code int
+		if err.Error() == "record not found" {
+			code = http.StatusNoContent
+			return response.ResponseSuccess(code, nil, c)
+		} else {
+			code = http.StatusInternalServerError
+			return response.ResponseError(code, err)
+		}
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
+}
+
+func (pc pointController) HandleGetUserPoint(c echo.Context) error {
 	userID, err := utils.GetUserIDFromJWT(c)
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := pc.ps.GetPoint(c.Request().Context(), userID)
-	if err != nil && err.Error() != "record not found" {
+	if err != nil {
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusNoContent, nil, c)
+		}
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	var code int
-	if err != nil && err.Error() == "record not found" {
-		code = http.StatusNoContent
-		return response.ResponseSuccess(code, nil, c)
-	} else {
-		code = http.StatusOK
-		return response.ResponseSuccess(code, data, c)
-	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
+
 }

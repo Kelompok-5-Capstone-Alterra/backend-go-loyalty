@@ -138,7 +138,11 @@ type ProductResponse struct {
 type ProductsResponse []ProductResponse
 
 type RedeemRequest struct {
-	RewardID uint64 `json:"reward_id"`
+	RewardID uint64 `json:"reward_id" validate:"required"`
+}
+type RedeemUpdateRequest struct {
+	RewardID   uint64 `json:"reward_id"`
+	PointSpent uint64 `json:"point_spent"`
 }
 
 type RedeemResponse struct {

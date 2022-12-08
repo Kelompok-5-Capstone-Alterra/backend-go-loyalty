@@ -59,7 +59,7 @@ func (ac authController) HandleSignUp(c echo.Context) error {
 	err = ac.as.SignUp(c.Request().Context(), req)
 	if err != nil {
 		var code int
-		if err.Error() == "email alreasy used" {
+		if err.Error() == "email already used" {
 			code = http.StatusConflict
 		} else {
 			code = http.StatusInternalServerError
@@ -101,7 +101,7 @@ func (ac authController) HandleRefreshToken(c echo.Context) error {
 	data, err := ac.as.RegenerateToken(c.Request().Context(), rt.RefreshToken)
 	if err != nil {
 		var code int
-		if err.Error() == "refresh token invalid" {
+		if err.Error() == "refresh token invalid" || err.Error() == "record not found" {
 			code = http.StatusUnauthorized
 		} else {
 			code = http.StatusInternalServerError
@@ -124,6 +124,8 @@ func (ac authController) HandleRequestNewOTP(c echo.Context) error {
 		var code int
 		if err.Error() == "cannot send new otp to activated user" {
 			code = http.StatusForbidden
+		} else if err.Error() == "record not found" {
+			code = http.StatusUnauthorized
 		} else {
 			code = http.StatusInternalServerError
 		}
