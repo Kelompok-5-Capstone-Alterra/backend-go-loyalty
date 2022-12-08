@@ -43,13 +43,13 @@ func (ar authRepository) GetUserByID(ctx context.Context, id uuid.UUID) (entity.
 func (ar authRepository) GetUserByEmail(ctx context.Context, email string) (entity.User, error) {
 	user := entity.User{}
 	err := ar.DB.Model(&model.User{}).Preload("Role").Where("email = ?", email).First(&user).Error
-	if err != nil {
-		if err.Error() == "record not found" {
-			err = errors.New("user with such email haven't signed up")
-		}
-		return entity.User{}, err
-	}
-	return user, nil
+	// if err != nil {
+	// 	if err.Error() == "record not found" {
+	// 		err = errors.New("user with such email haven't signed up")
+	// 	}
+	// 	return entity.User{}, err
+	// }
+	return user, err
 }
 
 func (ar authRepository) Login(ctx context.Context, email string, password string) (entity.User, error) {
@@ -112,9 +112,9 @@ func (ar authRepository) ValidateOTP(ctx context.Context, otp string, email stri
 	err := ar.DB.Where("otp_code = ? AND email = ?", otp, email).First(&entity.OTP{}).Error
 	if err != nil {
 		var errMessage string
-		if err.Error() == "record not found"{
+		if err.Error() == "record not found" {
 			errMessage = fmt.Sprint("invalid otp code")
-		} else{
+		} else {
 			errMessage = fmt.Sprint(err.Error())
 		}
 		return errors.New(errMessage)

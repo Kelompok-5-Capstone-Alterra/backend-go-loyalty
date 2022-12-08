@@ -17,8 +17,9 @@ type IRedeemService interface {
 	GetAllRedeemByUserID(ctx context.Context, userID uuid.UUID) (dto.RedeemResponses, error)
 	GetAllRedeems(ctx context.Context) (dto.RedeemResponses, error)
 	GetAllIncludeSoftDeleted(ctx context.Context) (dto.RedeemResponses, error)
-	GetRedeemByID(ctx context.Context, redeemID uint64) (dto.RedeemResponse, error)
-	UpdateRedeem(ctx context.Context, req dto.RedeemRequest, id uint64) error
+	GetRedeemByID(ctx context.Context, redeemID uint64, userID uuid.UUID) (dto.RedeemResponse, error)
+	AdminGetRedeemByID(ctx context.Context, redeemID uint64) (dto.RedeemResponse, error)
+	UpdateRedeem(ctx context.Context, req dto.RedeemUpdateRequest, id uint64) error
 	DeleteRedeem(ctx context.Context, redeemID uint64) error
 }
 
@@ -116,8 +117,31 @@ func (ds redeemServiceImpl) GetAllRedeemByUserID(ctx context.Context, userID uui
 	return redeemResponses, nil
 }
 
-func (ds redeemServiceImpl) GetRedeemByID(ctx context.Context, redeemID uint64) (dto.RedeemResponse, error) {
-	redeem, err := ds.dr.GetRedeemByID(ctx, redeemID)
+func (ds redeemServiceImpl) GetRedeemByID(ctx context.Context, redeemID uint64, userID uuid.UUID) (dto.RedeemResponse, error) {
+	redeem, err := ds.dr.GetRedeemByID(ctx, redeemID, userID)
+	if err != nil {
+		return dto.RedeemResponse{}, err
+	}
+	redeemResponse := dto.RedeemResponse{
+		ID:         redeem.ID,
+		PointSpent: redeem.PointSpent,
+		CreatedAt:  redeem.CreatedAt,
+		DeletedAt:  redeem.DeletedAt,
+		Reward: dto.RewardResponse{
+			ID:            redeem.Reward.ID,
+			Name:          redeem.Reward.Name,
+			Description:   redeem.Reward.Description,
+			RequiredPoint: redeem.Reward.RequiredPoint,
+			ValidUntil:    redeem.Reward.ValidUntil,
+			CreatedAt:     redeem.Reward.CreatedAt,
+			UpdatedAt:     redeem.Reward.UpdatedAt,
+			DeletedAt:     redeem.Reward.DeletedAt,
+		},
+	}
+	return redeemResponse, nil
+}
+func (ds redeemServiceImpl) AdminGetRedeemByID(ctx context.Context, redeemID uint64) (dto.RedeemResponse, error) {
+	redeem, err := ds.dr.AdminGetRedeemByID(ctx, redeemID)
 	if err != nil {
 		return dto.RedeemResponse{}, err
 	}
@@ -177,9 +201,10 @@ func (ds redeemServiceImpl) CreateRedeem(ctx context.Context, req dto.RedeemRequ
 	return err
 }
 
-func (ds redeemServiceImpl) UpdateRedeem(ctx context.Context, req dto.RedeemRequest, id uint64) error {
+func (ds redeemServiceImpl) UpdateRedeem(ctx context.Context, req dto.RedeemUpdateRequest, id uint64) error {
 	redeem := entity.Redeem{
-		RewardID: req.RewardID,
+		RewardID:   req.RewardID,
+		PointSpent: req.PointSpent,
 	}
 	err := ds.dr.UpdateRedeem(ctx, &redeem, id)
 	if err != nil {

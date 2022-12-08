@@ -18,6 +18,7 @@ type IRedeemController interface {
 	GetAllRedeem(c echo.Context) error
 	GetAllRedeemIncludeSoftDeleted(c echo.Context) error
 	GetRedeemByID(c echo.Context) error
+	AdminGetRedeemByID(c echo.Context) error
 	UpdateRedeem(c echo.Context) error
 	DeleteRedeem(c echo.Context) error
 }
@@ -73,12 +74,32 @@ func (dc redeemController) GetAllRedeemByUserID(c echo.Context) error {
 }
 
 func (dc redeemController) GetRedeemByID(c echo.Context) error {
+	userID, err := utils.GetUserIDFromJWT(c)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	data, err := dc.ds.GetRedeemByID(c.Request().Context(), id)
+	data, err := dc.ds.GetRedeemByID(c.Request().Context(), id, userID)
+	if err != nil {
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusNoContent, nil, c)
+		} else {
+			return response.ResponseError(http.StatusInternalServerError, err)
+		}
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
+}
+func (dc redeemController) AdminGetRedeemByID(c echo.Context) error {
+	param := c.Param("id")
+	id, err := strconv.ParseUint(param, 10, 64)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
+	data, err := dc.ds.AdminGetRedeemByID(c.Request().Context(), id)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return response.ResponseSuccess(http.StatusNoContent, nil, c)
@@ -117,7 +138,7 @@ func (dc redeemController) UpdateRedeem(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	var req dto.RedeemRequest
+	var req dto.RedeemUpdateRequest
 	c.Bind(&req)
 
 	err = dc.ds.UpdateRedeem(c.Request().Context(), req, id)
@@ -125,7 +146,7 @@ func (dc redeemController) UpdateRedeem(c echo.Context) error {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status": "SUCCESS_UPDATE_PRODUCT",
+		"status": "SUCCESS_UPDATE_REDEEM",
 	}, c)
 }
 
