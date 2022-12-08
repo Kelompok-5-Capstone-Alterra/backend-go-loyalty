@@ -98,11 +98,12 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 }
 
 func (prt pointRoutes) InitEndpoints() {
-	point := prt.router.Group("/points")
-	adminPoints := prt.router.Group("/admin/points", middleware.ValidateAdminJWT)
+	point := prt.router.Group("/points", middleware.ValidateJWT)
+	point.GET("", prt.pc.HandleGetUserPoint)
 
+	adminPoints := prt.router.Group("/admin/points", middleware.ValidateAdminJWT)
 	adminPoints.GET("", prt.pc.HandleGetAllPoint)
-	point.GET("/:id", prt.pc.HandleGetPointByID)
+	adminPoints.GET("/:id", prt.pc.HandleGetPointByID)
 }
 
 func (rrt rewardRoutes) InitEndpoints() {
@@ -136,10 +137,11 @@ func (art authRoutes) InitEndpoints() {
 
 func (urt userRoutes) InitEndpoints() {
 	user := urt.router.Group("/users", middleware.ValidateJWT)
+	user.GET("", urt.uc.HandleGetSelfUserData)
 	user.PUT("/change-password", urt.uc.HandleChangePassword)
 	user.PUT("", urt.uc.HandleUpdateData)
 
-	admin := urt.router.Group("/users", middleware.ValidateAdminJWT)
+	admin := urt.router.Group("/admin/users", middleware.ValidateAdminJWT)
 	admin.GET("", urt.uc.HandleGetAllUser)
 	admin.GET("/:id", urt.uc.HandleGetUserByID)
 	admin.PUT("/:id", urt.uc.HandleUpdateCustomerData)
@@ -158,8 +160,9 @@ func (prt productRoutes) InitEndpoints() {
 }
 
 func (drt redeemRoutes) InitEndpoints() {
-	adminRedeem := drt.router.Group("admin/redeems", middleware.ValidateAdminJWT)
+	adminRedeem := drt.router.Group("/admin/redeems", middleware.ValidateAdminJWT)
 	adminRedeem.GET("", drt.dc.GetAllRedeem)
+	adminRedeem.GET("/:id", drt.dc.AdminGetRedeemByID)
 	adminRedeem.GET("/all", drt.dc.GetAllRedeemIncludeSoftDeleted)
 	adminRedeem.PUT("/:id", drt.dc.UpdateRedeem)
 	adminRedeem.DELETE("/:id", drt.dc.DeleteRedeem)

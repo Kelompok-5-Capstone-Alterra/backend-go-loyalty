@@ -14,7 +14,8 @@ type IRedeemRepository interface {
 	GetAllRedeems(ctx context.Context) (*entity.Redeems, error)
 	GetAllRedeemByUserID(ctx context.Context, userID uuid.UUID) (*entity.Redeems, error)
 	GetAllIncludeSoftDelete(ctx context.Context) (*entity.Redeems, error)
-	GetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error)
+	GetRedeemByID(ctx context.Context, id uint64, userID uuid.UUID) (*entity.Redeem, error)
+	AdminGetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error)
 	UpdateRedeem(ctx context.Context, d *entity.Redeem, id uint64) error
 	DeleteRedeem(ctx context.Context, id uint64) error
 }
@@ -54,7 +55,15 @@ func (dr *redeemRepository) GetAllRedeemByUserID(ctx context.Context, userID uui
 	return &redeems, nil
 }
 
-func (dr *redeemRepository) GetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error) {
+func (dr *redeemRepository) GetRedeemByID(ctx context.Context, id uint64, userID uuid.UUID) (*entity.Redeem, error) {
+	var redeem entity.Redeem
+	err := dr.DB.Model(&model.Redeem{}).Preload("Reward").Preload("User").Where("user_id = ?", userID).First(&redeem, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &redeem, err
+}
+func (dr *redeemRepository) AdminGetRedeemByID(ctx context.Context, id uint64) (*entity.Redeem, error) {
 	var redeem entity.Redeem
 	err := dr.DB.Model(&model.Redeem{}).Preload("Reward").Preload("User").First(&redeem, id).Error
 	if err != nil {

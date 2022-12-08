@@ -19,6 +19,7 @@ type UserControllerInterface interface {
 	HandleDeleteCustomerData(c echo.Context) error
 	HandleGetAllUser(c echo.Context) error
 	HandleGetUserByID(c echo.Context) error
+	HandleGetSelfUserData(c echo.Context) error
 }
 
 type userController struct {
@@ -29,6 +30,24 @@ func NewUserController(us userService.UserServiceInterface) userController {
 	return userController{
 		us: us,
 	}
+}
+
+func (uc userController) HandleGetSelfUserData(c echo.Context) error {
+	id, err := utils.GetUserIDFromJWT(c)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
+	data, err := uc.us.GetUserByID(c.Request().Context(), id)
+	if err != nil {
+		var code int
+		if err.Error() == "record not found" {
+			code = http.StatusUnauthorized
+		} else {
+			code = http.StatusInternalServerError
+		}
+		return response.ResponseError(code, err)
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (uc userController) HandleGetAllUser(c echo.Context) error {
@@ -131,11 +150,9 @@ func (uc userController) HandleUpdateData(c echo.Context) error {
 	if err != nil {
 		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
-	_, err = uc.us.UpdateUserData(c.Request().Context(), req, id)
+	data, err := uc.us.UpdateUserData(c.Request().Context(), req, id)
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status": "SUCCESS_UPDATED_USER_DATA",
-	}, c)
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
