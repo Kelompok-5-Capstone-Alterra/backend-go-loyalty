@@ -56,9 +56,6 @@ func (uc userController) HandleGetAllUser(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if len(data) == 0 {
-		return response.ResponseSuccess(http.StatusNoContent, nil, c)
-	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 func (uc userController) HandleGetUserByID(c echo.Context) error {
@@ -68,11 +65,11 @@ func (uc userController) HandleGetUserByID(c echo.Context) error {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := uc.us.GetUserByID(c.Request().Context(), id)
-	if err != nil {
-		if err.Error() == "record not found" {
-			return response.ResponseSuccess(http.StatusNoContent, nil, c)
-		}
+	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	if err.Error() == "record not found" {
+		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 }

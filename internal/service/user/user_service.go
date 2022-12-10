@@ -52,6 +52,9 @@ func (us userService) GetUsers(ctx context.Context, query string) (dto.UserRespo
 		}
 		users = append(users, user)
 	}
+	if users == nil {
+		users = dto.UserResponses{}
+	}
 	return users, nil
 }
 func (us userService) GetUserByID(ctx context.Context, id uuid.UUID) (dto.UserResponse, error) {

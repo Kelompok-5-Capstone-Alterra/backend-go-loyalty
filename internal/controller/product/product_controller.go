@@ -33,16 +33,9 @@ func NewProductController(ps productService.IProductService) productController {
 func (pc productController) GetAll(c echo.Context) error {
 	data, err := pc.ps.GetAll(c.Request().Context())
 	if err != nil {
-		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
+		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-
-	var code int
-	if len(data) == 0 {
-		code = http.StatusNoContent
-	} else {
-		code = http.StatusOK
-	}
-	return response.ResponseSuccess(code, data, c)
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 func (pc productController) InsertProduct(c echo.Context) error {
 	var req dto.ProductRequest
@@ -66,11 +59,11 @@ func (pc productController) GetProductById(c echo.Context) error {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := pc.ps.GetProductByID(c.Request().Context(), id)
-	if err != nil {
-		if err.Error() == "record not found" {
-			return response.ResponseSuccess(http.StatusNoContent, nil, c)
-		}
+	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	if err.Error() == "record not found" {
+		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 }

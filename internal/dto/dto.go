@@ -10,7 +10,7 @@ import (
 type SignUpRequest struct {
 	Name         string `json:"name" validate:"required"`
 	Password     string `json:"password" validate:"required"`
-	Email        string `json:"email" validate:"required"`
+	Email        string `json:"email" validate:"required,email"`
 	MobileNumber string `json:"mobile_number" validate:"required"`
 }
 type UserUpdate struct {
@@ -19,7 +19,7 @@ type UserUpdate struct {
 }
 
 type SignInRequest struct {
-	Email    string `json:"email" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
 }
 
@@ -65,7 +65,7 @@ type ValidateOTP struct {
 }
 
 type RequestNewOTP struct {
-	Email string `json:"email" validate:"required"`
+	Email string `json:"email" validate:"required,email"`
 }
 
 type UpdatePasswordRequest struct {
@@ -123,6 +123,19 @@ type CategoryResponse struct {
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }
 
+type CategoriesResponse []CategoryResponse
+
+type CategoryRequest struct {
+	Name string `json:"name" validate:"required"`
+}
+
+type ForgotPasswordTokenRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type NewPassword struct {
+	Password string `json:"password" validate:"required"`
+}
 type ProductResponse struct {
 	ID                 uint64           `json:"id"`
 	Name               string           `json:"name"`
@@ -156,10 +169,17 @@ type RedeemResponse struct {
 
 type RedeemResponses []RedeemResponse
 
-type PointResponse struct {
-	ID     uint64       `json:"id"`
-	Amount uint64       `json:"amount"`
-	User   UserResponse `json:"user"`
+type UserCoinResponse struct {
+	ID     uint64 `json:"id"`
+	Amount uint64 `json:"amount"`
+	// User   UserResponse `json:"user"`
 }
 
-type PointResponses []PointResponse
+type UserCoinResponses []UserCoinResponse
+
+type CreditResponse struct {
+	ID     uint64 `json:"id"`
+	Amount uint64 `json:"amount"`
+}
+
+type CreditResponses []CreditResponse

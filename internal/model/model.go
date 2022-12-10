@@ -21,13 +21,22 @@ type User struct {
 	DeletedAt    gorm.DeletedAt `db:"deleted_at" gorm:"index"`
 	RoleID       int            `db:"role_id"`
 	Role         Role           `gorm:"foreignKey:RoleID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	UserCoinID   uint64         `db:"user_coin_id"`
+	UserCoin     UserCoin       `gorm:"foreignKey:UserCoinID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	CreditID     uint64         `db:"credit_id"`
+	Credit       Credit         `gorm:"foreignKey:CreditID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type UserCoin struct {
-	ID     uint64    `db:"id" gorm:"primaryKey;autoIncrement"`
-	UserID uuid.UUID `db:"user_id"`
-	Amount uint64    `db:"amount"`
-	User   User      `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ID uint64 `db:"id" gorm:"primaryKey;autoIncrement"`
+	// UserID uuid.UUID `db:"user_id"`
+	Amount uint64 `db:"amount"`
+	// User   User      `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+}
+
+type Credit struct {
+	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement"`
+	Amount uint64 `db:"amount"`
 }
 
 type UserCoins []UserCoin
@@ -77,12 +86,6 @@ type Redeem struct {
 }
 
 type Redeems []Redeem
-
-type Credit struct {
-	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
-	UserID uint64 `db:"user_id"`
-	Amount uint64 `db:"amount"`
-}
 
 // type Point struct {
 // 	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
@@ -163,3 +166,10 @@ type PaymentInvoice struct {
 }
 
 type PaymentInvoices []PaymentInvoice
+
+type ForgotPassword struct {
+	ID        uint64    `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	Email     string    `db:"email"`
+	Token     string    `db:"token"`
+	ExpiredAt time.Time `db:"expired_at"`
+}

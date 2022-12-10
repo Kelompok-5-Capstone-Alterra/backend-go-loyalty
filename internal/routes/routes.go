@@ -98,10 +98,10 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 }
 
 func (prt pointRoutes) InitEndpoints() {
-	point := prt.router.Group("/points", middleware.ValidateJWT)
+	point := prt.router.Group("/coins", middleware.ValidateJWT)
 	point.GET("", prt.pc.HandleGetUserPoint)
 
-	adminPoints := prt.router.Group("/admin/points", middleware.ValidateAdminJWT)
+	adminPoints := prt.router.Group("/admin/coins", middleware.ValidateAdminJWT)
 	adminPoints.GET("", prt.pc.HandleGetAllPoint)
 	adminPoints.GET("/:id", prt.pc.HandleGetPointByID)
 }
@@ -126,6 +126,8 @@ func (art authRoutes) InitEndpoints() {
 	auth := art.router.Group("/auth")
 	auth.POST("/signin", art.ac.HandleLogin)
 	auth.POST("/signup", art.ac.HandleSignUp)
+	auth.POST("/forgot-password", art.ac.HandleForgotPassword)
+	auth.POST("/new-password", art.ac.HandleNewPassword)
 
 	token := auth.Group("/token")
 	token.POST("/refresh", art.ac.HandleRefreshToken)
