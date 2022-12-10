@@ -2,6 +2,7 @@ package routes
 
 import (
 	authController "backend-go-loyalty/internal/controller/auth"
+	categoryController "backend-go-loyalty/internal/controller/category"
 	pingController "backend-go-loyalty/internal/controller/ping"
 	pointController "backend-go-loyalty/internal/controller/point"
 	productController "backend-go-loyalty/internal/controller/product"
@@ -36,6 +37,18 @@ type rewardRoutes struct {
 type pointRoutes struct {
 	pc     pointController.IPointController
 	router *echo.Echo
+}
+
+type categoryRoutes struct {
+	cc     categoryController.ICategoryController
+	router *echo.Echo
+}
+
+func NewCategoryRoutes(cc categoryController.ICategoryController, router *echo.Echo) categoryRoutes {
+	return categoryRoutes{
+		cc:     cc,
+		router: router,
+	}
 }
 
 func NewPointRoutes(pc pointController.IPointController, router *echo.Echo) pointRoutes {
@@ -95,6 +108,17 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 		dc:     dc,
 		router: router,
 	}
+}
+
+func (crt categoryRoutes) InitEndpoints() {
+	category := crt.router.Group("/category")
+	category.GET("", crt.cc.HandleGetAllCategories)
+	category.GET("/:id", crt.cc.HandleGetCategoryByID)
+
+	adminCategory := crt.router.Group("/admin/category", middleware.ValidateAdminJWT)
+	adminCategory.POST("", crt.cc.HandleCreateCategory)
+	adminCategory.PUT("/:id", crt.cc.HandleUpdateCategory)
+	adminCategory.DELETE("/:is", crt.cc.HandleDeleteCategory)
 }
 
 func (prt pointRoutes) InitEndpoints() {
