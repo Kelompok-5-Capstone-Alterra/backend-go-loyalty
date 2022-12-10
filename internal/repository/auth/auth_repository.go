@@ -35,18 +35,32 @@ func NewAuthRepository(db *gorm.DB) authRepository {
 }
 
 func (ar authRepository) ValidateForgotPassword(ctx context.Context, email string, token string, password string) (entity.User, error) {
-	user := entity.User{}
-	err := ar.DB.Where("email = ? AND token = ?", email, token).First(&user).Error
-	if err != nil {
-		return entity.User{}, err
-	}
-	user.Password = password
-	err = ar.DB.Model(&model.User{}).Where("email = ?", email).Updates(user).Error
+	fp := entity.ForgotPassword{}
+	err := ar.DB.Where("email = ? AND token = ?", email, token).First(&fp).Error
 	if err != nil {
 		return entity.User{}, err
 	}
 	var forgotpassword entity.ForgotPassword
+	if fp.ExpiredAt.Before(time.Now()) {
+		err = ar.DB.Where("email = ? AND token = ?", email, token).Delete(&forgotpassword).Error
+		if err != nil {
+			return entity.User{}, err
+		}
+		return entity.User{}, errors.New("token expired")
+	}
+	user := entity.User{
+		Password: password,
+	}
+	err = ar.DB.Model(&model.User{}).Where("email = ?", email).Updates(user).Error
+	if err != nil {
+		return entity.User{}, err
+	}
 	err = ar.DB.Where("email = ? AND token = ?", email, token).Delete(&forgotpassword).Error
+	if err != nil {
+		return entity.User{}, err
+	}
+	user = entity.User{}
+	err = ar.DB.Where("email = ?", email).First(&user).Error
 	return user, err
 }
 

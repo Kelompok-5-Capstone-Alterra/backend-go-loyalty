@@ -63,7 +63,7 @@ func (ac authController) HandleNewPassword(c echo.Context) error {
 	data, err := ac.as.ValidateForgotPasswordToken(c.Request().Context(), email, token, req)
 	if err != nil {
 		var code int
-		if err.Error() == "record not found" {
+		if err.Error() == "record not found" || err.Error() == "token expired" {
 			code = http.StatusUnauthorized
 		} else {
 			code = http.StatusInternalServerError
