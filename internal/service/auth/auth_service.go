@@ -64,6 +64,7 @@ func (as authService) ForgotPasswordToken(ctx context.Context, req dto.ForgotPas
 		return err
 	}
 	token := utils.HashPassword(utils.GenerateOTP())
+	token = token[:6]
 	forgotpassword := entity.ForgotPassword{
 		Email:     req.Email,
 		Token:     token,
