@@ -110,10 +110,6 @@ func (ar authRepository) SignUp(ctx context.Context, req entity.User) error {
 	err := ar.DB.Model(&model.User{}).Preload("Role").Where("email = ?", req.Email).First(&user).Error
 	if err != nil {
 		if err.Error() == "record not found" {
-			result := ar.DB.Create(&req)
-			if result.Error != nil {
-				return result.Error
-			}
 			err := ar.DB.Create(&coin).Error
 			if err != nil {
 				return err
@@ -121,6 +117,12 @@ func (ar authRepository) SignUp(ctx context.Context, req entity.User) error {
 			err = ar.DB.Create(&credit).Error
 			if err != nil {
 				return err
+			}
+			req.UserCoinID = coin.ID
+			req.CreditID = credit.ID
+			result := ar.DB.Create(&req)
+			if result.Error != nil {
+				return result.Error
 			}
 		}
 	}

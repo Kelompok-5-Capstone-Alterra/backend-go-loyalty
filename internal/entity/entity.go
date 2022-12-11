@@ -23,6 +23,8 @@ type User struct {
 	Role         Role           `db:"role"`
 	UserCoinID   uint64         `db:"user_coin_id"`
 	UserCoin     UserCoin       `db:"user_coin"`
+	CreditID     uint64         `db:"credit_id"`
+	Credit       Credit         `db:"credit"`
 }
 
 type Role struct {
