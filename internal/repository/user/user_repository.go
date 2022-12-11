@@ -31,7 +31,7 @@ func NewUserRepository(dbConn *gorm.DB) userRepository {
 func (ur userRepository) GetUsers(ctx context.Context, name string) (entity.Users, error) {
 	users := entity.Users{}
 	keyword := "%" + name + "%"
-	err := ur.DB.Model(&model.User{}).Preload("Role").Where("name LIKE ?", keyword).Find(&users).Error
+	err := ur.DB.Model(&model.User{}).Preload("Role").Where("name LIKE ? AND is_active = 1", keyword).Find(&users).Error
 	return users, err
 }
 func (ur userRepository) GetUserByID(ctx context.Context, id uuid.UUID) (entity.User, error) {

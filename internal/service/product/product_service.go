@@ -50,6 +50,9 @@ func (ps productServiceImpl) GetAll(ctx context.Context) (dto.ProductsResponse, 
 		}
 		productResponses = append(productResponses, item)
 	}
+	if productResponses == nil {
+		productResponses = dto.ProductsResponse{}
+	}
 	return productResponses, nil
 }
 

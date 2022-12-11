@@ -38,11 +38,7 @@ func (dc redeemController) GetAllRedeem(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if len(data) == 0 {
-		return response.ResponseSuccess(http.StatusNoContent, data, c)
-	} else {
-		return response.ResponseSuccess(http.StatusOK, data, c)
-	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (dc redeemController) GetAllRedeemIncludeSoftDeleted(c echo.Context) error {
@@ -50,11 +46,7 @@ func (dc redeemController) GetAllRedeemIncludeSoftDeleted(c echo.Context) error 
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if len(data) == 0 {
-		return response.ResponseSuccess(http.StatusNoContent, data, c)
-	} else {
-		return response.ResponseSuccess(http.StatusOK, data, c)
-	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (dc redeemController) GetAllRedeemByUserID(c echo.Context) error {
@@ -63,14 +55,13 @@ func (dc redeemController) GetAllRedeemByUserID(c echo.Context) error {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := dc.ds.GetAllRedeemByUserID(c.Request().Context(), userID)
-	if err != nil {
+	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if len(data) == 0 {
-		return response.ResponseSuccess(http.StatusNoContent, nil, c)
-	} else {
-		return response.ResponseSuccess(http.StatusOK, data, c)
+	if err.Error() == "record not found" {
+		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (dc redeemController) GetRedeemByID(c echo.Context) error {
@@ -84,12 +75,11 @@ func (dc redeemController) GetRedeemByID(c echo.Context) error {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := dc.ds.GetRedeemByID(c.Request().Context(), id, userID)
-	if err != nil {
-		if err.Error() == "record not found" {
-			return response.ResponseSuccess(http.StatusNoContent, nil, c)
-		} else {
-			return response.ResponseError(http.StatusInternalServerError, err)
-		}
+	if err != nil && err.Error() != "record not found" {
+		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	if err.Error() == "record not found" {
+		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 }
@@ -100,12 +90,11 @@ func (dc redeemController) AdminGetRedeemByID(c echo.Context) error {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := dc.ds.AdminGetRedeemByID(c.Request().Context(), id)
-	if err != nil {
-		if err.Error() == "record not found" {
-			return response.ResponseSuccess(http.StatusNoContent, nil, c)
-		} else {
-			return response.ResponseError(http.StatusInternalServerError, err)
-		}
+	if err != nil && err.Error() != "record not found" {
+		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	if err.Error() == "record not found" {
+		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 }

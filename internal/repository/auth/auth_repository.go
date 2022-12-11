@@ -20,6 +20,8 @@ type AuthRepository interface {
 	SignUp(ctx context.Context, req entity.User) error
 	InsertOTP(ctx context.Context, otp string, email string) error
 	ValidateOTP(ctx context.Context, otp string, email string) error
+	InsertForgotPassword(ctx context.Context, req entity.ForgotPassword) error
+	ValidateForgotPassword(ctx context.Context, email string, token string, password string) (entity.User, error)
 }
 
 type authRepository struct {
@@ -30,6 +32,36 @@ func NewAuthRepository(db *gorm.DB) authRepository {
 	return authRepository{
 		DB: db,
 	}
+}
+
+func (ar authRepository) ValidateForgotPassword(ctx context.Context, email string, token string, password string) (entity.User, error) {
+	fp := entity.ForgotPassword{}
+	err := ar.DB.Where("email = ? AND token = ?", email, token).First(&fp).Error
+	if err != nil {
+		return entity.User{}, err
+	}
+	var forgotpassword entity.ForgotPassword
+	if fp.ExpiredAt.Before(time.Now()) {
+		err = ar.DB.Where("email = ? AND token = ?", email, token).Delete(&forgotpassword).Error
+		if err != nil {
+			return entity.User{}, err
+		}
+		return entity.User{}, errors.New("token expired")
+	}
+	user := entity.User{
+		Password: password,
+	}
+	err = ar.DB.Model(&model.User{}).Where("email = ?", email).Updates(user).Error
+	if err != nil {
+		return entity.User{}, err
+	}
+	err = ar.DB.Where("email = ? AND token = ?", email, token).Delete(&forgotpassword).Error
+	if err != nil {
+		return entity.User{}, err
+	}
+	user = entity.User{}
+	err = ar.DB.Where("email = ?", email).First(&user).Error
+	return user, err
 }
 
 func (ar authRepository) GetUserByID(ctx context.Context, id uuid.UUID) (entity.User, error) {
@@ -70,7 +102,9 @@ func (ar authRepository) Login(ctx context.Context, email string, password strin
 func (ar authRepository) SignUp(ctx context.Context, req entity.User) error {
 	user := entity.User{}
 	coin := entity.UserCoin{
-		UserID: req.ID,
+		Amount: 0,
+	}
+	credit := entity.Credit{
 		Amount: 0,
 	}
 	err := ar.DB.Model(&model.User{}).Preload("Role").Where("email = ?", req.Email).First(&user).Error
@@ -81,6 +115,10 @@ func (ar authRepository) SignUp(ctx context.Context, req entity.User) error {
 				return result.Error
 			}
 			err := ar.DB.Create(&coin).Error
+			if err != nil {
+				return err
+			}
+			err = ar.DB.Create(&credit).Error
 			if err != nil {
 				return err
 			}
@@ -125,4 +163,9 @@ func (ar authRepository) ValidateOTP(ctx context.Context, otp string, email stri
 	}
 	ar.DB.Unscoped().Where("email = ? AND otp_code = ?", email, otp).Delete(&model.OTP{})
 	return nil
+}
+
+func (ar authRepository) InsertForgotPassword(ctx context.Context, req entity.ForgotPassword) error {
+	err := ar.DB.Create(&req).Error
+	return err
 }

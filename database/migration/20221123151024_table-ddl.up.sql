@@ -8,32 +8,37 @@ CREATE TABLE roles(
 	KEY (deleted_at)
 );
 
+CREATE TABLE user_coins(
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	amount BIGINT UNSIGNED,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE credits(
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	amount BIGINT UNSIGNED,
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE users(
 	id VARCHAR(36) NOT NULL,
 	name LONGTEXT,
 	email LONGTEXT,
 	password LONGTEXT,
 	mobile_number LONGTEXT,
+	user_coin_id BIGINT UNSIGNED,
+	credit_id BIGINT UNSIGNED,
 	is_active TINYINT(1),
 	created_at DATETIME(3),
 	updated_at DATETIME(3),
 	deleted_at DATETIME(3),
 	role_id BIGINT UNSIGNED,
 	PRIMARY KEY (id),
-	KEY (deleted_at,role_id),
-	FOREIGN KEY (role_id) REFERENCES roles(id) ON UPDATE CASCADE ON DELETE CASCADE
+	KEY (deleted_at,role_id,user_coin_id,credit_id),
+	FOREIGN KEY (role_id) REFERENCES roles(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	FOREIGN KEY (user_coin_id) REFERENCES user_coins(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	FOREIGN KEY (credit_id) REFERENCES credits(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
-
-
-CREATE TABLE user_coins(
-	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	user_id varchar(36),
-	amount BIGINT UNSIGNED,
-	PRIMARY KEY (id),
-	KEY (user_id),
-	FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE	
-);
-
 
 
 CREATE TABLE categories(
@@ -59,7 +64,7 @@ CREATE TABLE rewards(
 	PRIMARY KEY (id),
 	KEY (deleted_at,category_id),
 	FOREIGN KEY (category_id) REFERENCES categories(id)
-	ON UPDATE CASCADE ON DELETE CASCADE
+	ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE products(
@@ -74,7 +79,7 @@ CREATE TABLE products(
 	PRIMARY KEY (id),
 	KEY (deleted_at,category_id),
 	FOREIGN KEY (category_id) REFERENCES categories(id)
-	ON UPDATE CASCADE ON DELETE CASCADE
+	ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE otps(
@@ -96,7 +101,15 @@ CREATE TABLE redeems(
 	PRIMARY KEY (id),
 	KEY (deleted_at,user_id,reward_id),
 	FOREIGN KEY (user_id) REFERENCES users(id)
-	ON UPDATE CASCADE ON DELETE CASCADE,
+	ON UPDATE CASCADE ON DELETE NO ACTION,
 	FOREIGN KEY (reward_id) REFERENCES rewards(id)
-	ON UPDATE CASCADE ON DELETE CASCADE
+	ON UPDATE CASCADE ON DELETE NO ACTION
+);
+
+CREATE TABLE forgot_passwords(
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	email TEXT,
+	token LONGTEXT,
+	expired_at DATETIME,
+	PRIMARY KEY (id)
 );

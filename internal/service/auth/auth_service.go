@@ -19,6 +19,8 @@ type AuthService interface {
 	ValidateOTP(ctx context.Context, req dto.ValidateOTP) error
 	RequestNewOTP(ctx context.Context, email string) error
 	RegenerateToken(ctx context.Context, rt string) (dto.SignInResponse, error)
+	ForgotPasswordToken(ctx context.Context, req dto.ForgotPasswordTokenRequest) error
+	ValidateForgotPasswordToken(ctx context.Context, email string, token string, req dto.NewPassword) (dto.SignInResponse, error)
 }
 
 type authService struct {
@@ -29,6 +31,46 @@ func NewAuthService(ar authRepository.AuthRepository) authService {
 	return authService{
 		ar: ar,
 	}
+}
+
+func (as authService) ValidateForgotPasswordToken(ctx context.Context, email string, token string, req dto.NewPassword) (dto.SignInResponse, error) {
+	password := utils.HashPassword(req.Password)
+	user, err := as.ar.ValidateForgotPassword(ctx, email, token, password)
+	if err != nil {
+		return dto.SignInResponse{}, err
+	}
+	data := dto.JWTData{
+		Name:         user.Name,
+		Email:        user.Email,
+		MobileNumber: user.MobileNumber,
+		Role: dto.RoleResponse{
+			ID:        user.Role.ID,
+			Name:      user.Role.Name,
+			CreatedAt: user.Role.CreatedAt,
+			UpdatedAt: user.Role.UpdatedAt,
+		},
+	}
+	accessToken, refreshToken := utils.CreateLoginToken(user.ID, data)
+	res := dto.SignInResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+	return res, nil
+}
+
+func (as authService) ForgotPasswordToken(ctx context.Context, req dto.ForgotPasswordTokenRequest) error {
+	_, err := as.ar.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		return err
+	}
+	token := utils.HashPassword(utils.GenerateOTP())
+	forgotpassword := entity.ForgotPassword{
+		Email:     req.Email,
+		Token:     token,
+		ExpiredAt: time.Now().Add(5 * time.Minute),
+	}
+	err = as.ar.InsertForgotPassword(ctx, forgotpassword)
+	return err
 }
 
 func (as authService) Login(ctx context.Context, req dto.SignInRequest) (dto.SignInResponse, error) {

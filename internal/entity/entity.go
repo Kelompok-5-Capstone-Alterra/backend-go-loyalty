@@ -21,6 +21,8 @@ type User struct {
 	DeletedAt    gorm.DeletedAt `db:"deleted_at" gorm:"index"`
 	RoleID       int            `db:"role_id"`
 	Role         Role           `db:"role"`
+	UserCoinID   uint64         `db:"user_coin_id"`
+	UserCoin     UserCoin       `db:"user_coin"`
 }
 
 type Role struct {
@@ -72,9 +74,8 @@ type Redeems []Redeem
 type Rewards []Reward
 
 type Credit struct {
-	ID     uint64    `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
-	UserID uuid.UUID `db:"user_id"`
-	Amount uint64    `db:"amount"`
+	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	Amount uint64 `db:"amount"`
 }
 
 type Credits []Credit
@@ -125,6 +126,13 @@ type Product struct {
 	Category           Category       `db:"category"`
 }
 
+type ForgotPassword struct {
+	ID        uint64    `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	Email     string    `db:"email"`
+	Token     string    `db:"token"`
+	ExpiredAt time.Time `db:"expired_at"`
+}
+
 type Products []Product
 
 type Category struct {
@@ -150,10 +158,10 @@ type PaymentInvoice struct {
 type PaymentInvoices []PaymentInvoice
 
 type UserCoin struct {
-	ID     uint64    `db:"id" gorm:"primaryKey;autoIncrement"`
-	UserID uuid.UUID `db:"user_id"`
-	Amount uint64    `db:"amount"`
-	User   User      `db:"user"`
+	ID uint64 `db:"id" gorm:"primaryKey;autoIncrement"`
+	// UserID uuid.UUID `db:"user_id"`
+	Amount uint64 `db:"amount"`
+	// User   User      `db:"user"`
 }
 
 type UserCoins []UserCoin
