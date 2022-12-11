@@ -3,6 +3,7 @@ package routes
 import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	categoryController "backend-go-loyalty/internal/controller/category"
+	faqController "backend-go-loyalty/internal/controller/faq"
 	pingController "backend-go-loyalty/internal/controller/ping"
 	pointController "backend-go-loyalty/internal/controller/point"
 	productController "backend-go-loyalty/internal/controller/product"
@@ -13,6 +14,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
+
+type faqRoutes struct {
+	fc     faqController.IFaqController
+	router *echo.Echo
+}
 
 type pingRoutes struct {
 	pc     pingController.PingController
@@ -42,6 +48,13 @@ type pointRoutes struct {
 type categoryRoutes struct {
 	cc     categoryController.ICategoryController
 	router *echo.Echo
+}
+
+func NewFAQRoutes(fc faqController.IFaqController, router *echo.Echo) faqRoutes {
+	return faqRoutes{
+		fc:     fc,
+		router: router,
+	}
 }
 
 func NewCategoryRoutes(cc categoryController.ICategoryController, router *echo.Echo) categoryRoutes {
@@ -108,6 +121,17 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 		dc:     dc,
 		router: router,
 	}
+}
+
+func (frt faqRoutes) InitEndpoints() {
+	faq := frt.router.Group("/faqs")
+	faq.GET("", frt.fc.HandleGetAllFAQByKeyword)
+	faq.GET("/:id", frt.fc.HandleGetFAQByID)
+
+	adminFaq := frt.router.Group("/admin/faqs", middleware.ValidateAdminJWT)
+	adminFaq.POST("", frt.fc.HandleCreateFAQ)
+	adminFaq.PUT("/:id", frt.fc.HandleUpdateFAQ)
+	adminFaq.DELETE("/:id", frt.fc.HandleDeleteFAQ)
 }
 
 func (crt categoryRoutes) InitEndpoints() {

@@ -113,3 +113,14 @@ CREATE TABLE forgot_passwords(
 	expired_at DATETIME,
 	PRIMARY KEY (id)
 );
+
+CREATE TABLE faqs(
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	question LONGTEXT,
+	answer LONGTEXT,
+	created_at DATETIME(3),
+	updated_at DATETIME(3),
+	deleted_at DATETIME(3),
+	KEY (deleted_at),
+	PRIMARY KEY (id)
+);
