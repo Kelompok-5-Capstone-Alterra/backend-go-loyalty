@@ -61,6 +61,9 @@ func (ds redeemServiceImpl) GetAllIncludeSoftDeleted(ctx context.Context) (dto.R
 		}
 		redeemResponses = append(redeemResponses, item)
 	}
+	if redeemResponses == nil {
+		redeemResponses = dto.RedeemResponses{}
+	}
 	return redeemResponses, nil
 }
 func (ds redeemServiceImpl) GetAllRedeems(ctx context.Context) (dto.RedeemResponses, error) {
@@ -86,6 +89,9 @@ func (ds redeemServiceImpl) GetAllRedeems(ctx context.Context) (dto.RedeemRespon
 			DeletedAt:     redeem.Reward.DeletedAt,
 		}
 		redeemResponses = append(redeemResponses, item)
+	}
+	if redeemResponses == nil {
+		redeemResponses = dto.RedeemResponses{}
 	}
 	return redeemResponses, nil
 }
@@ -113,6 +119,9 @@ func (ds redeemServiceImpl) GetAllRedeemByUserID(ctx context.Context, userID uui
 			DeletedAt:     redeem.Reward.DeletedAt,
 		}
 		redeemResponses = append(redeemResponses, item)
+	}
+	if redeemResponses == nil {
+		redeemResponses = dto.RedeemResponses{}
 	}
 	return redeemResponses, nil
 }

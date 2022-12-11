@@ -16,6 +16,8 @@ type AuthController interface {
 	HandleValidateOTP(c echo.Context) error
 	HandleRefreshToken(c echo.Context) error
 	HandleRequestNewOTP(c echo.Context) error
+	HandleForgotPassword(c echo.Context) error
+	HandleNewPassword(c echo.Context) error
 }
 
 type authController struct {
@@ -26,6 +28,49 @@ func NewAuthController(as authService.AuthService) authController {
 	return authController{
 		as: as,
 	}
+}
+
+func (ac authController) HandleForgotPassword(c echo.Context) error {
+	req := dto.ForgotPasswordTokenRequest{}
+	c.Bind(&req)
+	validate := validator.New()
+	err := validate.Struct(req)
+	if err != nil {
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
+	}
+	err = ac.as.ForgotPasswordToken(c.Request().Context(), req)
+	if err != nil {
+		var code int
+		if err.Error() == "record not found" {
+			code = http.StatusUnauthorized
+		} else {
+			code = http.StatusInternalServerError
+		}
+		return response.ResponseError(code, err)
+	}
+	return response.ResponseSuccess(http.StatusOK, nil, c)
+}
+
+func (ac authController) HandleNewPassword(c echo.Context) error {
+	email := c.QueryParam("email")
+	token := c.QueryParam("token")
+	req := dto.NewPassword{}
+	validate := validator.New()
+	err := validate.Struct(req)
+	if err != nil {
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
+	}
+	data, err := ac.as.ValidateForgotPasswordToken(c.Request().Context(), email, token, req)
+	if err != nil {
+		var code int
+		if err.Error() == "record not found" || err.Error() == "token expired" {
+			code = http.StatusUnauthorized
+		} else {
+			code = http.StatusInternalServerError
+		}
+		return response.ResponseError(code, err)
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (ac authController) HandleLogin(c echo.Context) error {

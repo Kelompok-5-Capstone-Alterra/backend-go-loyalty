@@ -1,8 +1,8 @@
-package rewardController
+package categoryController
 
 import (
 	"backend-go-loyalty/internal/dto"
-	rewardService "backend-go-loyalty/internal/service/reward"
+	categoryService "backend-go-loyalty/internal/service/category"
 	"backend-go-loyalty/pkg/response"
 	"net/http"
 	"strconv"
@@ -11,39 +11,38 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type IRewardController interface {
-	FindAllReward(c echo.Context) error
-	FindRewardById(c echo.Context) error
-	CreateReward(c echo.Context) error
-	UpdateReward(c echo.Context) error
-	DeleteReward(c echo.Context) error
+type ICategoryController interface {
+	HandleGetAllCategories(c echo.Context) error
+	HandleGetCategoryByID(c echo.Context) error
+	HandleCreateCategory(c echo.Context) error
+	HandleUpdateCategory(c echo.Context) error
+	HandleDeleteCategory(c echo.Context) error
 }
 
-type rewardController struct {
-	rs rewardService.IRewardService
+type categoryController struct {
+	cs categoryService.ICategorySerivce
 }
 
-func NewRewardController(rs rewardService.IRewardService) rewardController {
-	return rewardController{
-		rs: rs,
+func NewCategoryController(cs categoryService.ICategorySerivce) categoryController {
+	return categoryController{
+		cs: cs,
 	}
 }
 
-func (rc rewardController) FindAllReward(c echo.Context) error {
-	data, err := rc.rs.FindAllReward(c.Request().Context())
+func (cc categoryController) HandleGetAllCategories(c echo.Context) error {
+	data, err := cc.cs.GetAllCategories(c.Request().Context())
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 }
-
-func (rc rewardController) FindRewardById(c echo.Context) error {
+func (cc categoryController) HandleGetCategoryByID(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	data, err := rc.rs.FindRewardByID(c.Request().Context(), id)
+	data, err := cc.cs.GetCategoryByID(c.Request().Context(), id)
 	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
@@ -52,52 +51,43 @@ func (rc rewardController) FindRewardById(c echo.Context) error {
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 }
-
-func (rc rewardController) CreateReward(c echo.Context) error {
-	var req dto.RewardRequest
+func (cc categoryController) HandleCreateCategory(c echo.Context) error {
+	req := dto.CategoryRequest{}
 	c.Bind(&req)
 	validate := validator.New()
 	err := validate.Struct(req)
 	if err != nil {
 		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
 	}
-	err = rc.rs.CreateReward(c.Request().Context(), req)
+	err = cc.cs.CreateCategory(c.Request().Context(), req)
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return response.ResponseSuccess(http.StatusCreated, echo.Map{
-		"status": "SUCCESS_INSERT_REWARD",
-	}, c)
+	return response.ResponseSuccess(http.StatusOK, nil, c)
 }
-func (rc rewardController) UpdateReward(c echo.Context) error {
+func (cc categoryController) HandleUpdateCategory(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	var req dto.RewardRequest
+	req := dto.CategoryRequest{}
 	c.Bind(&req)
-	err = rc.rs.UpdateReward(c.Request().Context(), req, id)
+	err = cc.cs.UpdateCategory(c.Request().Context(), id, req)
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status": "SUCCESS_UPDATE_REWARD",
-	}, c)
+	return response.ResponseSuccess(http.StatusOK, nil, c)
 }
-
-func (rc rewardController) DeleteReward(c echo.Context) error {
+func (cc categoryController) HandleDeleteCategory(c echo.Context) error {
 	param := c.Param("id")
 	id, err := strconv.ParseUint(param, 10, 64)
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-
-	err = rc.rs.DeleteReward(c.Request().Context(), id)
+	err = cc.cs.DeleteCategory(c.Request().Context(), id)
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status": "SUCCESS_DELETE_REWARD",
-	}, c)
+	return response.ResponseSuccess(http.StatusOK, nil, c)
 }

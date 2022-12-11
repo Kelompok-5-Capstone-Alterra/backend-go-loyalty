@@ -23,11 +23,16 @@ func ResponseErrorRequestBody(code int, err error) error {
 }
 
 func ResponseError(code int, err error) error {
-	errVal := ErrorResponseValue{
-		Key:   "error",
-		Value: err.Error(),
+	var errRes ErrorResponseData
+	if code >= 400 {
+		errVal := ErrorResponseValue{
+			Key:   "error",
+			Value: err.Error(),
+		}
+		errRes = ErrorResponseData{errVal}
+	} else {
+		errRes = nil
 	}
-	errRes := ErrorResponseData{errVal}
 	return echo.NewHTTPError(code,
 		NewBaseResponse(code,
 			http.StatusText(code),

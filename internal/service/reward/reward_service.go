@@ -52,6 +52,9 @@ func (rs rewardServiceImpl) FindAllReward(ctx context.Context) (dto.RewardsRespo
 		}
 		rewardResponses = append(rewardResponses, item)
 	}
+	if rewardResponses == nil {
+		rewardResponses = dto.RewardsResponse{}
+	}
 	return rewardResponses, nil
 }
 

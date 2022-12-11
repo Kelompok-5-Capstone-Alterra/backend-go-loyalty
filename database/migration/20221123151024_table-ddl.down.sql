@@ -1,8 +1,10 @@
 DROP TABLE otps;
 DROP TABLE redeems;
+DROP TABLE users;
 DROP TABLE roles;
 DROP TABLE user_coins;
-DROP TABLE users;
+DROP TABLE credits;
 DROP TABLE rewards;
 DROP TABLE products;
 DROP TABLE categories;
+DROP TABLE forgot_passwords;

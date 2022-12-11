@@ -30,13 +30,7 @@ func (pc pointController) HandleGetAllPoint(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	var code int
-	if len(data) == 0 {
-		code = http.StatusNoContent
-	} else {
-		code = http.StatusOK
-	}
-	return response.ResponseSuccess(code, data, c)
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (pc pointController) HandleGetPointByID(c echo.Context) error {
@@ -45,15 +39,11 @@ func (pc pointController) HandleGetPointByID(c echo.Context) error {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := pc.ps.GetPoint(c.Request().Context(), id)
-	if err != nil {
-		var code int
-		if err.Error() == "record not found" {
-			code = http.StatusNoContent
-			return response.ResponseSuccess(code, nil, c)
-		} else {
-			code = http.StatusInternalServerError
-			return response.ResponseError(code, err)
-		}
+	if err != nil && err.Error() != "record not found" {
+		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	if err.Error() == "record not found" {
+		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 }
@@ -64,11 +54,11 @@ func (pc pointController) HandleGetUserPoint(c echo.Context) error {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := pc.ps.GetPoint(c.Request().Context(), userID)
-	if err != nil {
-		if err.Error() == "record not found" {
-			return response.ResponseSuccess(http.StatusNoContent, nil, c)
-		}
+	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	if err.Error() == "record not found" {
+		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
 
