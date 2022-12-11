@@ -183,3 +183,23 @@ type CreditResponse struct {
 }
 
 type CreditResponses []CreditResponse
+
+type FAQResponse struct {
+	ID        uint64         `json:"id"`
+	Question  string         `json:"question"`
+	Answer    string         `json:"answer"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+}
+
+type FAQResponses []FAQResponse
+
+type FAQRequest struct {
+	Question string `json:"question" validate:"required"`
+	Answer   string `json:"answer" validate:"required"`
+}
+type FAQUpdateRequest struct {
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
+}
