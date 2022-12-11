@@ -70,6 +70,7 @@ func (as authService) ForgotPasswordToken(ctx context.Context, req dto.ForgotPas
 		ExpiredAt: time.Now().Add(5 * time.Minute),
 	}
 	err = as.ar.InsertForgotPassword(ctx, forgotpassword)
+	utils.ForgotPasswordToEmail(forgotpassword)
 	return err
 }
 

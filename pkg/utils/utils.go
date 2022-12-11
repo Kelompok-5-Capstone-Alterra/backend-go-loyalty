@@ -2,6 +2,7 @@ package utils
 
 import (
 	"backend-go-loyalty/internal/dto"
+	"backend-go-loyalty/internal/entity"
 	"backend-go-loyalty/pkg/config"
 	"crypto/sha256"
 	"encoding/base64"
@@ -84,6 +85,30 @@ func SendOTPToEmail(otp string, target string) error {
 	mailer := gomail.NewMessage()
 	mailer.SetHeader("From", env.Sender)
 	mailer.SetHeader("To", target)
+	mailer.SetHeader("Subject", "Digital Outlet Account Verification")
+	mailer.SetBody("text/html", mailBody)
+
+	dialer := gomail.NewDialer(
+		env.Host,
+		env.Port,
+		env.Email,
+		env.AppPassword,
+	)
+
+	err := dialer.DialAndSend(mailer)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	log.Println("Mail sent!")
+	return nil
+}
+func ForgotPasswordToEmail(fp entity.ForgotPassword) error {
+	env := GetSMTPConfig()
+	mailBody := fmt.Sprint("Forgot Password Token: ", fp.Token)
+	mailer := gomail.NewMessage()
+	mailer.SetHeader("From", env.Sender)
+	mailer.SetHeader("To", fp.Email)
 	mailer.SetHeader("Subject", "Digital Outlet Account Verification")
 	mailer.SetBody("text/html", mailBody)
 
