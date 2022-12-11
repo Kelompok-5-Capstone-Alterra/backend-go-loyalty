@@ -111,11 +111,11 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 }
 
 func (crt categoryRoutes) InitEndpoints() {
-	category := crt.router.Group("/category")
+	category := crt.router.Group("/categories")
 	category.GET("", crt.cc.HandleGetAllCategories)
 	category.GET("/:id", crt.cc.HandleGetCategoryByID)
 
-	adminCategory := crt.router.Group("/admin/category", middleware.ValidateAdminJWT)
+	adminCategory := crt.router.Group("/admin/categories", middleware.ValidateAdminJWT)
 	adminCategory.POST("", crt.cc.HandleCreateCategory)
 	adminCategory.PUT("/:id", crt.cc.HandleUpdateCategory)
 	adminCategory.DELETE("/:is", crt.cc.HandleDeleteCategory)

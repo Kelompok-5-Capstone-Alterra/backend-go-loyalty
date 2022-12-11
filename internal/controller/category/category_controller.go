@@ -63,7 +63,9 @@ func (cc categoryController) HandleCreateCategory(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return response.ResponseSuccess(http.StatusOK, nil, c)
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
+		"status":"SUCCES_INSERT_CATEGORY",
+	}, c)
 }
 func (cc categoryController) HandleUpdateCategory(c echo.Context) error {
 	param := c.Param("id")
@@ -77,7 +79,9 @@ func (cc categoryController) HandleUpdateCategory(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return response.ResponseSuccess(http.StatusOK, nil, c)
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
+		"status":"SUCCES_UPDATE_CATEGORY",
+	}, c)
 }
 func (cc categoryController) HandleDeleteCategory(c echo.Context) error {
 	param := c.Param("id")
@@ -89,5 +93,7 @@ func (cc categoryController) HandleDeleteCategory(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return response.ResponseSuccess(http.StatusOK, nil, c)
+	return response.ResponseSuccess(http.StatusOK, echo.Map{
+		"status":"SUCCES_DELETE_CATEGORY",
+	}, c)
 }
