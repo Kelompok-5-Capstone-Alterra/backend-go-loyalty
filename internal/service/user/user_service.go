@@ -109,10 +109,10 @@ func (us userService) UpdatePassword(ctx context.Context, req dto.UpdatePassword
 	if err != nil {
 		return err
 	}
-	req.NewPassword = utils.HashPassword(req.NewPassword)
+	newPassword := utils.HashPassword(req.NewPassword)
 	user := entity.User{
 		ID:       id,
-		Password: req.NewPassword,
+		Password: newPassword,
 	}
 	_, err = us.ur.UpdateUserData(ctx, user)
 	if err != nil {
