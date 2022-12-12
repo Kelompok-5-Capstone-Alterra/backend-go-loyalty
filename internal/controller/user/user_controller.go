@@ -121,14 +121,14 @@ func (uc userController) HandleChangePassword(c echo.Context) error {
 	errs := uc.us.UpdatePassword(c.Request().Context(), req, id)
 	if errs != nil {
 		var code int
-		if err.Error() == "new password must be different from old password" {
+		if errs.Error() == "new password must be different from old password" {
 			code = http.StatusBadRequest
-		} else if err.Error() == "password not match" {
+		} else if errs.Error() == "password not match" {
 			code = http.StatusUnauthorized
 		} else {
 			code = http.StatusInternalServerError
 		}
-		return response.ResponseError(code, err)
+		return response.ResponseError(code, errs)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
 		"status": "SUCCESS_UPDATE_PASSWORD",
