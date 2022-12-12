@@ -31,12 +31,12 @@ func NewUserRepository(dbConn *gorm.DB) userRepository {
 func (ur userRepository) GetUsers(ctx context.Context, name string) (entity.Users, error) {
 	users := entity.Users{}
 	keyword := "%" + name + "%"
-	err := ur.DB.Model(&model.User{}).Preload("Role").Where("name LIKE ? AND is_active = 1", keyword).Find(&users).Error
+	err := ur.DB.Model(&model.User{}).Preload("Role").Preload("UserCoin").Preload("Credit").Where("name LIKE ? AND is_active = 1", keyword).Find(&users).Error
 	return users, err
 }
 func (ur userRepository) GetUserByID(ctx context.Context, id uuid.UUID) (entity.User, error) {
 	user := entity.User{}
-	err := ur.DB.Model(&model.User{}).Preload("Role").First(&user, id).Error
+	err := ur.DB.Model(&model.User{}).Preload("Role").Preload("UserCoin").Preload("Credit").First(&user, id).Error
 	return user, err
 }
 
@@ -51,7 +51,7 @@ func (ur userRepository) UpdateUserData(ctx context.Context, req entity.User) (e
 		return entity.User{}, result.Error
 	}
 	res := entity.User{}
-	err := ur.DB.Model(&model.User{}).Preload("Role").First(&res, req.ID).Error
+	err := ur.DB.Model(&model.User{}).Preload("Role").Preload("UserCoin").Preload("Credit").First(&res, req.ID).Error
 	if err != nil {
 		return entity.User{}, err
 	}

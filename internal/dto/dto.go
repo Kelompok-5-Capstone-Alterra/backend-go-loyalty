@@ -33,13 +33,15 @@ type SignInResponse struct {
 }
 
 type UserResponse struct {
-	ID           uuid.UUID    `json:"id"`
-	Name         string       `json:"name"`
-	Email        string       `json:"email"`
-	MobileNumber string       `json:"mobile_number"`
-	CreatedAt    time.Time    `json:"created_at"`
-	UpdatedAt    time.Time    `json:"updated_at"`
-	Role         RoleResponse `json:"role"`
+	ID           uuid.UUID        `json:"id"`
+	Name         string           `json:"name"`
+	Email        string           `json:"email"`
+	MobileNumber string           `json:"mobile_number"`
+	CreatedAt    time.Time        `json:"created_at"`
+	UpdatedAt    time.Time        `json:"updated_at"`
+	Role         RoleResponse     `json:"role"`
+	UserCoin     UserCoinResponse `json:"user_coin"`
+	Credit       CreditResponse   `json:"credit"`
 }
 
 type RoleResponse struct {
@@ -53,10 +55,12 @@ type UserResponses []UserResponse
 type RoleResponses []RoleResponse
 
 type JWTData struct {
-	Name         string       `json:"name"`
-	Email        string       `json:"email"`
-	MobileNumber string       `json:"mobile_number"`
-	Role         RoleResponse `json:"role"`
+	Name         string           `json:"name"`
+	Email        string           `json:"email"`
+	MobileNumber string           `json:"mobile_number"`
+	Role         RoleResponse     `json:"role"`
+	UserCoin     UserCoinResponse `json:"user_coin"`
+	Credit       CreditResponse   `json:"credit"`
 }
 
 type ValidateOTP struct {
