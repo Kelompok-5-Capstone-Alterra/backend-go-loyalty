@@ -55,6 +55,7 @@ func (ac authController) HandleNewPassword(c echo.Context) error {
 	email := c.QueryParam("email")
 	token := c.QueryParam("token")
 	req := dto.NewPassword{}
+	c.Bind(&req)
 	validate := validator.New()
 	err := validate.Struct(req)
 	if err != nil {
