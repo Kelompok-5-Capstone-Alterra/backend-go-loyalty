@@ -5,7 +5,6 @@ import (
 	categoryController "backend-go-loyalty/internal/controller/category"
 	faqController "backend-go-loyalty/internal/controller/faq"
 	pingController "backend-go-loyalty/internal/controller/ping"
-	pointController "backend-go-loyalty/internal/controller/point"
 	productController "backend-go-loyalty/internal/controller/product"
 	redeemController "backend-go-loyalty/internal/controller/redeem"
 	rewardController "backend-go-loyalty/internal/controller/reward"
@@ -23,7 +22,6 @@ import (
 	categoryService "backend-go-loyalty/internal/service/category"
 	faqService "backend-go-loyalty/internal/service/faq"
 	pingService "backend-go-loyalty/internal/service/ping"
-	pointService "backend-go-loyalty/internal/service/point"
 	productService "backend-go-loyalty/internal/service/product"
 	redeemService "backend-go-loyalty/internal/service/redeem"
 	rewardService "backend-go-loyalty/internal/service/reward"
@@ -64,10 +62,10 @@ func InitEndpoints(router *echo.Echo, db *gorm.DB) {
 	productRoutes.InitEndpoints()
 
 	pointRepository := pointRepository.NewPointRepository(db)
-	pointService := pointService.NewPointService(pointRepository)
-	pointController := pointController.NewPointController(pointService)
-	pointRoutes := routes.NewPointRoutes(pointController, router)
-	pointRoutes.InitEndpoints()
+	// pointService := pointService.NewPointService(pointRepository)
+	// pointController := pointController.NewPointController(pointService)
+	// pointRoutes := routes.NewPointRoutes(pointController, router)
+	// pointRoutes.InitEndpoints()
 
 	redeemRepository := redeemRepository.NewRedeemRepository(db)
 	redeemService := redeemService.NewRedeemService(redeemRepository, pointRepository, rewardRepository)
