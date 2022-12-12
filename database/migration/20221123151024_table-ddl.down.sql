@@ -8,3 +8,4 @@ DROP TABLE rewards;
 DROP TABLE products;
 DROP TABLE categories;
 DROP TABLE forgot_passwords;
+DROP TABLE faqs;
