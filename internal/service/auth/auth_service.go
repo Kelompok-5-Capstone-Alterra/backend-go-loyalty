@@ -49,6 +49,14 @@ func (as authService) ValidateForgotPasswordToken(ctx context.Context, email str
 			CreatedAt: user.Role.CreatedAt,
 			UpdatedAt: user.Role.UpdatedAt,
 		},
+		UserCoin: dto.UserCoinResponse{
+			ID:     user.UserCoin.ID,
+			Amount: user.UserCoin.Amount,
+		},
+		Credit: dto.CreditResponse{
+			ID:     user.Credit.ID,
+			Amount: user.Credit.Amount,
+		},
 	}
 	accessToken, refreshToken := utils.CreateLoginToken(user.ID, data)
 	res := dto.SignInResponse{
@@ -90,6 +98,14 @@ func (as authService) Login(ctx context.Context, req dto.SignInRequest) (dto.Sig
 			Name:      user.Role.Name,
 			CreatedAt: user.Role.CreatedAt,
 			UpdatedAt: user.Role.UpdatedAt,
+		},
+		UserCoin: dto.UserCoinResponse{
+			ID:     user.UserCoin.ID,
+			Amount: user.UserCoin.Amount,
+		},
+		Credit: dto.CreditResponse{
+			ID:     user.Credit.ID,
+			Amount: user.Credit.Amount,
 		},
 	}
 	accessToken, refreshToken := utils.CreateLoginToken(user.ID, data)
@@ -178,6 +194,14 @@ func (as authService) RegenerateToken(ctx context.Context, rt string) (dto.SignI
 			Name:      user.Role.Name,
 			CreatedAt: user.Role.CreatedAt,
 			UpdatedAt: user.Role.UpdatedAt,
+		},
+		UserCoin: dto.UserCoinResponse{
+			ID:     user.UserCoin.ID,
+			Amount: user.UserCoin.Amount,
+		},
+		Credit: dto.CreditResponse{
+			ID:     user.Credit.ID,
+			Amount: user.Credit.Amount,
 		},
 	}
 	accessToken, refreshToken := utils.CreateLoginToken(user.ID, data)
