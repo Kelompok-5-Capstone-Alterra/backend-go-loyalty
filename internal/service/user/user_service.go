@@ -49,6 +49,14 @@ func (us userService) GetUsers(ctx context.Context, query string) (dto.UserRespo
 				CreatedAt: val.Role.CreatedAt,
 				UpdatedAt: val.Role.UpdatedAt,
 			},
+			UserCoin: dto.UserCoinResponse{
+				ID:     val.UserCoin.ID,
+				Amount: val.UserCoin.Amount,
+			},
+			Credit: dto.CreditResponse{
+				ID:     val.Credit.ID,
+				Amount: val.Credit.Amount,
+			},
 		}
 		users = append(users, user)
 	}
@@ -74,6 +82,14 @@ func (us userService) GetUserByID(ctx context.Context, id uuid.UUID) (dto.UserRe
 			Name:      data.Role.Name,
 			CreatedAt: data.Role.CreatedAt,
 			UpdatedAt: data.Role.UpdatedAt,
+		},
+		UserCoin: dto.UserCoinResponse{
+			ID:     data.UserCoin.ID,
+			Amount: data.UserCoin.Amount,
+		},
+		Credit: dto.CreditResponse{
+			ID:     data.Credit.ID,
+			Amount: data.Credit.Amount,
 		},
 	}
 	return user, nil
@@ -123,6 +139,14 @@ func (us userService) UpdateUserData(ctx context.Context, req dto.UserUpdate, id
 			Name:      res.Role.Name,
 			CreatedAt: res.Role.CreatedAt,
 			UpdatedAt: res.Role.UpdatedAt,
+		},
+		UserCoin: dto.UserCoinResponse{
+			ID:     res.UserCoin.ID,
+			Amount: res.UserCoin.Amount,
+		},
+		Credit: dto.CreditResponse{
+			ID:     res.Credit.ID,
+			Amount: res.Credit.Amount,
 		},
 	}
 	t, rt := utils.CreateLoginToken(id, data)
