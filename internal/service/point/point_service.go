@@ -4,13 +4,11 @@ import (
 	"backend-go-loyalty/internal/dto"
 	pointRepository "backend-go-loyalty/internal/repository/point"
 	"context"
-
-	"github.com/google/uuid"
 )
 
 type IPointService interface {
 	GetAllPoints(ctx context.Context) (dto.UserCoinResponses, error)
-	GetPoint(ctx context.Context, id uuid.UUID) (dto.UserCoinResponse, error)
+	GetPoint(ctx context.Context, userCoinID uint64) (dto.UserCoinResponse, error)
 }
 
 type pointService struct {
@@ -43,8 +41,8 @@ func (ps pointService) GetAllPoints(ctx context.Context) (dto.UserCoinResponses,
 	}
 	return res, err
 }
-func (ps pointService) GetPoint(ctx context.Context, id uuid.UUID) (dto.UserCoinResponse, error) {
-	data, err := ps.pr.GetPoint(ctx, id)
+func (ps pointService) GetPoint(ctx context.Context, userCoinID uint64) (dto.UserCoinResponse, error) {
+	data, err := ps.pr.GetPoint(ctx, userCoinID)
 	if err != nil {
 		return dto.UserCoinResponse{}, err
 	}

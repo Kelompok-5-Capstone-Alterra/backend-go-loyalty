@@ -112,8 +112,15 @@ func (dc redeemController) CreateRedeem(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId)
+	userData, err := utils.GetUserDataFromJWT(c)
 	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
+	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId, userData)
+	if err != nil {
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusOK, nil, c)
+		}
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusCreated, echo.Map{
@@ -132,6 +139,9 @@ func (dc redeemController) UpdateRedeem(c echo.Context) error {
 
 	err = dc.ds.UpdateRedeem(c.Request().Context(), req, id)
 	if err != nil {
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusOK, nil, c)
+		}
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
@@ -147,6 +157,9 @@ func (dc redeemController) DeleteRedeem(c echo.Context) error {
 	}
 	err = dc.ds.DeleteRedeem(c.Request().Context(), id)
 	if err != nil {
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusOK, nil, c)
+		}
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
