@@ -112,11 +112,7 @@ func (dc redeemController) CreateRedeem(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	userData, err := utils.GetUserDataFromJWT(c)
-	if err != nil {
-		return response.ResponseError(http.StatusBadRequest, err)
-	}
-	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId, userData)
+	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return response.ResponseSuccess(http.StatusOK, nil, c)
