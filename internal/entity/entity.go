@@ -50,7 +50,7 @@ type Reward struct {
 	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	Name          string         `db:"name"`
 	Description   string         `db:"description"`
-	RequiredPoint uint64         `db:"required_points"`
+	RequiredPoint int64          `db:"required_points"`
 	ValidUntil    time.Time      `db:"valid_until"`
 	CategoryID    uint64         `db:"category_id"`
 	CreatedAt     time.Time      `db:"created_at"`
@@ -63,7 +63,7 @@ type Redeem struct {
 	ID         uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	RewardID   uint64         `db:"reward_id"`
 	UserID     uuid.UUID      `db:"user_id"`
-	PointSpent uint64         `db:"point_spent"`
+	PointSpent int64          `db:"point_spent"`
 	CreatedAt  time.Time      `db:"created_at"`
 	UpdatedAt  time.Time      `db:"updated_at"`
 	DeletedAt  gorm.DeletedAt `db:"deleted_at" gorm:"index"`
@@ -77,7 +77,7 @@ type Rewards []Reward
 
 type Credit struct {
 	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
-	Amount uint64 `db:"amount"`
+	Amount int64  `db:"amount"`
 }
 
 type Credits []Credit
@@ -97,7 +97,7 @@ type Transaction struct {
 	ID        uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
 	UserID    uuid.UUID      `db:"user_id"`
 	Status    string         `db:"status"`
-	Amount    uint64         `db:"amount"`
+	Amount    int64          `db:"amount"`
 	CreatedAt time.Time      `db:"created_at"`
 	UpdatedAt time.Time      `db:"updated_at"`
 	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
@@ -119,9 +119,13 @@ type TransactionDetails []TransactionDetail
 type Product struct {
 	ID                 uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	Name               string         `db:"name"`
+	Description        string         `db:"description"`
+	Provider           string         `db:"provider"`
+	ActivePeriod       int64          `db:"active_period"`
+	Price              int64          `db:"price"`
 	CategoryID         uint64         `db:"category_id"`
 	MinimumTransaction uint32         `db:"minimum_transaction"`
-	Points             int            `db:"points"`
+	Coins              int            `db:"coins"`
 	CreatedAt          time.Time      `db:"created_at"`
 	UpdatedAt          time.Time      `db:"updated_at"`
 	DeletedAt          gorm.DeletedAt `db:"deleted_at" gorm:"index"`
@@ -151,7 +155,7 @@ type PaymentInvoice struct {
 	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	TransactionID uint64         `db:"transaction_id"`
 	URL           string         `db:"url"`
-	Amount        uint64         `db:"amount"`
+	Amount        int64          `db:"amount"`
 	CreatedAt     time.Time      `db:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at"`
 	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`
@@ -162,7 +166,7 @@ type PaymentInvoices []PaymentInvoice
 type UserCoin struct {
 	ID uint64 `db:"id" gorm:"primaryKey;autoIncrement"`
 	// UserID uuid.UUID `db:"user_id"`
-	Amount uint64 `db:"amount"`
+	Amount int64 `db:"amount"`
 	// User   User      `db:"user"`
 }
 

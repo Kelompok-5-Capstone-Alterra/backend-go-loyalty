@@ -136,7 +136,7 @@ func (crt categoryRoutes) InitEndpoints() {
 	crt.router.GET("/categories/:id", crt.cc.HandleGetCategoryByID)
 	crt.router.POST("/categories", crt.cc.HandleCreateCategory, middleware.ValidateAdminJWT)
 	crt.router.PUT("/categories/:id", crt.cc.HandleUpdateCategory, middleware.ValidateAdminJWT)
-	crt.router.DELETE("/categories/:is", crt.cc.HandleDeleteCategory, middleware.ValidateAdminJWT)
+	crt.router.DELETE("/categories/:id", crt.cc.HandleDeleteCategory, middleware.ValidateAdminJWT)
 }
 
 func (prt pointRoutes) InitEndpoints() {

@@ -10,13 +10,13 @@ CREATE TABLE roles(
 
 CREATE TABLE user_coins(
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	amount BIGINT UNSIGNED,
+	amount BIGINT,
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE credits(
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	amount BIGINT UNSIGNED,
+	amount BIGINT,
 	PRIMARY KEY (id)
 );
 
@@ -55,7 +55,7 @@ CREATE TABLE rewards(
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	name LONGTEXT,
 	description LONGTEXT,
-	required_point BIGINT UNSIGNED,
+	required_point BIGINT,
 	valid_until DATETIME(3),
 	category_id BIGINT UNSIGNED,
 	created_at DATETIME(3),
@@ -70,9 +70,13 @@ CREATE TABLE rewards(
 CREATE TABLE products(
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	name LONGTEXT,
+	description LONGTEXT,
+	provider TEXT,
+	active_period BIGINT,
+	price BIGINT,
 	category_id BIGINT UNSIGNED,
-	minimum_transaction INT UNSIGNED,
-	points BIGINT,
+	minimum_transaction BIGINT,
+	coins BIGINT,
 	created_at DATETIME(3),
 	updated_at DATETIME(3),
 	deleted_at DATETIME(3),
@@ -94,7 +98,7 @@ CREATE TABLE redeems(
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	reward_id BIGINT UNSIGNED,
 	user_id VARCHAR(36),
-	point_spent BIGINT UNSIGNED,
+	point_spent BIGINT,
 	created_at DATETIME(3),
 	updated_at DATETIME(3),
 	deleted_at DATETIME(3),
