@@ -124,45 +124,36 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 }
 
 func (frt faqRoutes) InitEndpoints() {
-	faq := frt.router.Group("/faqs")
-	faq.GET("", frt.fc.HandleGetAllFAQByKeyword)
-	faq.GET("/:id", frt.fc.HandleGetFAQByID)
-
-	adminFaq := frt.router.Group("/admin/faqs", middleware.ValidateAdminJWT)
-	adminFaq.POST("", frt.fc.HandleCreateFAQ)
-	adminFaq.PUT("/:id", frt.fc.HandleUpdateFAQ)
-	adminFaq.DELETE("/:id", frt.fc.HandleDeleteFAQ)
+	frt.router.GET("/faqs", frt.fc.HandleGetAllFAQByKeyword)
+	frt.router.GET("/faqs/:id", frt.fc.HandleGetFAQByID)
+	frt.router.POST("/admin/faqs", frt.fc.HandleCreateFAQ, middleware.ValidateAdminJWT)
+	frt.router.PUT("/admin/faqs/:id", frt.fc.HandleUpdateFAQ, middleware.ValidateAdminJWT)
+	frt.router.DELETE("/admin/faqs/:id", frt.fc.HandleDeleteFAQ, middleware.ValidateAdminJWT)
 }
 
 func (crt categoryRoutes) InitEndpoints() {
-	category := crt.router.Group("/categories")
-	category.GET("", crt.cc.HandleGetAllCategories)
-	category.GET("/:id", crt.cc.HandleGetCategoryByID)
-
-	adminCategory := crt.router.Group("/admin/categories", middleware.ValidateAdminJWT)
-	adminCategory.POST("", crt.cc.HandleCreateCategory)
-	adminCategory.PUT("/:id", crt.cc.HandleUpdateCategory)
-	adminCategory.DELETE("/:is", crt.cc.HandleDeleteCategory)
+	crt.router.GET("/categories", crt.cc.HandleGetAllCategories)
+	crt.router.GET("/categories/:id", crt.cc.HandleGetCategoryByID)
+	crt.router.POST("/categories", crt.cc.HandleCreateCategory, middleware.ValidateAdminJWT)
+	crt.router.PUT("/categories/:id", crt.cc.HandleUpdateCategory, middleware.ValidateAdminJWT)
+	crt.router.DELETE("/categories/:is", crt.cc.HandleDeleteCategory, middleware.ValidateAdminJWT)
 }
 
 func (prt pointRoutes) InitEndpoints() {
-	point := prt.router.Group("/coins", middleware.ValidateJWT)
-	point.GET("", prt.pc.HandleGetUserPoint)
+	// point := prt.router.Group("/coins", middleware.ValidateJWT)
+	// point.GET("", prt.pc.HandleGetUserPoint)
 
-	adminPoints := prt.router.Group("/admin/coins", middleware.ValidateAdminJWT)
-	adminPoints.GET("", prt.pc.HandleGetAllPoint)
-	adminPoints.GET("/:id", prt.pc.HandleGetPointByID)
+	// adminPoints := prt.router.Group("/admin/coins", middleware.ValidateAdminJWT)
+	// adminPoints.GET("", prt.pc.HandleGetAllPoint)
+	// adminPoints.GET("/:id", prt.pc.HandleGetPointByID)
 }
 
 func (rrt rewardRoutes) InitEndpoints() {
-	reward := rrt.router.Group("/rewards")
-	reward.GET("", rrt.rc.FindAllReward)
-	reward.GET("/:id", rrt.rc.FindRewardById)
-
-	adminReward := rrt.router.Group("/admin/rewards", middleware.ValidateAdminJWT)
-	adminReward.POST("", rrt.rc.CreateReward)
-	adminReward.PUT("/:id", rrt.rc.UpdateReward)
-	adminReward.DELETE("/:id", rrt.rc.DeleteReward)
+	rrt.router.GET("/rewards", rrt.rc.FindAllReward)
+	rrt.router.GET("/rewards/:id", rrt.rc.FindRewardById)
+	rrt.router.POST("/admin/rewards", rrt.rc.CreateReward, middleware.ValidateAdminJWT)
+	rrt.router.PUT("/admin/rewards/:id", rrt.rc.UpdateReward, middleware.ValidateAdminJWT)
+	rrt.router.DELETE("/admin/rewards/:id", rrt.rc.DeleteReward, middleware.ValidateAdminJWT)
 }
 
 func (prt pingRoutes) InitEndpoints() {
@@ -171,54 +162,40 @@ func (prt pingRoutes) InitEndpoints() {
 }
 
 func (art authRoutes) InitEndpoints() {
-	auth := art.router.Group("/auth")
-	auth.POST("/signin", art.ac.HandleLogin)
-	auth.POST("/signup", art.ac.HandleSignUp)
-	auth.POST("/forgot-password", art.ac.HandleForgotPassword)
-	auth.POST("/new-password", art.ac.HandleNewPassword)
-
-	token := auth.Group("/token")
-	token.POST("/refresh", art.ac.HandleRefreshToken)
-
-	otp := auth.Group("/otp")
-	otp.POST("/validate", art.ac.HandleValidateOTP)
-	otp.POST("/resend", art.ac.HandleRequestNewOTP)
+	art.router.POST("/auth/signin", art.ac.HandleLogin)
+	art.router.POST("/auth/signup", art.ac.HandleSignUp)
+	art.router.POST("/auth/forgot-password", art.ac.HandleForgotPassword)
+	art.router.POST("/auth/new-password", art.ac.HandleNewPassword)
+	art.router.POST("/auth/token/refresh", art.ac.HandleRefreshToken)
+	art.router.POST("/auth/otp/validate", art.ac.HandleValidateOTP)
+	art.router.POST("/auth/otp/resend", art.ac.HandleRequestNewOTP)
 }
 
 func (urt userRoutes) InitEndpoints() {
-	user := urt.router.Group("/users", middleware.ValidateJWT)
-	user.GET("", urt.uc.HandleGetSelfUserData)
-	user.PUT("/change-password", urt.uc.HandleChangePassword)
-	user.PUT("", urt.uc.HandleUpdateData)
-
-	admin := urt.router.Group("/admin/users", middleware.ValidateAdminJWT)
-	admin.GET("", urt.uc.HandleGetAllUser)
-	admin.GET("/:id", urt.uc.HandleGetUserByID)
-	admin.PUT("/:id", urt.uc.HandleUpdateCustomerData)
-	admin.DELETE("/:id", urt.uc.HandleDeleteCustomerData)
+	urt.router.GET("/users", urt.uc.HandleGetSelfUserData, middleware.ValidateJWT)
+	urt.router.PUT("/users/change-password", urt.uc.HandleChangePassword, middleware.ValidateJWT)
+	urt.router.PUT("/users", urt.uc.HandleUpdateData, middleware.ValidateJWT)
+	urt.router.GET("/admin/users", urt.uc.HandleGetAllUser, middleware.ValidateAdminJWT)
+	urt.router.GET("/admin/users/:id", urt.uc.HandleGetUserByID, middleware.ValidateAdminJWT)
+	urt.router.PUT("/admin/users/:id", urt.uc.HandleUpdateCustomerData, middleware.ValidateAdminJWT)
+	urt.router.DELETE("/admin/users/:id", urt.uc.HandleDeleteCustomerData, middleware.ValidateAdminJWT)
 }
 
 func (prt productRoutes) InitEndpoints() {
-	product := prt.router.Group("/products")
-	product.GET("", prt.pc.GetAll)
-	product.GET("/:id", prt.pc.GetProductById)
-
-	adminProduct := prt.router.Group("/admin/products", middleware.ValidateAdminJWT)
-	adminProduct.POST("", prt.pc.InsertProduct)
-	adminProduct.PUT("/:id", prt.pc.UpdateProduct)
-	adminProduct.DELETE("/:id", prt.pc.DeleteProduct)
+	prt.router.GET("/products", prt.pc.GetAll)
+	prt.router.GET("/products/:id", prt.pc.GetProductById)
+	prt.router.POST("/admin/products", prt.pc.InsertProduct, middleware.ValidateAdminJWT)
+	prt.router.PUT("/admin/products/:id", prt.pc.UpdateProduct, middleware.ValidateAdminJWT)
+	prt.router.DELETE("/admin/products/:id", prt.pc.DeleteProduct, middleware.ValidateAdminJWT)
 }
 
 func (drt redeemRoutes) InitEndpoints() {
-	adminRedeem := drt.router.Group("/admin/redeems", middleware.ValidateAdminJWT)
-	adminRedeem.GET("", drt.dc.GetAllRedeem)
-	adminRedeem.GET("/:id", drt.dc.AdminGetRedeemByID)
-	adminRedeem.GET("/all", drt.dc.GetAllRedeemIncludeSoftDeleted)
-	adminRedeem.PUT("/:id", drt.dc.UpdateRedeem)
-	adminRedeem.DELETE("/:id", drt.dc.DeleteRedeem)
-
-	redeem := drt.router.Group("/redeems", middleware.ValidateJWT)
-	redeem.GET("", drt.dc.GetAllRedeemByUserID)
-	redeem.GET("/:id", drt.dc.GetRedeemByID)
-	redeem.POST("", drt.dc.CreateRedeem)
+	drt.router.GET("/admin/redeems", drt.dc.GetAllRedeem, middleware.ValidateAdminJWT)
+	drt.router.GET("/admin/redeems/:id", drt.dc.AdminGetRedeemByID, middleware.ValidateAdminJWT)
+	drt.router.GET("/admin/redeems/all", drt.dc.GetAllRedeemIncludeSoftDeleted, middleware.ValidateAdminJWT)
+	drt.router.PUT("/admin/redeems/:id", drt.dc.UpdateRedeem, middleware.ValidateAdminJWT)
+	drt.router.DELETE("/admin/redeems/:id", drt.dc.DeleteRedeem, middleware.ValidateAdminJWT)
+	drt.router.GET("/redeems", drt.dc.GetAllRedeemByUserID, middleware.ValidateJWT)
+	drt.router.GET("/redeems/:id", drt.dc.GetRedeemByID, middleware.ValidateJWT)
+	drt.router.POST("/redeems", drt.dc.CreateRedeem, middleware.ValidateJWT)
 }

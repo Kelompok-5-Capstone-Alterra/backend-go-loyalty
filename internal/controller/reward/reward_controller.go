@@ -47,7 +47,7 @@ func (rc rewardController) FindRewardById(c echo.Context) error {
 	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if err.Error() == "record not found" {
+	if err != nil && err.Error() == "record not found" {
 		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)

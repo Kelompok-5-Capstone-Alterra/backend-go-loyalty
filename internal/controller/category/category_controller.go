@@ -46,7 +46,7 @@ func (cc categoryController) HandleGetCategoryByID(c echo.Context) error {
 	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if err.Error() == "record not found" {
+	if err != nil && err.Error() == "record not found" {
 		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
@@ -64,7 +64,7 @@ func (cc categoryController) HandleCreateCategory(c echo.Context) error {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status":"SUCCES_INSERT_CATEGORY",
+		"status": "SUCCES_INSERT_CATEGORY",
 	}, c)
 }
 func (cc categoryController) HandleUpdateCategory(c echo.Context) error {
@@ -80,7 +80,7 @@ func (cc categoryController) HandleUpdateCategory(c echo.Context) error {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status":"SUCCES_UPDATE_CATEGORY",
+		"status": "SUCCES_UPDATE_CATEGORY",
 	}, c)
 }
 func (cc categoryController) HandleDeleteCategory(c echo.Context) error {
@@ -94,6 +94,6 @@ func (cc categoryController) HandleDeleteCategory(c echo.Context) error {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusOK, echo.Map{
-		"status":"SUCCES_DELETE_CATEGORY",
+		"status": "SUCCES_DELETE_CATEGORY",
 	}, c)
 }

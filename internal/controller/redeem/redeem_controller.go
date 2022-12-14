@@ -58,7 +58,7 @@ func (dc redeemController) GetAllRedeemByUserID(c echo.Context) error {
 	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if err.Error() == "record not found" {
+	if err != nil && err.Error() == "record not found" {
 		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
@@ -78,7 +78,7 @@ func (dc redeemController) GetRedeemByID(c echo.Context) error {
 	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if err.Error() == "record not found" {
+	if err != nil && err.Error() == "record not found" {
 		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
@@ -93,7 +93,7 @@ func (dc redeemController) AdminGetRedeemByID(c echo.Context) error {
 	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if err.Error() == "record not found" {
+	if err != nil && err.Error() == "record not found" {
 		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)

@@ -11,6 +11,7 @@ type IProductService interface {
 	InsertProduct(ctx context.Context, req dto.ProductRequest) error
 	GetAll(ctx context.Context) (dto.ProductsResponse, error)
 	GetProductByID(ctx context.Context, productID uint64) (dto.ProductResponse, error)
+	GetProductByCategoryID(ctx context.Context, id uint64) (dto.ProductResponse, error)
 	UpdateProduct(ctx context.Context, req dto.ProductUpdateRequest, id uint64) error
 	DeleteProduct(ctx context.Context, productID uint64) error
 }
@@ -23,6 +24,31 @@ func NewProductService(pr productRepository.IProductRepository) productServiceIm
 	return productServiceImpl{
 		pr: pr,
 	}
+}
+
+func (ps productServiceImpl) GetProductByCategoryID(ctx context.Context, id uint64) (dto.ProductResponse, error) {
+	product, err := ps.pr.GetProductByCategoryID(ctx, id)
+	if err != nil {
+		return dto.ProductResponse{}, err
+	}
+	productResponse := dto.ProductResponse{
+		ID:                 product.ID,
+		Name:               product.Name,
+		CategoryID:         product.CategoryID,
+		MinimumTransaction: product.MinimumTransaction,
+		Points:             product.Points,
+		CreatedAt:          product.CreatedAt,
+		UpdatedAt:          product.UpdatedAt,
+		DeletedAt:          product.DeletedAt,
+		Category: dto.CategoryResponse{
+			ID:        product.Category.ID,
+			Name:      product.Category.Name,
+			CreatedAt: product.Category.CreatedAt,
+			UpdatedAt: product.Category.UpdatedAt,
+			DeletedAt: product.Category.DeletedAt,
+		},
+	}
+	return productResponse, nil
 }
 
 func (ps productServiceImpl) GetAll(ctx context.Context) (dto.ProductsResponse, error) {
