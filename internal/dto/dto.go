@@ -80,7 +80,7 @@ type UpdatePasswordRequest struct {
 type RewardRequest struct {
 	Name          string `json:"name" validate:"required"`
 	Description   string `json:"description" validate:"required"`
-	RequiredPoint uint64 `json:"required_point" validate:"required"`
+	RequiredPoint int64  `json:"required_point" validate:"required"`
 	ValidUntil    string `json:"valid_until" validate:"required"`
 	CategoryID    uint64 `json:"category_id" validate:"required"`
 }
@@ -88,7 +88,7 @@ type RewardRequest struct {
 type RewardUpdateRequest struct {
 	Name          string `json:"name"`
 	Description   string `json:"description"`
-	RequiredPoint uint64 `json:"required_point"`
+	RequiredPoint int64  `json:"required_point"`
 	ValidUntil    string `json:"valid_until"`
 	CategoryID    uint64 `json:"category_id"`
 }
@@ -97,7 +97,7 @@ type RewardResponse struct {
 	ID            uint64           `json:"id"`
 	Name          string           `json:"name"`
 	Description   string           `json:"description"`
-	RequiredPoint uint64           `json:"required_points"`
+	RequiredPoint int64            `json:"required_points"`
 	ValidUntil    time.Time        `json:"valid_until"`
 	CreatedAt     time.Time        `json:"created_at"`
 	UpdatedAt     time.Time        `json:"updated_at"`
@@ -108,15 +108,23 @@ type RewardResponse struct {
 type RewardsResponse []RewardResponse
 type ProductRequest struct {
 	Name               string `json:"name" validate:"required"`
+	Description        string `json:"description" validate:"required"`
+	Provider           string `json:"provider" validate:"required"`
+	ActivePeriod       int64  `json:"active_period" validate:"required"`
+	Price              int64  `json:"price" validate:"required"`
 	CategoryID         uint64 `json:"category_id" validate:"required"`
 	MinimumTransaction uint32 `json:"minimum_transaction" validate:"required"`
-	Points             int    `json:"points" validate:"required"`
+	Coins              int    `json:"coins" validate:"required"`
 }
 type ProductUpdateRequest struct {
 	Name               string `json:"name"`
+	Description        string `json:"description"`
+	Provider           string `json:"provider"`
+	ActivePeriod       int64  `json:"active_period"`
+	Price              int64  `json:"price"`
 	CategoryID         uint64 `json:"category_id"`
 	MinimumTransaction uint32 `json:"minimum_transaction"`
-	Points             int    `json:"points"`
+	Coins              int    `json:"coins"`
 }
 
 type CategoryResponse struct {
@@ -143,9 +151,12 @@ type NewPassword struct {
 type ProductResponse struct {
 	ID                 uint64           `json:"id"`
 	Name               string           `json:"name"`
-	CategoryID         uint64           `json:"category_id"`
+	Description        string           `json:"description"`
+	Provider           string           `json:"provider"`
+	ActivePeriod       int64            `json:"active_period"`
+	Price              int64            `json:"price"`
 	MinimumTransaction uint32           `json:"minimum_transaction"`
-	Points             int              `json:"points"`
+	Coins              int              `json:"coins"`
 	CreatedAt          time.Time        `json:"created_at"`
 	UpdatedAt          time.Time        `json:"updated_at"`
 	DeletedAt          gorm.DeletedAt   `json:"deleted_at"`
@@ -159,12 +170,12 @@ type RedeemRequest struct {
 }
 type RedeemUpdateRequest struct {
 	RewardID   uint64 `json:"reward_id"`
-	PointSpent uint64 `json:"point_spent"`
+	PointSpent int64  `json:"point_spent"`
 }
 
 type RedeemResponse struct {
 	ID         uint64         `json:"id"`
-	PointSpent uint64         `json:"point_spent"`
+	PointSpent int64          `json:"point_spent"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at"`
@@ -175,7 +186,7 @@ type RedeemResponses []RedeemResponse
 
 type UserCoinResponse struct {
 	ID     uint64 `json:"id"`
-	Amount uint64 `json:"amount"`
+	Amount int64  `json:"amount"`
 	// User   UserResponse `json:"user"`
 }
 
@@ -183,7 +194,7 @@ type UserCoinResponses []UserCoinResponse
 
 type CreditResponse struct {
 	ID     uint64 `json:"id"`
-	Amount uint64 `json:"amount"`
+	Amount int64  `json:"amount"`
 }
 
 type CreditResponses []CreditResponse

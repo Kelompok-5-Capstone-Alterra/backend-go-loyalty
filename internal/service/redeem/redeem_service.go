@@ -207,7 +207,7 @@ func (ds redeemServiceImpl) CreateRedeem(ctx context.Context, req dto.RedeemRequ
 		return err
 	}
 	pointUpdate := entity.UserCoin{
-		Amount: uint64(sub),
+		Amount: int64(sub),
 	}
 	err = ds.pr.UpdatePoint(ctx, user.UserCoin.ID, pointUpdate)
 	return err
