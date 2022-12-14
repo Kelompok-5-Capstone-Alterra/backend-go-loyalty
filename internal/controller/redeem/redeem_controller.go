@@ -112,7 +112,11 @@ func (dc redeemController) CreateRedeem(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId)
+	userData, err := utils.GetUserDataFromJWT(c)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
+	err = dc.ds.CreateRedeem(c.Request().Context(), req, userId, userData)
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}

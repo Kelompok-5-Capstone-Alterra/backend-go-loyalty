@@ -6,6 +6,7 @@ import (
 	"backend-go-loyalty/pkg/config"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -159,6 +160,33 @@ func GetDataFromRefreshToken(rt string) (uuid.UUID, time.Time, error) {
 		return idConv, res, nil
 	}
 	return uuid.UUID{}, time.Time{}, errors.New("token invalid")
+}
+
+func GetUserDataFromJWT(c echo.Context) (dto.JWTData, error) {
+	if c.Request().Header["Authorization"] != nil {
+		claims := jwt.MapClaims{}
+		auth := strings.Split(c.Request().Header["Authorization"][0], " ")
+		token, err := jwt.ParseWithClaims(auth[1], claims, func(t *jwt.Token) (interface{}, error) {
+			_, ok := t.Method.(*jwt.SigningMethodHMAC)
+			if !ok {
+				return nil, errors.New("unauthorized")
+			}
+			return []byte(config.GetJWTKey()), nil
+		})
+		if err != nil {
+			return dto.JWTData{}, err
+		}
+
+		if token.Valid {
+			data := fmt.Sprintf("%v", claims["data"])
+			res := dto.JWTData{}
+			json.Unmarshal([]byte(data), &res)
+			return res, err
+		}
+		return dto.JWTData{}, errors.New("unauthorized")
+	} else {
+		return dto.JWTData{}, errors.New("unauthorized")
+	}
 }
 
 func GetUserIDFromJWT(c echo.Context) (uuid.UUID, error) {
