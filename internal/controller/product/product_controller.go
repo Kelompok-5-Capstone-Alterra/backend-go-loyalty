@@ -16,6 +16,7 @@ type IProductController interface {
 	GetAll(c echo.Context) error
 	InsertProduct(c echo.Context) error
 	GetProductById(c echo.Context) error
+	GetProductByCategoryID(c echo.Context) error
 	UpdateProduct(c echo.Context) error
 	DeleteProduct(c echo.Context) error
 }
@@ -28,6 +29,22 @@ func NewProductController(ps productService.IProductService) productController {
 	return productController{
 		ps: ps,
 	}
+}
+
+func (pc productController) GetProductByCategoryID(c echo.Context) error {
+	param := c.Param("id")
+	id, err := strconv.ParseUint(param, 10, 64)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
+	data, err := pc.ps.GetProductByCategoryID(c.Request().Context(), id)
+	if err != nil {
+		if err.Error() == "record not found" {
+			return response.ResponseSuccess(http.StatusOK, nil, c)
+		}
+		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
 }
 
 func (pc productController) GetAll(c echo.Context) error {
@@ -62,7 +79,7 @@ func (pc productController) GetProductById(c echo.Context) error {
 	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	if err.Error() == "record not found" {
+	if err != nil && err.Error() == "record not found" {
 		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
 	return response.ResponseSuccess(http.StatusOK, data, c)
