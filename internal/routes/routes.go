@@ -140,12 +140,9 @@ func (crt categoryRoutes) InitEndpoints() {
 }
 
 func (prt pointRoutes) InitEndpoints() {
-	// point := prt.router.Group("/coins", middleware.ValidateJWT)
-	// point.GET("", prt.pc.HandleGetUserPoint)
-
-	// adminPoints := prt.router.Group("/admin/coins", middleware.ValidateAdminJWT)
-	// adminPoints.GET("", prt.pc.HandleGetAllPoint)
-	// adminPoints.GET("/:id", prt.pc.HandleGetPointByID)
+	prt.router.GET("/coins", prt.pc.HandleGetUserPoint, middleware.ValidateJWT)
+	prt.router.GET("/admin/coins", prt.pc.HandleGetAllPoint, middleware.ValidateAdminJWT)
+	prt.router.GET("/admin/coins/:id", prt.pc.HandleGetPointByID, middleware.ValidateAdminJWT)
 }
 
 func (rrt rewardRoutes) InitEndpoints() {
