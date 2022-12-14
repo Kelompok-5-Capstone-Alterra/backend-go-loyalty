@@ -15,6 +15,7 @@ func UseCommonMiddlewares(router *echo.Echo) *echo.Echo {
 	whitelist := config.GetWhitelistedURLS()
 	router.Use(internalMiddleware.CorsMiddleware(whitelist))
 	router.Pre(middleware.RemoveTrailingSlash())
+	router.Use(middleware.Logger())
 	return router
 }
 
