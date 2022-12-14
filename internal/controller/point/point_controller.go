@@ -2,6 +2,7 @@ package pointController
 
 import (
 	pointService "backend-go-loyalty/internal/service/point"
+	userService "backend-go-loyalty/internal/service/user"
 	"backend-go-loyalty/pkg/response"
 	"backend-go-loyalty/pkg/utils"
 	"net/http"
@@ -18,11 +19,13 @@ type IPointController interface {
 
 type pointController struct {
 	ps pointService.IPointService
+	us userService.UserServiceInterface
 }
 
-func NewPointController(ps pointService.IPointService) pointController {
+func NewPointController(ps pointService.IPointService, us userService.UserServiceInterface) pointController {
 	return pointController{
 		ps: ps,
+		us: us,
 	}
 }
 
@@ -51,17 +54,17 @@ func (pc pointController) HandleGetPointByID(c echo.Context) error {
 }
 
 func (pc pointController) HandleGetUserPoint(c echo.Context) error {
-	userData, err := utils.GetUserDataFromJWT(c)
+	userID, err := utils.GetUserIDFromJWT(c)
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	data, err := pc.ps.GetPoint(c.Request().Context(), userData.UserCoin.ID)
+	user, err := pc.us.GetUserByID(c.Request().Context(), userID)
 	if err != nil && err.Error() != "record not found" {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	if err.Error() == "record not found" {
 		return response.ResponseSuccess(http.StatusOK, nil, c)
 	}
-	return response.ResponseSuccess(http.StatusOK, data, c)
+	return response.ResponseSuccess(http.StatusOK, user.UserCoin, c)
 
 }

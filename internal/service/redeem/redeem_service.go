@@ -6,6 +6,7 @@ import (
 	pointRepository "backend-go-loyalty/internal/repository/point"
 	redeemRepository "backend-go-loyalty/internal/repository/redeem"
 	rewardRepository "backend-go-loyalty/internal/repository/reward"
+	userRepository "backend-go-loyalty/internal/repository/user"
 	"context"
 	"errors"
 
@@ -13,7 +14,7 @@ import (
 )
 
 type IRedeemService interface {
-	CreateRedeem(ctx context.Context, req dto.RedeemRequest, userID uuid.UUID, userData dto.JWTData) error
+	CreateRedeem(ctx context.Context, req dto.RedeemRequest, userID uuid.UUID) error
 	GetAllRedeemByUserID(ctx context.Context, userID uuid.UUID) (dto.RedeemResponses, error)
 	GetAllRedeems(ctx context.Context) (dto.RedeemResponses, error)
 	GetAllIncludeSoftDeleted(ctx context.Context) (dto.RedeemResponses, error)
@@ -27,13 +28,15 @@ type redeemServiceImpl struct {
 	dr redeemRepository.IRedeemRepository
 	pr pointRepository.IPointRepository
 	rr rewardRepository.IRewardRepository
+	ur userRepository.UserRepositoryInterface
 }
 
-func NewRedeemService(dr redeemRepository.IRedeemRepository, pr pointRepository.IPointRepository, rr rewardRepository.IRewardRepository) redeemServiceImpl {
+func NewRedeemService(dr redeemRepository.IRedeemRepository, pr pointRepository.IPointRepository, rr rewardRepository.IRewardRepository, ur userRepository.UserRepositoryInterface) redeemServiceImpl {
 	return redeemServiceImpl{
 		dr: dr,
 		pr: pr,
 		rr: rr,
+		ur: ur,
 	}
 }
 
@@ -173,18 +176,21 @@ func (ds redeemServiceImpl) AdminGetRedeemByID(ctx context.Context, redeemID uin
 	return redeemResponse, nil
 }
 
-func (ds redeemServiceImpl) CreateRedeem(ctx context.Context, req dto.RedeemRequest, userID uuid.UUID, userData dto.JWTData) error {
+func (ds redeemServiceImpl) CreateRedeem(ctx context.Context, req dto.RedeemRequest, userID uuid.UUID) error {
 	/* TODO:
 	- Check point amount.
 	- If enough, decrease. if not enough, return error.
 	- if enough, create.
 	*/
-	amount := userData.UserCoin.Amount
 	reward, err := ds.rr.FindRewardByID(ctx, req.RewardID)
 	if err != nil {
 		return err
 	}
-	sub := int(amount) - int(reward.RequiredPoint)
+	user, err := ds.ur.GetUserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	sub := int(user.UserCoin.Amount) - int(reward.RequiredPoint)
 	if sub < 0 {
 		return errors.New("not enough point")
 	}
@@ -203,7 +209,7 @@ func (ds redeemServiceImpl) CreateRedeem(ctx context.Context, req dto.RedeemRequ
 	pointUpdate := entity.UserCoin{
 		Amount: uint64(sub),
 	}
-	err = ds.pr.UpdatePoint(ctx, userData.UserCoin.ID, pointUpdate)
+	err = ds.pr.UpdatePoint(ctx, user.UserCoin.ID, pointUpdate)
 	return err
 }
 

@@ -68,7 +68,7 @@ func InitEndpoints(router *echo.Echo, db *gorm.DB) {
 	// pointRoutes.InitEndpoints()
 
 	redeemRepository := redeemRepository.NewRedeemRepository(db)
-	redeemService := redeemService.NewRedeemService(redeemRepository, pointRepository, rewardRepository)
+	redeemService := redeemService.NewRedeemService(redeemRepository, pointRepository, rewardRepository, userRepository)
 	redeemController := redeemController.NewRedeemController(redeemService)
 	redeemRoutes := routes.NewRedeemRoutes(redeemController, router)
 	redeemRoutes.InitEndpoints()

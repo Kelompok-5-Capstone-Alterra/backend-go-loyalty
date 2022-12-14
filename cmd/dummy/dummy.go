@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	godotenv.Load(".env")
+	godotenv.Load(".migration.env")
 	env := config.GetEnvVariables()
 	db := config.GetDatabase(env.DBAddress, env.DBUsername, env.DBPassword, env.DBName)
 	switch os.Args[1] {
