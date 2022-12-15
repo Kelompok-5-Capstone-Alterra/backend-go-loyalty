@@ -103,6 +103,7 @@ type Transaction struct {
 	UpdatedAt time.Time      `db:"updated_at"`
 	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
 	Product   Product        `db:"product"`
+	User      User           `db:"user"`
 }
 
 type Transactions []Transaction
@@ -157,7 +158,7 @@ type PaymentInvoice struct {
 	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	TransactionID uint64         `db:"transaction_id"`
 	URL           string         `db:"url"`
-	Amount        int64          `db:"amount"`
+	Amount        float64        `db:"amount"`
 	CreatedAt     time.Time      `db:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at"`
 	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`

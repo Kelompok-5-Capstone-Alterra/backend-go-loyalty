@@ -221,7 +221,7 @@ type FAQUpdateRequest struct {
 
 type TransactionResponse struct {
 	ID        uint64          `json:"id"`
-	UserID    uint64          `json:"user_id"`
+	UserID    uuid.UUID       `json:"user_id"`
 	Status    string          `json:"status"`
 	Amount    int64           `json:"amount"`
 	ProductID uint64          `json:"product_id"`
@@ -229,6 +229,10 @@ type TransactionResponse struct {
 	UpdatedAt time.Time       `json:"updated_at"`
 	DeletedAt gorm.DeletedAt  `json:"deleted_at"`
 	Product   ProductResponse `json:"products"`
+	User      UserResponse    `json:"user"`
+}
+type TransactionRequest struct {
+	ProductID uint64 `json:"product_id" validate:"required"`
 }
 
 type TransactionResponses []TransactionResponse
