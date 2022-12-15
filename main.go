@@ -16,7 +16,6 @@ func UseCommonMiddlewares(router *echo.Echo) *echo.Echo {
 	router.Use(internalMiddleware.CorsMiddleware(whitelist))
 	router.Pre(middleware.RemoveTrailingSlash())
 	router.Use(internalMiddleware.MiddlewareLogging)
-	router.HTTPErrorHandler = internalMiddleware.ErrorHandler
 	// router.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 	// 	Format: "[${time_rfc3339}] ${status} ${method} ${path} (${remote_ip}) ${latency_human}\n",
 	// 	Output: router.Logger.Output(),
