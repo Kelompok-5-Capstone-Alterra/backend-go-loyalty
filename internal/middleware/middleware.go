@@ -4,12 +4,15 @@ import (
 	"backend-go-loyalty/pkg/config"
 	"backend-go-loyalty/pkg/response"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 func ValidateAdminJWT(next echo.HandlerFunc) echo.HandlerFunc {
@@ -112,4 +115,38 @@ func CorsMiddleware(whitelistedUrls map[string]bool) echo.MiddlewareFunc {
 			return nil
 		}
 	}
+}
+
+func MiddlewareLogging(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		makeLogEntry(c).Info("Incoming Request")
+		return next(c)
+	}
+}
+
+func ErrorHandler(err error, c echo.Context) {
+	report, ok := err.(*echo.HTTPError)
+	if ok {
+		report.Message = fmt.Sprintf("http error %d - %v", report.Code, report.Message)
+	} else {
+		report = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	makeLogEntry(c).Error(report.Message)
+	c.HTML(report.Code, report.Message.(string))
+}
+
+func makeLogEntry(c echo.Context) *logrus.Entry {
+	if c == nil {
+		return logrus.WithFields(logrus.Fields{
+			"at": time.Now().Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return logrus.WithFields(logrus.Fields{
+		"At":     time.Now().Format("2006-01-02 15:04:05"),
+		"Method": c.Request().Method,
+		"URI":    c.Request().URL.String(),
+		"IP":     c.Request().RemoteAddr,
+	})
 }
