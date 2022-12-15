@@ -20,18 +20,18 @@ type User struct {
 	UpdatedAt    time.Time      `db:"updated_at"`
 	DeletedAt    gorm.DeletedAt `db:"deleted_at" gorm:"index"`
 	RoleID       int            `db:"role_id"`
-	Role         Role           `gorm:"foreignKey:RoleID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Role         Role           `gorm:"foreignKey:RoleID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	UserCoinID   uint64         `db:"user_coin_id"`
-	UserCoin     UserCoin       `gorm:"foreignKey:UserCoinID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	UserCoin     UserCoin       `gorm:"foreignKey:UserCoinID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	CreditID     uint64         `db:"credit_id"`
-	Credit       Credit         `gorm:"foreignKey:CreditID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Credit       Credit         `gorm:"foreignKey:CreditID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type UserCoin struct {
 	ID uint64 `db:"id" gorm:"primaryKey;autoIncrement"`
 	// UserID uuid.UUID `db:"user_id"`
 	Amount int64 `db:"amount"`
-	// User   User      `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	// User   User      `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type Credit struct {
@@ -69,20 +69,20 @@ type Reward struct {
 	CategoryID    uint64         `db:"category_id"`
 	CreatedAt     time.Time      `db:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at"`
-	DeletedAt     gorm.DeletedAt `db:"deleted_at"`
+	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`
 	Category      Category       `db:"category"`
 }
 
 type Redeem struct {
 	ID         uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	RewardID   uint64         `db:"reward_id"`
-	UserID     uint64         `db:"user_id"`
+	UserID     uuid.UUID      `db:"user_id"`
 	PointSpent int64          `db:"point_spent"`
 	CreatedAt  time.Time      `db:"created_at"`
 	UpdatedAt  time.Time      `db:"updated_at"`
-	DeletedAt  gorm.DeletedAt `db:"deleted_at"`
-	Reward     Reward         `gorm:"foreignKey:RewardID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	User       User           `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	DeletedAt  gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Reward     Reward         `gorm:"foreignKey:RewardID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	User       User           `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type Redeems []Redeem
@@ -103,33 +103,25 @@ type FAQ struct {
 	Answer    string         `db:"answer"`
 	CreatedAt time.Time      `db:"created_at"`
 	UpdatedAt time.Time      `db:"updated_at"`
-	DeletedAt gorm.DeletedAt `db:"deleted_at"`
+	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
 }
 
 type FAQs []FAQ
 
 type Transaction struct {
 	ID        uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
-	UserID    uint64         `db:"user_id"`
+	UserID    uuid.UUID      `db:"user_id"`
 	Status    string         `db:"status"`
 	Amount    int64          `db:"amount"`
+	ProductID uint64         `db:"product_id"`
 	CreatedAt time.Time      `db:"created_at"`
 	UpdatedAt time.Time      `db:"updated_at"`
-	DeletedAt gorm.DeletedAt `db:"deleted_at"`
+	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Product   Product        `gorm:"foreignKey:ProductID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	User      User           `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type Transactions []Transaction
-
-type TransactionDetail struct {
-	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
-	TransactionID uint64         `db:"transaction_id"`
-	ProductID     uint64         `db:"product_id"`
-	CreatedAt     time.Time      `db:"created_at"`
-	UpdatedAt     time.Time      `db:"updated_at"`
-	DeletedAt     gorm.DeletedAt `db:"deleted_at"`
-}
-
-type TransactionDetails []TransactionDetail
 
 type Product struct {
 	ID                 uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
@@ -143,8 +135,8 @@ type Product struct {
 	Coins              int            `db:"coins"`
 	CreatedAt          time.Time      `db:"created_at"`
 	UpdatedAt          time.Time      `db:"updated_at"`
-	DeletedAt          gorm.DeletedAt `db:"deleted_at"`
-	Category           Category       `gorm:"foreignKey:CategoryID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	DeletedAt          gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Category           Category       `gorm:"foreignKey:CategoryID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type Products []Product
@@ -154,7 +146,7 @@ type Category struct {
 	Name      string         `db:"name"`
 	CreatedAt time.Time      `db:"created_at"`
 	UpdatedAt time.Time      `db:"updated_at"`
-	DeletedAt gorm.DeletedAt `db:"deleted_at"`
+	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
 }
 
 type Categories []Category
@@ -166,7 +158,8 @@ type PaymentInvoice struct {
 	Amount        int64          `db:"amount"`
 	CreatedAt     time.Time      `db:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at"`
-	DeletedAt     gorm.DeletedAt `db:"deleted_at"`
+	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Transaction   Transaction    `gorm:"foreignKey:TransactionID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type PaymentInvoices []PaymentInvoice

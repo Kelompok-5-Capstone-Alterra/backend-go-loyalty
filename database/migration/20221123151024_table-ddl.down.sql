@@ -1,4 +1,6 @@
 DROP TABLE otps;
+DROP TABLE payment_invoices;
+DROP TABLE transactions;
 DROP TABLE redeems;
 DROP TABLE users;
 DROP TABLE roles;

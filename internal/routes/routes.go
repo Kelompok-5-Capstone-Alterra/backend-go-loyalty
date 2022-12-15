@@ -4,11 +4,13 @@ import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	categoryController "backend-go-loyalty/internal/controller/category"
 	faqController "backend-go-loyalty/internal/controller/faq"
+	paymentController "backend-go-loyalty/internal/controller/payment"
 	pingController "backend-go-loyalty/internal/controller/ping"
 	pointController "backend-go-loyalty/internal/controller/point"
 	productController "backend-go-loyalty/internal/controller/product"
 	redeemController "backend-go-loyalty/internal/controller/redeem"
 	rewardController "backend-go-loyalty/internal/controller/reward"
+	transactionController "backend-go-loyalty/internal/controller/transaction"
 	userController "backend-go-loyalty/internal/controller/user"
 	"backend-go-loyalty/internal/middleware"
 
@@ -48,6 +50,30 @@ type pointRoutes struct {
 type categoryRoutes struct {
 	cc     categoryController.ICategoryController
 	router *echo.Echo
+}
+
+type transactionRoutes struct {
+	tc     transactionController.ITransactionController
+	router *echo.Echo
+}
+
+type paymentRoutes struct {
+	pc     paymentController.IPaymentController
+	router *echo.Echo
+}
+
+func NewPaymentRoutes(pc paymentController.IPaymentController, router *echo.Echo) paymentRoutes {
+	return paymentRoutes{
+		pc:     pc,
+		router: router,
+	}
+}
+
+func NewTransactionRoutes(tc transactionController.ITransactionController, router *echo.Echo) transactionRoutes {
+	return transactionRoutes{
+		tc:     tc,
+		router: router,
+	}
 }
 
 func NewFAQRoutes(fc faqController.IFaqController, router *echo.Echo) faqRoutes {
@@ -121,6 +147,19 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 		dc:     dc,
 		router: router,
 	}
+}
+
+func (prt paymentRoutes) InitEndpoints() {
+	prt.router.POST("/payment/webhook", prt.pc.HandleNotification, middleware.ValidateXenditCallback)
+}
+
+func (trt transactionRoutes) InitEndpoints() {
+	trt.router.GET("/admin/transactions", trt.tc.HandleGetAllTransaction, middleware.ValidateAdminJWT)
+	trt.router.GET("/admin/transactions/:id", trt.tc.HandleGetTransactionByID, middleware.ValidateAdminJWT)
+
+	trt.router.GET("/transactions", trt.tc.HandleGetTransactionsByUserID, middleware.ValidateJWT)
+	trt.router.GET("/transactions/:id", trt.tc.HandleGetTransactionByIDByUser, middleware.ValidateJWT)
+	trt.router.GET("/transactions", trt.tc.HandleCreateTransaction, middleware.ValidateJWT)
 }
 
 func (frt faqRoutes) InitEndpoints() {

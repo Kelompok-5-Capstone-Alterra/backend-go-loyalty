@@ -214,3 +214,21 @@ func GetUserIDFromJWT(c echo.Context) (uuid.UUID, error) {
 		return uuid.UUID{}, errors.New("unauthorized")
 	}
 }
+
+func CreateExternalID(id uint64) string {
+	year, month, day := time.Now().Date()
+	hour, minute, sec := time.Now().Clock()
+	date := fmt.Sprintf("%d%d%d%d%d%d", year, int(month), day, hour, minute, sec)
+	return fmt.Sprint("DIGO", "_", id, "_", date)
+}
+
+func ExtractExternalID(externalID string) (int, error) {
+	var id int
+	str := fmt.Sprint("DIGO", "_%d_%s")
+	var str2 string
+	_, err := fmt.Sscanf(externalID, str, &id, &str2)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
