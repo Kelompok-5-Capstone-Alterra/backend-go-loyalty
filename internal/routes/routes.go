@@ -150,7 +150,7 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 }
 
 func (prt paymentRoutes) InitEndpoints() {
-	prt.router.POST("/payment/webhook", prt.pc.HandleNotification)
+	prt.router.POST("/payment/webhook", prt.pc.HandleNotification, middleware.ValidateXenditCallback)
 }
 
 func (trt transactionRoutes) InitEndpoints() {

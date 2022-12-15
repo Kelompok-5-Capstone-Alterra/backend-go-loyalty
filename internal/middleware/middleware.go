@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -149,4 +150,18 @@ func makeLogEntry(c echo.Context) *logrus.Entry {
 		"URI":    c.Request().URL.String(),
 		"IP":     c.Request().RemoteAddr,
 	})
+}
+
+func ValidateXenditCallback(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := os.Getenv("X_CALLBACK_TOKEN")
+		if c.Request().Header["X-Callback-Token"][0] == token {
+			return next(c)
+		} else {
+			return echo.NewHTTPError(http.StatusUnauthorized, echo.Map{
+				"code":  http.StatusUnauthorized,
+				"error": "ACCESS_DENIED",
+			})
+		}
+	}
 }
