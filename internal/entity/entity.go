@@ -97,10 +97,12 @@ type Transaction struct {
 	ID        uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
 	UserID    uuid.UUID      `db:"user_id"`
 	Status    string         `db:"status"`
+	ProductID uint64         `db:"product_id"`
 	Amount    int64          `db:"amount"`
 	CreatedAt time.Time      `db:"created_at"`
 	UpdatedAt time.Time      `db:"updated_at"`
 	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Product   Product        `db:"product"`
 }
 
 type Transactions []Transaction
