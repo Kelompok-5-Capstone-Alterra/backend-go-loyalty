@@ -128,3 +128,28 @@ CREATE TABLE faqs(
 	KEY (deleted_at),
 	PRIMARY KEY (id)
 );
+
+CREATE TABLE transactions(
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	user_id VARCHAR(36) NOT NULL,
+	status TEXT NOT NULL,
+	amount BIGINT,
+	product_id BIGINT UNSIGNED,
+	created_at DATETIME(3),
+	updated_at DATETIME(3),
+	deleted_at DATETIME(3),
+	KEY (user_id, product_id, deleted_at),
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE payment_invoices(
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	transaction_id BIGINT UNSIGNED,
+	url TEXT,
+	amount BIGINT,
+	created_at DATETIME(3),
+	updated_at DATETIME(3),
+	deleted_at DATETIME(3),
+	KEY (deleted_at),
+	PRIMARY KEY (id)
+);

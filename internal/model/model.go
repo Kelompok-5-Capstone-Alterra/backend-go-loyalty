@@ -76,7 +76,7 @@ type Reward struct {
 type Redeem struct {
 	ID         uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	RewardID   uint64         `db:"reward_id"`
-	UserID     uint64         `db:"user_id"`
+	UserID     uuid.UUID      `db:"user_id"`
 	PointSpent int64          `db:"point_spent"`
 	CreatedAt  time.Time      `db:"created_at"`
 	UpdatedAt  time.Time      `db:"updated_at"`
@@ -110,7 +110,7 @@ type FAQs []FAQ
 
 type Transaction struct {
 	ID        uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
-	UserID    uint64         `db:"user_id"`
+	UserID    uuid.UUID      `db:"user_id"`
 	Status    string         `db:"status"`
 	Amount    int64          `db:"amount"`
 	ProductID uint64         `db:"product_id"`
@@ -118,21 +118,10 @@ type Transaction struct {
 	UpdatedAt time.Time      `db:"updated_at"`
 	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
 	Product   Product        `gorm:"foreignKey:ProductID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-	User   User        `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	User      User           `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type Transactions []Transaction
-
-type TransactionDetail struct {
-	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
-	TransactionID uint64         `db:"transaction_id"`
-	ProductID     uint64         `db:"product_id"`
-	CreatedAt     time.Time      `db:"created_at"`
-	UpdatedAt     time.Time      `db:"updated_at"`
-	DeletedAt     gorm.DeletedAt `db:"deleted_at"`
-}
-
-type TransactionDetails []TransactionDetail
 
 type Product struct {
 	ID                 uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
@@ -170,6 +159,7 @@ type PaymentInvoice struct {
 	CreatedAt     time.Time      `db:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at"`
 	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Transaction   Transaction    `gorm:"foreignKey:TransactionID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type PaymentInvoices []PaymentInvoice

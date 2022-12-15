@@ -108,17 +108,6 @@ type Transaction struct {
 
 type Transactions []Transaction
 
-type TransactionDetail struct {
-	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
-	TransactionID uint64         `db:"transaction_id"`
-	ProductID     uint64         `db:"product_id"`
-	CreatedAt     time.Time      `db:"created_at"`
-	UpdatedAt     time.Time      `db:"updated_at"`
-	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`
-}
-
-type TransactionDetails []TransactionDetail
-
 type Product struct {
 	ID                 uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	Name               string         `db:"name"`
@@ -162,6 +151,7 @@ type PaymentInvoice struct {
 	CreatedAt     time.Time      `db:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at"`
 	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Transaction   Transaction    `gorm:"foreignKey:TransactionID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type PaymentInvoices []PaymentInvoice
