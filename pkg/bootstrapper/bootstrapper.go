@@ -4,18 +4,22 @@ import (
 	authController "backend-go-loyalty/internal/controller/auth"
 	categoryController "backend-go-loyalty/internal/controller/category"
 	faqController "backend-go-loyalty/internal/controller/faq"
+	paymentController "backend-go-loyalty/internal/controller/payment"
 	pingController "backend-go-loyalty/internal/controller/ping"
 	productController "backend-go-loyalty/internal/controller/product"
 	redeemController "backend-go-loyalty/internal/controller/redeem"
 	rewardController "backend-go-loyalty/internal/controller/reward"
+	transactionController "backend-go-loyalty/internal/controller/transaction"
 	userController "backend-go-loyalty/internal/controller/user"
 	authRepository "backend-go-loyalty/internal/repository/auth"
 	categoryRepository "backend-go-loyalty/internal/repository/category"
 	faqRepository "backend-go-loyalty/internal/repository/faq"
+	paymentRepository "backend-go-loyalty/internal/repository/payment"
 	pointRepository "backend-go-loyalty/internal/repository/point"
 	productRepository "backend-go-loyalty/internal/repository/product"
 	redeemRepository "backend-go-loyalty/internal/repository/redeem"
 	rewardRepository "backend-go-loyalty/internal/repository/reward"
+	transactionRepository "backend-go-loyalty/internal/repository/transaction"
 	userRepository "backend-go-loyalty/internal/repository/user"
 	"backend-go-loyalty/internal/routes"
 	authService "backend-go-loyalty/internal/service/auth"
@@ -25,13 +29,15 @@ import (
 	productService "backend-go-loyalty/internal/service/product"
 	redeemService "backend-go-loyalty/internal/service/redeem"
 	rewardService "backend-go-loyalty/internal/service/reward"
+	transactionService "backend-go-loyalty/internal/service/transaction"
 	userService "backend-go-loyalty/internal/service/user"
 
 	"github.com/labstack/echo/v4"
+	"github.com/xendit/xendit-go/invoice"
 	"gorm.io/gorm"
 )
 
-func InitEndpoints(router *echo.Echo, db *gorm.DB) {
+func InitEndpoints(router *echo.Echo, db *gorm.DB, xen *invoice.Client) {
 	pingService := pingService.NewPingService()
 	pingController := pingController.NewPingController(pingService)
 	pingRoutes := routes.NewPingRoutes(pingController, router)
@@ -84,4 +90,16 @@ func InitEndpoints(router *echo.Echo, db *gorm.DB) {
 	faqController := faqController.NewFAQController(faqService)
 	faqRoutes := routes.NewFAQRoutes(faqController, router)
 	faqRoutes.InitEndpoints()
+
+	paymentRepository := paymentRepository.NewPaymentRepository(xen, db)
+
+	transactionRepository := transactionRepository.NewTransactionRepository(db)
+	transactionService := transactionService.NewTransactionService(transactionRepository, userRepository, productRepository, paymentRepository)
+	transactionController := transactionController.NewTransactionController(transactionService)
+	transactionRoutes := routes.NewTransactionRoutes(transactionController, router)
+	transactionRoutes.InitEndpoints()
+
+	paymentController := paymentController.NewPaymentController(transactionService)
+	paymentRoutes := routes.NewPaymentRoutes(paymentController, router)
+	paymentRoutes.InitEndpoints()
 }

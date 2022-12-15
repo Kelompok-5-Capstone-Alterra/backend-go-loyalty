@@ -97,24 +97,16 @@ type Transaction struct {
 	ID        uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
 	UserID    uuid.UUID      `db:"user_id"`
 	Status    string         `db:"status"`
+	ProductID uint64         `db:"product_id"`
 	Amount    int64          `db:"amount"`
 	CreatedAt time.Time      `db:"created_at"`
 	UpdatedAt time.Time      `db:"updated_at"`
 	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Product   Product        `db:"product"`
+	User      User           `db:"user"`
 }
 
 type Transactions []Transaction
-
-type TransactionDetail struct {
-	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
-	TransactionID uint64         `db:"transaction_id"`
-	ProductID     uint64         `db:"product_id"`
-	CreatedAt     time.Time      `db:"created_at"`
-	UpdatedAt     time.Time      `db:"updated_at"`
-	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`
-}
-
-type TransactionDetails []TransactionDetail
 
 type Product struct {
 	ID                 uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
@@ -155,10 +147,11 @@ type PaymentInvoice struct {
 	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	TransactionID uint64         `db:"transaction_id"`
 	URL           string         `db:"url"`
-	Amount        int64          `db:"amount"`
+	Amount        float64        `db:"amount"`
 	CreatedAt     time.Time      `db:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at"`
 	DeletedAt     gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Transaction   Transaction    `gorm:"foreignKey:TransactionID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type PaymentInvoices []PaymentInvoice
