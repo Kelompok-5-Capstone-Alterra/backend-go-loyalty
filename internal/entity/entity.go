@@ -94,16 +94,17 @@ type FAQ struct {
 type FAQs []FAQ
 
 type Transaction struct {
-	ID        uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
-	UserID    uuid.UUID      `db:"user_id"`
-	Status    string         `db:"status"`
-	ProductID uint64         `db:"product_id"`
-	Amount    int64          `db:"amount"`
-	CreatedAt time.Time      `db:"created_at"`
-	UpdatedAt time.Time      `db:"updated_at"`
-	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
-	Product   Product        `db:"product"`
-	User      User           `db:"user"`
+	ID          uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
+	UserID      uuid.UUID      `db:"user_id"`
+	Status      string         `db:"status"`
+	ProductID   uint64         `db:"product_id"`
+	Amount      int64          `db:"amount"`
+	CoinsEarned int64          `db:"coins_earned"`
+	CreatedAt   time.Time      `db:"created_at"`
+	UpdatedAt   time.Time      `db:"updated_at"`
+	DeletedAt   gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Product     Product        `db:"product"`
+	User        User           `db:"user"`
 }
 
 type Transactions []Transaction
@@ -145,6 +146,7 @@ type Categories []Category
 
 type PaymentInvoice struct {
 	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	InvoiceID     string         `db:"invoice_id"`
 	TransactionID uint64         `db:"transaction_id"`
 	URL           string         `db:"url"`
 	Amount        float64        `db:"amount"`

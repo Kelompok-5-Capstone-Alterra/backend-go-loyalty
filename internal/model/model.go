@@ -109,16 +109,17 @@ type FAQ struct {
 type FAQs []FAQ
 
 type Transaction struct {
-	ID        uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
-	UserID    uuid.UUID      `db:"user_id"`
-	Status    string         `db:"status"`
-	Amount    int64          `db:"amount"`
-	ProductID uint64         `db:"product_id"`
-	CreatedAt time.Time      `db:"created_at"`
-	UpdatedAt time.Time      `db:"updated_at"`
-	DeletedAt gorm.DeletedAt `db:"deleted_at" gorm:"index"`
-	Product   Product        `gorm:"foreignKey:ProductID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-	User      User           `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	ID          uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
+	UserID      uuid.UUID      `db:"user_id"`
+	Status      string         `db:"status"`
+	Amount      int64          `db:"amount"`
+	ProductID   uint64         `db:"product_id"`
+	CoinsEarned int64          `db:"coins_earned"`
+	CreatedAt   time.Time      `db:"created_at"`
+	UpdatedAt   time.Time      `db:"updated_at"`
+	DeletedAt   gorm.DeletedAt `db:"deleted_at" gorm:"index"`
+	Product     Product        `gorm:"foreignKey:ProductID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	User        User           `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 type Transactions []Transaction
@@ -153,6 +154,7 @@ type Categories []Category
 
 type PaymentInvoice struct {
 	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	InvoiceID     string         `db:"invoice_id"`
 	TransactionID uint64         `db:"transaction_id"`
 	URL           string         `db:"url"`
 	Amount        int64          `db:"amount"`
