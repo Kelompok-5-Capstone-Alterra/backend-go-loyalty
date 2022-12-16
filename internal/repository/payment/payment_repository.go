@@ -3,6 +3,7 @@ package paymentRepository
 import (
 	"backend-go-loyalty/internal/entity"
 	"backend-go-loyalty/internal/interfaces"
+	"backend-go-loyalty/internal/model"
 	"backend-go-loyalty/pkg/utils"
 	"context"
 	"time"
@@ -15,6 +16,7 @@ import (
 type IPaymentRepository interface {
 	CreateInvoice(ctx context.Context, req entity.Transaction, user entity.User) (*xendit.Invoice, error)
 	InsertInvoiceData(ctx context.Context, req *xendit.Invoice, transactionID uint64) error
+	DeleteInvoiceByTransactionID(ctx context.Context, transactionID uint64) error
 }
 
 type paymentRepository struct {
@@ -82,4 +84,24 @@ func (pr paymentRepository) InsertInvoiceData(ctx context.Context, req *xendit.I
 	}
 	err := pr.db.Create(&invoice).Error
 	return err
+}
+
+func (pr paymentRepository) DeleteInvoiceByTransactionID(ctx context.Context, transactionID uint64) error {
+	payment := entity.PaymentInvoice{}
+	err := pr.db.Model(&model.PaymentInvoice{}).Where("transaction_id = ?", transactionID).First(&payment).Error
+	if err != nil {
+		return err
+	}
+	err = pr.db.Where("transaction_id = ?", transactionID).Delete(&entity.PaymentInvoice{}).Error
+	if err != nil {
+		return err
+	}
+	cancelInvoice := invoice.ExpireParams{
+		ID: payment.InvoiceID,
+	}
+	_, errs := pr.Xendit.Expire(&cancelInvoice)
+	if errs != nil {
+		return errs
+	}
+	return nil
 }

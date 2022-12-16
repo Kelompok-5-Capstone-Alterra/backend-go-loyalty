@@ -225,6 +225,7 @@ type TransactionResponse struct {
 	Status    string          `json:"status"`
 	Amount    int64           `json:"amount"`
 	ProductID uint64          `json:"product_id"`
+	CoinsEarned int64 `json:"coins_earned"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
 	DeletedAt gorm.DeletedAt  `json:"deleted_at"`

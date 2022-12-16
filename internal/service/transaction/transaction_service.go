@@ -4,6 +4,7 @@ import (
 	"backend-go-loyalty/internal/dto"
 	"backend-go-loyalty/internal/entity"
 	paymentRepository "backend-go-loyalty/internal/repository/payment"
+	pointRepository "backend-go-loyalty/internal/repository/point"
 	productRepository "backend-go-loyalty/internal/repository/product"
 	transactionRepository "backend-go-loyalty/internal/repository/transaction"
 	userRepository "backend-go-loyalty/internal/repository/user"
@@ -22,6 +23,8 @@ type ITransactionService interface {
 	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error
 	UpdateStatus(ctx context.Context, status string, id uint64) error
 	DeleteTransaction(ctx context.Context, id uint64) error
+	CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transaction entity.Transaction) error
+	DeleteInvoice(ctx context.Context, transactionID uint64) error
 }
 
 type transactionService struct {
@@ -29,14 +32,16 @@ type transactionService struct {
 	ur  userRepository.UserRepositoryInterface
 	pr  productRepository.IProductRepository
 	pyr paymentRepository.IPaymentRepository
+	cr  pointRepository.IPointRepository
 }
 
-func NewTransactionService(tr transactionRepository.ITransactionRepository, ur userRepository.UserRepositoryInterface, pr productRepository.IProductRepository, pyr paymentRepository.IPaymentRepository) transactionService {
+func NewTransactionService(tr transactionRepository.ITransactionRepository, ur userRepository.UserRepositoryInterface, pr productRepository.IProductRepository, pyr paymentRepository.IPaymentRepository, cr pointRepository.IPointRepository) transactionService {
 	return transactionService{
 		tr:  tr,
 		ur:  ur,
 		pr:  pr,
 		pyr: pyr,
+		cr:  cr,
 	}
 }
 
@@ -325,5 +330,35 @@ func (ts transactionService) UpdateStatus(ctx context.Context, status string, id
 
 func (ts transactionService) DeleteTransaction(ctx context.Context, id uint64) error {
 	err := ts.tr.DeleteTransaction(ctx, id)
+	return err
+}
+func (ts transactionService) CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transaction entity.Transaction) error {
+	count, err := ts.tr.CountSuccessTransactionByUserID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if count%int64(transaction.Product.Coins) == 0 {
+		req := entity.Transaction{
+			CoinsEarned: int64(transaction.Product.Coins),
+		}
+		err = ts.tr.UpdateTransaction(ctx, req, transaction.ID)
+		if err != nil {
+			return err
+		}
+		user, err := ts.ur.GetUserByID(ctx, userID)
+		if err != nil {
+			return err
+		}
+		userCoin := entity.UserCoin{
+			Amount: user.UserCoin.Amount + int64(transaction.Product.Coins),
+		}
+		err = ts.cr.UpdatePoint(ctx, user.UserCoinID, userCoin)
+		return err
+	}
+	return nil
+}
+
+func (ts transactionService) DeleteInvoice(ctx context.Context, transactionID uint64) error {
+	err := ts.tr.DeleteInvoice(ctx, transactionID)
 	return err
 }

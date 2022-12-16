@@ -94,7 +94,7 @@ func InitEndpoints(router *echo.Echo, db *gorm.DB, xen *invoice.Client) {
 	paymentRepository := paymentRepository.NewPaymentRepository(xen, db)
 
 	transactionRepository := transactionRepository.NewTransactionRepository(db)
-	transactionService := transactionService.NewTransactionService(transactionRepository, userRepository, productRepository, paymentRepository)
+	transactionService := transactionService.NewTransactionService(transactionRepository, userRepository, productRepository, paymentRepository, pointRepository)
 	transactionController := transactionController.NewTransactionController(transactionService)
 	transactionRoutes := routes.NewTransactionRoutes(transactionController, router)
 	transactionRoutes.InitEndpoints()
