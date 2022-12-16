@@ -43,12 +43,18 @@ func (pc paymentController) HandleNotification(c echo.Context) error {
 	}
 
 	if body["status"].(string) == "EXPIRED" && parsedCreatedAt.Hour()-time.Now().Hour() >= 1 {
-		pc.ts.DeleteTransaction(c.Request().Context(), uint64(transactionID))
+		err = pc.ts.UpdateStatus(c.Request().Context(), "EXPIRED", uint64(transactionID))
+		if err != nil {
+			return response.ResponseError(http.StatusInternalServerError, err)
+		}
+		err = pc.ts.DeleteInvoice(c.Request().Context(), uint64(transactionID))
+		if err != nil {
+			return response.ResponseError(http.StatusInternalServerError, err)
+		}
 		fmt.Println("======INVOICE EXPIRED======")
 	} else if body["status"].(string) == "EXPIRED" && parsedCreatedAt.Hour()-time.Now().Hour() < 1 {
 		fmt.Println("======INVOICE EXPIRED======")
 	} else {
-
 		err = pc.ts.UpdateStatus(c.Request().Context(), "SUCCESS", uint64(transactionID))
 		if err != nil {
 			return response.ResponseError(http.StatusInternalServerError, err)

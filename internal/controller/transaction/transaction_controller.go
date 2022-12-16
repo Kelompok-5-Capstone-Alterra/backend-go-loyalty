@@ -68,7 +68,7 @@ func (tc transactionController) HandleCreateTransaction(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	return response.ResponseSuccess(http.StatusOK, echo.Map{
+	return response.ResponseSuccess(http.StatusCreated, echo.Map{
 		"status": "PENDING_PAYMENT",
 	}, c)
 }
