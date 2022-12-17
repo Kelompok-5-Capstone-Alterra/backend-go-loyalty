@@ -35,8 +35,8 @@ type UserCoin struct {
 }
 
 type Credit struct {
-	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement"`
-	Amount int64  `db:"amount"`
+	ID     uint64  `db:"id" gorm:"primaryKey;autoIncrement"`
+	Amount float64 `db:"amount"`
 }
 
 type UserCoins []UserCoin
@@ -112,7 +112,7 @@ type Transaction struct {
 	ID          uint64         `db:"id" gorm:"primaryKey;autoIncrement"`
 	UserID      uuid.UUID      `db:"user_id"`
 	Status      string         `db:"status"`
-	Amount      int64          `db:"amount"`
+	Amount      float64        `db:"amount"`
 	ProductID   uint64         `db:"product_id"`
 	CoinsEarned int64          `db:"coins_earned"`
 	CreatedAt   time.Time      `db:"created_at"`
@@ -130,7 +130,7 @@ type Product struct {
 	Description        string         `db:"description"`
 	Provider           string         `db:"provider"`
 	ActivePeriod       int64          `db:"active_period"`
-	Price              int64          `db:"price"`
+	Price              float64        `db:"price"`
 	CategoryID         uint64         `db:"category_id"`
 	MinimumTransaction uint32         `db:"minimum_transaction"`
 	Coins              int            `db:"coins"`

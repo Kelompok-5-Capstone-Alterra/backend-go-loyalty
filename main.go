@@ -32,7 +32,7 @@ func main() {
 	db := config.GetDatabase(env.DBAddress, env.DBUsername, env.DBPassword, env.DBName)
 	xenditClient := client.New(env.XenditServerKey)
 	// config.InitialMigration(db, &model.Role{}, &model.User{}, &model.OTP{}, &model.Product{}, &model.Reward{}) // Disabled because the app will use go migrate to declare DDL and other initial migration stuffs
-	bootstrapper.InitEndpoints(router, db, xenditClient.Invoice)
+	bootstrapper.InitEndpoints(router, db, xenditClient)
 	server := server.NewServer(env.ServerAddress, router)
 	server.ListenAndServe()
 }

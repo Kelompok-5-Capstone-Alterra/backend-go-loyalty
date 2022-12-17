@@ -11,11 +11,11 @@ type SignUpRequest struct {
 	Name         string `json:"name" validate:"required"`
 	Password     string `json:"password" validate:"required"`
 	Email        string `json:"email" validate:"required,email"`
-	MobileNumber string `json:"mobile_number" validate:"required"`
+	MobileNumber string `json:"mobile_number" validate:"required,e164"`
 }
 type UserUpdate struct {
 	Name         string `json:"name"`
-	MobileNumber string `json:"mobile_number"`
+	MobileNumber string `json:"mobile_number" validate:"e164"`
 }
 
 type SignInRequest struct {
@@ -107,24 +107,24 @@ type RewardResponse struct {
 
 type RewardsResponse []RewardResponse
 type ProductRequest struct {
-	Name               string `json:"name" validate:"required"`
-	Description        string `json:"description" validate:"required"`
-	Provider           string `json:"provider" validate:"required"`
-	ActivePeriod       int64  `json:"active_period" validate:"required"`
-	Price              int64  `json:"price" validate:"required"`
-	CategoryID         uint64 `json:"category_id" validate:"required"`
-	MinimumTransaction uint32 `json:"minimum_transaction" validate:"required"`
-	Coins              int    `json:"coins" validate:"required"`
+	Name               string  `json:"name" validate:"required"`
+	Description        string  `json:"description" validate:"required"`
+	Provider           string  `json:"provider" validate:"required"`
+	ActivePeriod       int64   `json:"active_period" validate:"required"`
+	Price              float64 `json:"price" validate:"required"`
+	CategoryID         uint64  `json:"category_id" validate:"required"`
+	MinimumTransaction uint32  `json:"minimum_transaction" validate:"required"`
+	Coins              int     `json:"coins" validate:"required"`
 }
 type ProductUpdateRequest struct {
-	Name               string `json:"name"`
-	Description        string `json:"description"`
-	Provider           string `json:"provider"`
-	ActivePeriod       int64  `json:"active_period"`
-	Price              int64  `json:"price"`
-	CategoryID         uint64 `json:"category_id"`
-	MinimumTransaction uint32 `json:"minimum_transaction"`
-	Coins              int    `json:"coins"`
+	Name               string  `json:"name"`
+	Description        string  `json:"description"`
+	Provider           string  `json:"provider"`
+	ActivePeriod       int64   `json:"active_period"`
+	Price              float64 `json:"price"`
+	CategoryID         uint64  `json:"category_id"`
+	MinimumTransaction uint32  `json:"minimum_transaction"`
+	Coins              int     `json:"coins"`
 }
 
 type CategoryResponse struct {
@@ -154,7 +154,7 @@ type ProductResponse struct {
 	Description        string           `json:"description"`
 	Provider           string           `json:"provider"`
 	ActivePeriod       int64            `json:"active_period"`
-	Price              int64            `json:"price"`
+	Price              float64          `json:"price"`
 	MinimumTransaction uint32           `json:"minimum_transaction"`
 	Coins              int              `json:"coins"`
 	CreatedAt          time.Time        `json:"created_at"`
@@ -193,8 +193,8 @@ type UserCoinResponse struct {
 type UserCoinResponses []UserCoinResponse
 
 type CreditResponse struct {
-	ID     uint64 `json:"id"`
-	Amount int64  `json:"amount"`
+	ID     uint64  `json:"id"`
+	Amount float64 `json:"amount"`
 }
 
 type CreditResponses []CreditResponse
@@ -220,20 +220,29 @@ type FAQUpdateRequest struct {
 }
 
 type TransactionResponse struct {
-	ID        uint64          `json:"id"`
-	UserID    uuid.UUID       `json:"user_id"`
-	Status    string          `json:"status"`
-	Amount    int64           `json:"amount"`
-	ProductID uint64          `json:"product_id"`
-	CoinsEarned int64 `json:"coins_earned"`
-	CreatedAt time.Time       `json:"created_at"`
-	UpdatedAt time.Time       `json:"updated_at"`
-	DeletedAt gorm.DeletedAt  `json:"deleted_at"`
-	Product   ProductResponse `json:"products"`
-	User      UserResponse    `json:"user"`
+	ID          uint64          `json:"id"`
+	UserID      uuid.UUID       `json:"user_id"`
+	Status      string          `json:"status"`
+	Amount      float64         `json:"amount"`
+	ProductID   uint64          `json:"product_id"`
+	CoinsEarned int64           `json:"coins_earned"`
+	CreatedAt   time.Time       `json:"created_at"`
+	UpdatedAt   time.Time       `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt  `json:"deleted_at"`
+	Product     ProductResponse `json:"products"`
+	User        UserResponse    `json:"user"`
 }
 type TransactionRequest struct {
 	ProductID uint64 `json:"product_id" validate:"required"`
 }
 
 type TransactionResponses []TransactionResponse
+
+type PayWithCredit struct {
+	TransactionID uint64 `json:"transaction_id" validate:"required"`
+}
+
+type PayWithOVO struct {
+	TransactionID uint64 `json:"transaction_id" validate:"required"`
+	MobileNumber  string `json:"mobile_number" validate:"e164"`
+}

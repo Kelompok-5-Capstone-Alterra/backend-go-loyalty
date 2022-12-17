@@ -12,6 +12,7 @@ import (
 	rewardController "backend-go-loyalty/internal/controller/reward"
 	transactionController "backend-go-loyalty/internal/controller/transaction"
 	userController "backend-go-loyalty/internal/controller/user"
+	webhookController "backend-go-loyalty/internal/controller/webhook"
 	"backend-go-loyalty/internal/middleware"
 
 	"github.com/labstack/echo/v4"
@@ -60,6 +61,18 @@ type transactionRoutes struct {
 type paymentRoutes struct {
 	pc     paymentController.IPaymentController
 	router *echo.Echo
+}
+
+type webhookRoutes struct {
+	wc     webhookController.IWebhookController
+	router *echo.Echo
+}
+
+func NewWebhookRoutes(wc webhookController.IWebhookController, router *echo.Echo) webhookRoutes {
+	return webhookRoutes{
+		wc:     wc,
+		router: router,
+	}
 }
 
 func NewPaymentRoutes(pc paymentController.IPaymentController, router *echo.Echo) paymentRoutes {
@@ -149,8 +162,12 @@ func NewRedeemRoutes(dc redeemController.IRedeemController, router *echo.Echo) r
 	}
 }
 
+func (wrt webhookRoutes) InitEndpoints() {
+	wrt.router.POST("/callback/ewallet", wrt.wc.HandleEwalletPaymentCallback, middleware.ValidateXenditCallback)
+}
+
 func (prt paymentRoutes) InitEndpoints() {
-	prt.router.POST("/payment/webhook", prt.pc.HandleNotification, middleware.ValidateXenditCallback)
+	prt.router.POST("/payment/pay/credit", prt.pc.HandlePayWithCredit, middleware.ValidateJWT)
 }
 
 func (trt transactionRoutes) InitEndpoints() {
@@ -159,7 +176,7 @@ func (trt transactionRoutes) InitEndpoints() {
 
 	trt.router.GET("/transactions", trt.tc.HandleGetTransactionsByUserID, middleware.ValidateJWT)
 	trt.router.GET("/transactions/:id", trt.tc.HandleGetTransactionByIDByUser, middleware.ValidateJWT)
-	trt.router.GET("/transactions", trt.tc.HandleCreateTransaction, middleware.ValidateJWT)
+	trt.router.POST("/transactions", trt.tc.HandleCreateTransaction, middleware.ValidateJWT)
 }
 
 func (frt faqRoutes) InitEndpoints() {

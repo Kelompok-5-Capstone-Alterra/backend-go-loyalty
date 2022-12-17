@@ -76,8 +76,8 @@ type Redeems []Redeem
 type Rewards []Reward
 
 type Credit struct {
-	ID     uint64 `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
-	Amount int64  `db:"amount"`
+	ID     uint64  `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	Amount float64 `db:"amount"`
 }
 
 type Credits []Credit
@@ -98,7 +98,7 @@ type Transaction struct {
 	UserID      uuid.UUID      `db:"user_id"`
 	Status      string         `db:"status"`
 	ProductID   uint64         `db:"product_id"`
-	Amount      int64          `db:"amount"`
+	Amount      float64        `db:"amount"`
 	CoinsEarned int64          `db:"coins_earned"`
 	CreatedAt   time.Time      `db:"created_at"`
 	UpdatedAt   time.Time      `db:"updated_at"`
@@ -115,7 +115,7 @@ type Product struct {
 	Description        string         `db:"description"`
 	Provider           string         `db:"provider"`
 	ActivePeriod       int64          `db:"active_period"`
-	Price              int64          `db:"price"`
+	Price              float64        `db:"price"`
 	CategoryID         uint64         `db:"category_id"`
 	MinimumTransaction uint32         `db:"minimum_transaction"`
 	Coins              int            `db:"coins"`

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/xendit/xendit-go"
 )
 
 type ITransactionService interface {
@@ -20,7 +21,7 @@ type ITransactionService interface {
 	GetTransactionByIDByUserID(ctx context.Context, user_id uuid.UUID, id uint64) (dto.TransactionResponse, error)
 	GetAllTransaction(ctx context.Context) (dto.TransactionResponses, error)
 	GetTransactionByID(ctx context.Context, id uint64) (dto.TransactionResponse, error)
-	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error
+	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) (*xendit.Invoice, error)
 	UpdateStatus(ctx context.Context, status string, id uint64) error
 	DeleteTransaction(ctx context.Context, id uint64) error
 	CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transaction entity.Transaction) error
@@ -284,21 +285,26 @@ func (ts transactionService) GetTransactionByID(ctx context.Context, id uint64) 
 	}
 	return transaction, err
 }
-func (ts transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error {
-	user, err := ts.ur.GetUserByID(ctx, id)
-	if err != nil {
-		errorMsg := "[user] " + err.Error()
-		return errors.New(errorMsg)
-	}
+func (ts transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) (*xendit.Invoice, error) {
+	// Get user data
+	// user, err := ts.ur.GetUserByID(ctx, id)
+	// if err != nil {
+	// 	errorMsg := "[user] " + err.Error()
+	// 	return nil, errors.New(errorMsg)
+	// }
+	// Get product data
 	product, err := ts.pr.GetProductByID(ctx, req.ProductID)
 	if err != nil {
 		errorMsg := "[product] " + err.Error()
-		return errors.New(errorMsg)
+		return nil, errors.New(errorMsg)
 	}
-	sub := user.Credit.Amount - product.Price
-	if sub < 0 {
-		return errors.New("not enough credit")
-	}
+	// // Check if credit is enough
+	// sub := user.Credit.Amount - product.Price
+	// if sub < 0 {
+	// 	return errors.New("not enough credit")
+	// }
+
+	// Create transaction request
 	transactionRequest := entity.Transaction{
 		UserID:    id,
 		Status:    "PENDING",
@@ -307,17 +313,25 @@ func (ts transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	transaction, err := ts.tr.InsertTransaction(ctx, transactionRequest)
+
+	// Insert transaction to database
+	_, err = ts.tr.InsertTransaction(ctx, transactionRequest)
 	if err != nil {
 		errorMsg := "[transaction] " + err.Error()
-		return errors.New(errorMsg)
+		return nil, errors.New(errorMsg)
 	}
-	invo, err := ts.pyr.CreateInvoice(ctx, transaction, user)
-	if err != nil {
-		return err
-	}
-	err = ts.pyr.InsertInvoiceData(ctx, invo, transaction.ID)
-	return err
+
+	// Create xendit invoice
+	// invo, err := ts.pyr.CreateInvoice(ctx, transaction, user)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// // Insert invoice data to database
+	// err = ts.pyr.InsertInvoiceData(ctx, invo, transaction.ID)
+
+	// // Return invoice data and errors
+	return nil, err
 }
 
 func (ts transactionService) UpdateStatus(ctx context.Context, status string, id uint64) error {
