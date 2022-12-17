@@ -40,6 +40,9 @@ func (ps paymentService) PayWithOVO(ctx context.Context, req dto.PayWithOVO, use
 	if err != nil {
 		return nil, err
 	}
+	if transaction.Status == "SUCCEEDED" || transaction.Status == "REFUNDED" || transaction.Status == "FAILED" {
+		return nil, errors.New("cannot charge")
+	}
 
 	params := ewallet.CreateEWalletChargeParams{
 		ReferenceID:    utils.CreateExternalID(req.TransactionID),

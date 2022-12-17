@@ -17,7 +17,7 @@ type ITransactionRepository interface {
 	InsertTransaction(ctx context.Context, req entity.Transaction) (entity.Transaction, error)
 	UpdateTransaction(ctx context.Context, req entity.Transaction, id uint64) error
 	DeleteTransaction(ctx context.Context, id uint64) error
-	CountSuccessTransactionByUserID(ctx context.Context, userID uuid.UUID)(int64, error)
+	CountSuccessTransactionByUserID(ctx context.Context, userID uuid.UUID) (int64, error)
 	DeleteInvoice(ctx context.Context, transactionID uint64) error
 }
 
@@ -68,13 +68,13 @@ func (tr transactionRepository) DeleteTransaction(ctx context.Context, id uint64
 	return err
 }
 
-func (tr transactionRepository) CountSuccessTransactionByUserID(ctx context.Context, userID uuid.UUID)(int64, error){
+func (tr transactionRepository) CountSuccessTransactionByUserID(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
-	err := tr.db.Model(&model.Transaction{}).Where("user_id = ? AND status = ", userID, "SUCCESS").Count(&count).Error
+	err := tr.db.Model(&model.Transaction{}).Where("user_id = ? AND status = ", userID, "SUCCEEDED").Count(&count).Error
 	return count, err
 }
 
-func (tr transactionRepository) DeleteInvoice(ctx context.Context, transactionID uint64) error{
-	err := tr.db.Where("transaction_id = ?",transactionID).Delete(&model.PaymentInvoice{}).Error
+func (tr transactionRepository) DeleteInvoice(ctx context.Context, transactionID uint64) error {
+	err := tr.db.Where("transaction_id = ?", transactionID).Delete(&model.PaymentInvoice{}).Error
 	return err
 }

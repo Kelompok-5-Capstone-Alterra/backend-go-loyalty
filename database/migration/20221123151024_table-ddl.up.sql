@@ -16,7 +16,7 @@ CREATE TABLE user_coins(
 
 CREATE TABLE credits(
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	amount BIGINT,
+	amount DOUBLE,
 	PRIMARY KEY (id)
 );
 
@@ -73,7 +73,7 @@ CREATE TABLE products(
 	description LONGTEXT,
 	provider TEXT,
 	active_period BIGINT,
-	price BIGINT,
+	price DOUBLE,
 	category_id BIGINT UNSIGNED,
 	minimum_transaction BIGINT,
 	coins BIGINT,
@@ -133,7 +133,7 @@ CREATE TABLE transactions(
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	user_id VARCHAR(36) NOT NULL,
 	status TEXT NOT NULL,
-	amount BIGINT,
+	amount DOUBLE,
 	product_id BIGINT UNSIGNED,
 	created_at DATETIME(3),
 	updated_at DATETIME(3),
@@ -142,14 +142,14 @@ CREATE TABLE transactions(
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE payment_invoices(
-	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	transaction_id BIGINT UNSIGNED,
-	url TEXT,
-	amount BIGINT,
-	created_at DATETIME(3),
-	updated_at DATETIME(3),
-	deleted_at DATETIME(3),
-	KEY (deleted_at),
-	PRIMARY KEY (id)
-);
+-- CREATE TABLE payment_invoices(
+-- 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+-- 	transaction_id BIGINT UNSIGNED,
+-- 	url TEXT,
+-- 	amount BIGINT,
+-- 	created_at DATETIME(3),
+-- 	updated_at DATETIME(3),
+-- 	deleted_at DATETIME(3),
+-- 	KEY (deleted_at),
+-- 	PRIMARY KEY (id)
+-- );
