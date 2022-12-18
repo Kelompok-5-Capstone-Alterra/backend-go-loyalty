@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/color"
 )
@@ -44,15 +43,15 @@ func (wc webhookController) HandleEwalletPaymentCallback(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
-	metadata := data["metadata"].(map[string]interface{})
-	userID := metadata["user_id"].(string)
-	id, err := uuid.Parse(userID)
-	if err != nil {
-		return response.ResponseError(http.StatusInternalServerError, err)
-	}
-	err = wc.ts.CheckCoinEligibility(c.Request().Context(), id, uint64(transactionID))
-	if err != nil {
-		return response.ResponseError(http.StatusInternalServerError, err)
-	}
+	// metadata := data["metadata"].(map[string]interface{})
+	// userID := metadata["user_id"].(string)
+	// id, err := uuid.Parse(userID)
+	// if err != nil {
+	// 	return response.ResponseError(http.StatusInternalServerError, err)
+	// }
+	// err = wc.ts.CheckCoinEligibility(c.Request().Context(), id, uint64(transactionID))
+	// if err != nil {
+	// 	return response.ResponseError(http.StatusInternalServerError, err)
+	// }
 	return response.ResponseSuccess(http.StatusOK, nil, c)
 }
