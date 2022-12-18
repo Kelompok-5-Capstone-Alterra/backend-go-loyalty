@@ -9,6 +9,7 @@ import (
 	"backend-go-loyalty/pkg/utils"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/xendit/xendit-go"
@@ -18,6 +19,8 @@ import (
 type IPaymentService interface {
 	PayWithCredit(ctx context.Context, userID uuid.UUID, transactionID uint64) error
 	PayWithOVO(ctx context.Context, req dto.PayWithOVO, userID uuid.UUID) (*xendit.EWalletCharge, error)
+	PayWithDANA(ctx context.Context, req dto.PayWithDANA, userID uuid.UUID) (*xendit.EWalletCharge, error)
+	PayWithShopeePay(ctx context.Context, req dto.PayWithDANA, userID uuid.UUID) (*xendit.EWalletCharge, error)
 }
 
 type paymentService struct {
@@ -43,19 +46,106 @@ func (ps paymentService) PayWithOVO(ctx context.Context, req dto.PayWithOVO, use
 	if transaction.Status == "SUCCEEDED" || transaction.Status == "REFUNDED" || transaction.Status == "FAILED" {
 		return nil, errors.New("cannot charge")
 	}
-
+	productReferenceID := fmt.Sprint("DIGO_Product_", transaction.ProductID)
 	params := ewallet.CreateEWalletChargeParams{
 		ReferenceID:    utils.CreateExternalID(req.TransactionID),
 		Currency:       "IDR",
 		Amount:         transaction.Amount,
 		CheckoutMethod: "ONE_TIME_PAYMENT",
 		ChannelCode:    "ID_OVO",
+		Metadata: map[string]interface{}{
+			"user_id": userID.String(),
+		},
 		ChannelProperties: map[string]string{
+
 			"mobile_number": req.MobileNumber,
 		},
+		Basket: []xendit.EWalletBasketItem{
+			{
+				ReferenceID: productReferenceID,
+				Name:        transaction.Product.Name,
+				Category:    transaction.Product.Category.Name,
+				Currency:    "IDR",
+				Price:       transaction.Product.Price,
+				Quantity:    1,
+				Type:        transaction.Product.Category.Name,
+			},
+		},
+	}
+	res, err := ps.pr.CreateEWalletCharge(ctx, &params)
+	return res, err
+}
+func (ps paymentService) PayWithDANA(ctx context.Context, req dto.PayWithDANA, userID uuid.UUID) (*xendit.EWalletCharge, error) {
+	// Get Transaction Data
+	transaction, err := ps.tr.GetTransactionByIDByUserID(ctx, req.TransactionID, userID)
+	if err != nil {
+		return nil, err
+	}
+	if transaction.Status == "SUCCEEDED" || transaction.Status == "REFUNDED" || transaction.Status == "FAILED" {
+		return nil, errors.New("cannot charge")
+	}
+	productReferenceID := fmt.Sprint("DIGO_Product_", transaction.ProductID)
+	params := ewallet.CreateEWalletChargeParams{
+		ReferenceID:    utils.CreateExternalID(req.TransactionID),
+		Currency:       "IDR",
+		Amount:         transaction.Amount,
+		CheckoutMethod: "ONE_TIME_PAYMENT",
+		ChannelCode:    "ID_DANA",
 		Metadata: map[string]interface{}{
-			"product_name": transaction.Product.Name,
-			"ordered_at":   transaction.CreatedAt,
+			"user_id": userID.String(),
+		},
+		ChannelProperties: map[string]string{
+
+			"success_redirect_url": "https://kuroyamii.works",
+		},
+		Basket: []xendit.EWalletBasketItem{
+			{
+				ReferenceID: productReferenceID,
+				Name:        transaction.Product.Name,
+				Category:    transaction.Product.Category.Name,
+				Currency:    "IDR",
+				Price:       transaction.Product.Price,
+				Quantity:    1,
+				Type:        transaction.Product.Category.Name,
+			},
+		},
+	}
+	res, err := ps.pr.CreateEWalletCharge(ctx, &params)
+	return res, err
+}
+func (ps paymentService) PayWithShopeePay(ctx context.Context, req dto.PayWithDANA, userID uuid.UUID) (*xendit.EWalletCharge, error) {
+	// Get Transaction Data
+	transaction, err := ps.tr.GetTransactionByIDByUserID(ctx, req.TransactionID, userID)
+	if err != nil {
+		return nil, err
+	}
+	if transaction.Status == "SUCCEEDED" || transaction.Status == "REFUNDED" || transaction.Status == "FAILED" {
+		return nil, errors.New("cannot charge")
+	}
+	productReferenceID := fmt.Sprint("DIGO_Product_", transaction.ProductID)
+	params := ewallet.CreateEWalletChargeParams{
+		ReferenceID:    utils.CreateExternalID(req.TransactionID),
+		Currency:       "IDR",
+		Amount:         transaction.Amount,
+		CheckoutMethod: "ONE_TIME_PAYMENT",
+		ChannelCode:    "ID_SHOPEEPAY",
+		Metadata: map[string]interface{}{
+			"user_id": userID.String(),
+		},
+		ChannelProperties: map[string]string{
+
+			"success_redirect_url": "https://kuroyamii.works",
+		},
+		Basket: []xendit.EWalletBasketItem{
+			{
+				ReferenceID: productReferenceID,
+				Name:        transaction.Product.Name,
+				Category:    transaction.Product.Category.Name,
+				Currency:    "IDR",
+				Price:       transaction.Product.Price,
+				Quantity:    1,
+				Type:        transaction.Product.Category.Name,
+			},
 		},
 	}
 	res, err := ps.pr.CreateEWalletCharge(ctx, &params)

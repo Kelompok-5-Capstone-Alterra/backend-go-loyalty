@@ -230,7 +230,6 @@ type TransactionResponse struct {
 	UpdatedAt   time.Time       `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt  `json:"deleted_at"`
 	Product     ProductResponse `json:"products"`
-	User        UserResponse    `json:"user"`
 }
 type TransactionRequest struct {
 	ProductID uint64 `json:"product_id" validate:"required"`
@@ -245,4 +244,7 @@ type PayWithCredit struct {
 type PayWithOVO struct {
 	TransactionID uint64 `json:"transaction_id" validate:"required"`
 	MobileNumber  string `json:"mobile_number" validate:"e164"`
+}
+type PayWithDANA struct {
+	TransactionID uint64 `json:"transaction_id" validate:"required"`
 }

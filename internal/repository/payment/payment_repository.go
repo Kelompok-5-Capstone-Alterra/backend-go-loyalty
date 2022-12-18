@@ -5,6 +5,8 @@ import (
 	"backend-go-loyalty/internal/interfaces"
 	"backend-go-loyalty/internal/model"
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/xendit/xendit-go"
@@ -39,7 +41,11 @@ func (pr paymentRepository) UpdateCredit(ctx context.Context, req entity.Credit)
 
 func (pr paymentRepository) CreateEWalletCharge(ctx context.Context, data *ewallet.CreateEWalletChargeParams) (*xendit.EWalletCharge, error) {
 	charge, err := pr.EWallet.CreateEWalletCharge(data)
-	return charge, err
+	if err != nil{
+		fmt.Println(err)
+		return nil, errors.New(err.Error())
+	}
+	return charge, nil
 }
 
 // func (pr paymentRepository) CreateInvoice(ctx context.Context, req entity.Transaction, user entity.User) (*xendit.Invoice, error) {

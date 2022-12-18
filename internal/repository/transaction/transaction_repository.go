@@ -33,24 +33,24 @@ func NewTransactionRepository(db *gorm.DB) transactionRepository {
 
 func (tr transactionRepository) GetTransactionByIDByUserID(ctx context.Context, id uint64, user_id uuid.UUID) (entity.Transaction, error) {
 	var transaction entity.Transaction
-	err := tr.db.Model(&model.Transaction{}).Preload("Product").Preload("User").Where("user_id = ?", user_id).First(&transaction, id).Error
+	err := tr.db.Model(&model.Transaction{}).Preload("Product").Preload("Product.Category").Preload("User").Where("user_id = ?", user_id).First(&transaction, id).Error
 	return transaction, err
 }
 
 func (tr transactionRepository) GetTransactionByUserID(ctx context.Context, id uuid.UUID) (entity.Transactions, error) {
 	var transactions entity.Transactions
-	err := tr.db.Model(&model.Transaction{}).Preload("Product").Preload("User").Where("user_id = ?", id).Find(&transactions).Error
+	err := tr.db.Model(&model.Transaction{}).Preload("Product").Preload("Product.Category").Preload("User").Where("user_id = ?", id).Find(&transactions).Error
 	return transactions, err
 }
 
 func (tr transactionRepository) GetAllTransaction(ctx context.Context) (entity.Transactions, error) {
 	var transactions entity.Transactions
-	err := tr.db.Model(&model.Transaction{}).Preload("Product").Preload("User").Find(&transactions).Error
+	err := tr.db.Model(&model.Transaction{}).Preload("Product").Preload("Product.Category").Preload("User").Find(&transactions).Error
 	return transactions, err
 }
 func (tr transactionRepository) GetTransactionByID(ctx context.Context, id uint64) (entity.Transaction, error) {
 	var transaction entity.Transaction
-	err := tr.db.Model(&model.Transaction{}).Preload("Product").Preload("User").First(&transaction, id).Error
+	err := tr.db.Model(&model.Transaction{}).Preload("Product").Preload("Product.Category").Preload("User").First(&transaction, id).Error
 	return transaction, err
 }
 func (tr transactionRepository) InsertTransaction(ctx context.Context, req entity.Transaction) (entity.Transaction, error) {
@@ -70,7 +70,7 @@ func (tr transactionRepository) DeleteTransaction(ctx context.Context, id uint64
 
 func (tr transactionRepository) CountSuccessTransactionByUserID(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
-	err := tr.db.Model(&model.Transaction{}).Where("user_id = ? AND status = ", userID, "SUCCEEDED").Count(&count).Error
+	err := tr.db.Model(&model.Transaction{}).Where("user_id = ? AND status = ?", userID, "SUCCEEDED").Count(&count).Error
 	return count, err
 }
 

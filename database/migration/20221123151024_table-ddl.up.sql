@@ -134,6 +134,7 @@ CREATE TABLE transactions(
 	user_id VARCHAR(36) NOT NULL,
 	status TEXT NOT NULL,
 	amount DOUBLE,
+	coins_earned BIGINT,
 	product_id BIGINT UNSIGNED,
 	created_at DATETIME(3),
 	updated_at DATETIME(3),

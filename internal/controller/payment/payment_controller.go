@@ -16,6 +16,8 @@ type IPaymentController interface {
 	// HandleNotification(c echo.Context) error
 	HandlePayWithCredit(c echo.Context) error
 	HandlePayWithOVO(c echo.Context) error
+	HandlePayWithDANA(c echo.Context) error
+	HandlePayWithShopeePay(c echo.Context) error
 }
 
 type paymentController struct {
@@ -43,6 +45,42 @@ func (pc paymentController) HandlePayWithOVO(c echo.Context) error {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
 	data, err := pc.ps.PayWithOVO(c.Request().Context(), req, userID)
+	if err != nil {
+		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
+}
+func (pc paymentController) HandlePayWithDANA(c echo.Context) error {
+	req := dto.PayWithDANA{}
+	c.Bind(&req)
+	validate := validator.New()
+	err := validate.Struct(req)
+	if err != nil {
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
+	}
+	userID, err := utils.GetUserIDFromJWT(c)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
+	data, err := pc.ps.PayWithDANA(c.Request().Context(), req, userID)
+	if err != nil {
+		return response.ResponseError(http.StatusInternalServerError, err)
+	}
+	return response.ResponseSuccess(http.StatusOK, data, c)
+}
+func (pc paymentController) HandlePayWithShopeePay(c echo.Context) error {
+	req := dto.PayWithDANA{}
+	c.Bind(&req)
+	validate := validator.New()
+	err := validate.Struct(req)
+	if err != nil {
+		return response.ResponseErrorRequestBody(http.StatusBadRequest, err)
+	}
+	userID, err := utils.GetUserIDFromJWT(c)
+	if err != nil {
+		return response.ResponseError(http.StatusBadRequest, err)
+	}
+	data, err := pc.ps.PayWithShopeePay(c.Request().Context(), req, userID)
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
