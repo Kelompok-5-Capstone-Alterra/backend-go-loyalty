@@ -11,6 +11,7 @@ import (
 	rewardController "backend-go-loyalty/internal/controller/reward"
 	transactionController "backend-go-loyalty/internal/controller/transaction"
 	userController "backend-go-loyalty/internal/controller/user"
+	webhookController "backend-go-loyalty/internal/controller/webhook"
 	authRepository "backend-go-loyalty/internal/repository/auth"
 	categoryRepository "backend-go-loyalty/internal/repository/category"
 	faqRepository "backend-go-loyalty/internal/repository/faq"
@@ -25,6 +26,7 @@ import (
 	authService "backend-go-loyalty/internal/service/auth"
 	categoryService "backend-go-loyalty/internal/service/category"
 	faqService "backend-go-loyalty/internal/service/faq"
+	paymentService "backend-go-loyalty/internal/service/payment"
 	pingService "backend-go-loyalty/internal/service/ping"
 	productService "backend-go-loyalty/internal/service/product"
 	redeemService "backend-go-loyalty/internal/service/redeem"
@@ -33,11 +35,11 @@ import (
 	userService "backend-go-loyalty/internal/service/user"
 
 	"github.com/labstack/echo/v4"
-	"github.com/xendit/xendit-go/invoice"
+	"github.com/xendit/xendit-go/client"
 	"gorm.io/gorm"
 )
 
-func InitEndpoints(router *echo.Echo, db *gorm.DB, xen *invoice.Client) {
+func InitEndpoints(router *echo.Echo, db *gorm.DB, xenditAPI *client.API) {
 	pingService := pingService.NewPingService()
 	pingController := pingController.NewPingController(pingService)
 	pingRoutes := routes.NewPingRoutes(pingController, router)
@@ -91,7 +93,7 @@ func InitEndpoints(router *echo.Echo, db *gorm.DB, xen *invoice.Client) {
 	faqRoutes := routes.NewFAQRoutes(faqController, router)
 	faqRoutes.InitEndpoints()
 
-	paymentRepository := paymentRepository.NewPaymentRepository(xen, db)
+	paymentRepository := paymentRepository.NewPaymentRepository(db, xenditAPI.EWallet)
 
 	transactionRepository := transactionRepository.NewTransactionRepository(db)
 	transactionService := transactionService.NewTransactionService(transactionRepository, userRepository, productRepository, paymentRepository, pointRepository)
@@ -99,7 +101,12 @@ func InitEndpoints(router *echo.Echo, db *gorm.DB, xen *invoice.Client) {
 	transactionRoutes := routes.NewTransactionRoutes(transactionController, router)
 	transactionRoutes.InitEndpoints()
 
-	paymentController := paymentController.NewPaymentController(transactionService)
+	paymentService := paymentService.NewPaymentService(transactionRepository, paymentRepository, userRepository)
+	paymentController := paymentController.NewPaymentController(transactionService, paymentService)
 	paymentRoutes := routes.NewPaymentRoutes(paymentController, router)
 	paymentRoutes.InitEndpoints()
+
+	webhookController := webhookController.NewWebhookController(transactionService)
+	webhookRoutes := routes.NewWebhookRoutes(webhookController, router)
+	webhookRoutes.InitEndpoints()
 }

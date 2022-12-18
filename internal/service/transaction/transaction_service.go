@@ -10,9 +10,11 @@ import (
 	userRepository "backend-go-loyalty/internal/repository/user"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/xendit/xendit-go"
 )
 
 type ITransactionService interface {
@@ -20,10 +22,10 @@ type ITransactionService interface {
 	GetTransactionByIDByUserID(ctx context.Context, user_id uuid.UUID, id uint64) (dto.TransactionResponse, error)
 	GetAllTransaction(ctx context.Context) (dto.TransactionResponses, error)
 	GetTransactionByID(ctx context.Context, id uint64) (dto.TransactionResponse, error)
-	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error
+	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) (*xendit.Invoice, error)
 	UpdateStatus(ctx context.Context, status string, id uint64) error
 	DeleteTransaction(ctx context.Context, id uint64) error
-	CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transaction entity.Transaction) error
+	CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transactionID uint64) error
 	DeleteInvoice(ctx context.Context, transactionID uint64) error
 }
 
@@ -81,28 +83,6 @@ func (ts transactionService) GetTransactionByUserID(ctx context.Context, id uuid
 					DeletedAt: val.Product.Category.DeletedAt,
 				},
 			},
-			User: dto.UserResponse{
-				ID:           val.User.ID,
-				Name:         val.User.Name,
-				Email:        val.User.Email,
-				MobileNumber: val.User.MobileNumber,
-				CreatedAt:    val.User.CreatedAt,
-				UpdatedAt:    val.User.UpdatedAt,
-				Role: dto.RoleResponse{
-					ID:        val.User.Role.ID,
-					Name:      val.User.Role.Name,
-					CreatedAt: val.User.Role.CreatedAt,
-					UpdatedAt: val.User.Role.UpdatedAt,
-				},
-				UserCoin: dto.UserCoinResponse{
-					ID:     val.User.UserCoin.ID,
-					Amount: val.User.UserCoin.Amount,
-				},
-				Credit: dto.CreditResponse{
-					ID:     val.User.Credit.ID,
-					Amount: val.User.Credit.Amount,
-				},
-			},
 		}
 		transactions = append(transactions, transaction)
 	}
@@ -137,28 +117,6 @@ func (ts transactionService) GetTransactionByIDByUserID(ctx context.Context, use
 				CreatedAt: data.Product.Category.CreatedAt,
 				UpdatedAt: data.Product.Category.UpdatedAt,
 				DeletedAt: data.Product.Category.DeletedAt,
-			},
-		},
-		User: dto.UserResponse{
-			ID:           data.User.ID,
-			Name:         data.User.Name,
-			Email:        data.User.Email,
-			MobileNumber: data.User.MobileNumber,
-			CreatedAt:    data.User.CreatedAt,
-			UpdatedAt:    data.User.UpdatedAt,
-			Role: dto.RoleResponse{
-				ID:        data.User.Role.ID,
-				Name:      data.User.Role.Name,
-				CreatedAt: data.User.Role.CreatedAt,
-				UpdatedAt: data.User.Role.UpdatedAt,
-			},
-			UserCoin: dto.UserCoinResponse{
-				ID:     data.User.UserCoin.ID,
-				Amount: data.User.UserCoin.Amount,
-			},
-			Credit: dto.CreditResponse{
-				ID:     data.User.Credit.ID,
-				Amount: data.User.Credit.Amount,
 			},
 		},
 	}
@@ -201,28 +159,6 @@ func (ts transactionService) GetAllTransaction(ctx context.Context) (dto.Transac
 					DeletedAt: val.Product.Category.DeletedAt,
 				},
 			},
-			User: dto.UserResponse{
-				ID:           val.User.ID,
-				Name:         val.User.Name,
-				Email:        val.User.Email,
-				MobileNumber: val.User.MobileNumber,
-				CreatedAt:    val.User.CreatedAt,
-				UpdatedAt:    val.User.UpdatedAt,
-				Role: dto.RoleResponse{
-					ID:        val.User.Role.ID,
-					Name:      val.User.Role.Name,
-					CreatedAt: val.User.Role.CreatedAt,
-					UpdatedAt: val.User.Role.UpdatedAt,
-				},
-				UserCoin: dto.UserCoinResponse{
-					ID:     val.User.UserCoin.ID,
-					Amount: val.User.UserCoin.Amount,
-				},
-				Credit: dto.CreditResponse{
-					ID:     val.User.Credit.ID,
-					Amount: val.User.Credit.Amount,
-				},
-			},
 		}
 		transactions = append(transactions, transaction)
 	}
@@ -259,46 +195,29 @@ func (ts transactionService) GetTransactionByID(ctx context.Context, id uint64) 
 				DeletedAt: data.Product.Category.DeletedAt,
 			},
 		},
-		User: dto.UserResponse{
-			ID:           data.User.ID,
-			Name:         data.User.Name,
-			Email:        data.User.Email,
-			MobileNumber: data.User.MobileNumber,
-			CreatedAt:    data.User.CreatedAt,
-			UpdatedAt:    data.User.UpdatedAt,
-			Role: dto.RoleResponse{
-				ID:        data.User.Role.ID,
-				Name:      data.User.Role.Name,
-				CreatedAt: data.User.Role.CreatedAt,
-				UpdatedAt: data.User.Role.UpdatedAt,
-			},
-			UserCoin: dto.UserCoinResponse{
-				ID:     data.User.UserCoin.ID,
-				Amount: data.User.UserCoin.Amount,
-			},
-			Credit: dto.CreditResponse{
-				ID:     data.User.Credit.ID,
-				Amount: data.User.Credit.Amount,
-			},
-		},
 	}
 	return transaction, err
 }
-func (ts transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error {
-	user, err := ts.ur.GetUserByID(ctx, id)
-	if err != nil {
-		errorMsg := "[user] " + err.Error()
-		return errors.New(errorMsg)
-	}
+func (ts transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) (*xendit.Invoice, error) {
+	// Get user data
+	// user, err := ts.ur.GetUserByID(ctx, id)
+	// if err != nil {
+	// 	errorMsg := "[user] " + err.Error()
+	// 	return nil, errors.New(errorMsg)
+	// }
+	// Get product data
 	product, err := ts.pr.GetProductByID(ctx, req.ProductID)
 	if err != nil {
 		errorMsg := "[product] " + err.Error()
-		return errors.New(errorMsg)
+		return nil, errors.New(errorMsg)
 	}
-	sub := user.Credit.Amount - product.Price
-	if sub < 0 {
-		return errors.New("not enough credit")
-	}
+	// // Check if credit is enough
+	// sub := user.Credit.Amount - product.Price
+	// if sub < 0 {
+	// 	return errors.New("not enough credit")
+	// }
+
+	// Create transaction request
 	transactionRequest := entity.Transaction{
 		UserID:    id,
 		Status:    "PENDING",
@@ -307,17 +226,25 @@ func (ts transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	transaction, err := ts.tr.InsertTransaction(ctx, transactionRequest)
+
+	// Insert transaction to database
+	_, err = ts.tr.InsertTransaction(ctx, transactionRequest)
 	if err != nil {
 		errorMsg := "[transaction] " + err.Error()
-		return errors.New(errorMsg)
+		return nil, errors.New(errorMsg)
 	}
-	invo, err := ts.pyr.CreateInvoice(ctx, transaction, user)
-	if err != nil {
-		return err
-	}
-	err = ts.pyr.InsertInvoiceData(ctx, invo, transaction.ID)
-	return err
+
+	// Create xendit invoice
+	// invo, err := ts.pyr.CreateInvoice(ctx, transaction, user)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// // Insert invoice data to database
+	// err = ts.pyr.InsertInvoiceData(ctx, invo, transaction.ID)
+
+	// // Return invoice data and errors
+	return nil, err
 }
 
 func (ts transactionService) UpdateStatus(ctx context.Context, status string, id uint64) error {
@@ -332,12 +259,14 @@ func (ts transactionService) DeleteTransaction(ctx context.Context, id uint64) e
 	err := ts.tr.DeleteTransaction(ctx, id)
 	return err
 }
-func (ts transactionService) CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transaction entity.Transaction) error {
+func (ts transactionService) CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transactionID uint64) error {
+	transaction, err := ts.tr.GetTransactionByID(ctx, transactionID)
 	count, err := ts.tr.CountSuccessTransactionByUserID(ctx, userID)
+	fmt.Println(count, transaction.Product.MinimumTransaction)
 	if err != nil {
 		return err
 	}
-	if count%int64(transaction.Product.Coins) == 0 {
+	if count%int64(transaction.Product.MinimumTransaction) == 0 {
 		req := entity.Transaction{
 			CoinsEarned: int64(transaction.Product.Coins),
 		}

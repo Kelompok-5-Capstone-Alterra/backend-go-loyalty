@@ -75,7 +75,7 @@ func (rc rewardController) UpdateReward(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	var req dto.RewardRequest
+	req := dto.RewardRequest{}
 	c.Bind(&req)
 	err = rc.rs.UpdateReward(c.Request().Context(), req, id)
 	if err != nil {

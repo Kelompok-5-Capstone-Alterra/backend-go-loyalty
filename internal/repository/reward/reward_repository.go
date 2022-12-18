@@ -12,7 +12,7 @@ type IRewardRepository interface {
 	CreateReward(ctx context.Context, reward *entity.Reward) error
 	FindAllReward(ctx context.Context) (*entity.Rewards, error)
 	FindRewardByID(ctx context.Context, id uint64) (*entity.Reward, error)
-	UpdateReward(ctx context.Context, r *entity.Reward, id uint64) error
+	UpdateReward(ctx context.Context, r entity.Reward, id uint64) error
 	DeleteReward(ctx context.Context, id uint64) error
 }
 
@@ -50,13 +50,9 @@ func (rr *rewardRepository) CreateReward(ctx context.Context, reward *entity.Rew
 	return nil
 }
 
-func (rr *rewardRepository) UpdateReward(ctx context.Context, r *entity.Reward, id uint64) error {
+func (rr *rewardRepository) UpdateReward(ctx context.Context, r entity.Reward, id uint64) error {
 	err := rr.DB.Model(&model.Reward{}).Where("id = ?", id).Updates(r).Error
-
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (rr *rewardRepository) DeleteReward(ctx context.Context, id uint64) error {
