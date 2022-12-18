@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/xendit/xendit-go"
 )
 
 type ITransactionService interface {
@@ -22,7 +21,7 @@ type ITransactionService interface {
 	GetTransactionByIDByUserID(ctx context.Context, user_id uuid.UUID, id uint64) (dto.TransactionResponse, error)
 	GetAllTransaction(ctx context.Context) (dto.TransactionResponses, error)
 	GetTransactionByID(ctx context.Context, id uint64) (dto.TransactionResponse, error)
-	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) (*xendit.Invoice, error)
+	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error
 	UpdateStatus(ctx context.Context, status string, id uint64) error
 	DeleteTransaction(ctx context.Context, id uint64) error
 	CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transactionID uint64) error
@@ -198,7 +197,7 @@ func (ts transactionService) GetTransactionByID(ctx context.Context, id uint64) 
 	}
 	return transaction, err
 }
-func (ts transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) (*xendit.Invoice, error) {
+func (ts transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error {
 	// Get user data
 	// user, err := ts.ur.GetUserByID(ctx, id)
 	// if err != nil {
@@ -209,7 +208,7 @@ func (ts transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 	product, err := ts.pr.GetProductByID(ctx, req.ProductID)
 	if err != nil {
 		errorMsg := "[product] " + err.Error()
-		return nil, errors.New(errorMsg)
+		return errors.New(errorMsg)
 	}
 	// // Check if credit is enough
 	// sub := user.Credit.Amount - product.Price
@@ -229,10 +228,7 @@ func (ts transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 
 	// Insert transaction to database
 	_, err = ts.tr.InsertTransaction(ctx, transactionRequest)
-	if err != nil {
-		errorMsg := "[transaction] " + err.Error()
-		return nil, errors.New(errorMsg)
-	}
+	return err
 
 	// Create xendit invoice
 	// invo, err := ts.pyr.CreateInvoice(ctx, transaction, user)
@@ -244,7 +240,6 @@ func (ts transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 	// err = ts.pyr.InsertInvoiceData(ctx, invo, transaction.ID)
 
 	// // Return invoice data and errors
-	return nil, err
 }
 
 func (ts transactionService) UpdateStatus(ctx context.Context, status string, id uint64) error {

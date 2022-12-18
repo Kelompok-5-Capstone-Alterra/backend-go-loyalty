@@ -64,13 +64,12 @@ func (tc transactionController) HandleCreateTransaction(c echo.Context) error {
 	if err != nil {
 		return response.ResponseError(http.StatusBadRequest, err)
 	}
-	data,err := tc.ts.CreateTransaction(c.Request().Context(), req, id)
+	err = tc.ts.CreateTransaction(c.Request().Context(), req, id)
 	if err != nil {
 		return response.ResponseError(http.StatusInternalServerError, err)
 	}
 	return response.ResponseSuccess(http.StatusCreated, echo.Map{
 		"status": "PENDING_PAYMENT",
-		"invoice":data,
 	}, c)
 }
 func (tc transactionController) HandleGetTransactionsByUserID(c echo.Context) error {
