@@ -31,7 +31,7 @@ func (fs faqService) GetAllFAQ(ctx context.Context, keyword string) (dto.FAQResp
 	if err != nil {
 		return dto.FAQResponses{}, err
 	}
-	var faqs dto.FAQResponses
+	faqs := dto.FAQResponses{}
 	for _, val := range data {
 		faq := dto.FAQResponse{
 			ID:        val.ID,
@@ -74,7 +74,6 @@ func (fs faqService) UpdateFAQ(ctx context.Context, req dto.FAQUpdateRequest, id
 	faq := entity.FAQ{
 		Question:  req.Question,
 		Answer:    req.Answer,
-		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 	err := fs.fr.UpdateFAQ(ctx, faq, id)

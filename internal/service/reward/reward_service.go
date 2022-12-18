@@ -109,6 +109,7 @@ func (rs rewardServiceImpl) UpdateReward(ctx context.Context, req dto.RewardRequ
 		Description:   req.Description,
 		RequiredPoint: req.RequiredPoint,
 		CategoryID:    req.CategoryID,
+		UpdatedAt:     time.Now(),
 	}
 
 	if req.ValidUntil != "" {
@@ -119,11 +120,8 @@ func (rs rewardServiceImpl) UpdateReward(ctx context.Context, req dto.RewardRequ
 		reward.ValidUntil = valid
 	}
 
-	err := rs.rr.UpdateReward(ctx, &reward, id)
-	if err != nil {
-		return err
-	}
-	return nil
+	err := rs.rr.UpdateReward(ctx, reward, id)
+	return err
 }
 
 func (rs rewardServiceImpl) DeleteReward(ctx context.Context, rewardID uint64) error {

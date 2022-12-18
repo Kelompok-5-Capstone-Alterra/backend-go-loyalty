@@ -64,7 +64,7 @@ type Reward struct {
 	ID            uint64         `db:"id" gorm:"primaryKey;autoIncrement;column:id"`
 	Name          string         `db:"name"`
 	Description   string         `db:"description"`
-	RequiredPoint uint64         `db:"required_points"`
+	RequiredPoint int64          `db:"required_points"`
 	ValidUntil    time.Time      `db:"valid_until"`
 	CategoryID    uint64         `db:"category_id"`
 	CreatedAt     time.Time      `db:"created_at"`

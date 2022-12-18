@@ -168,9 +168,9 @@ func (wrt webhookRoutes) InitEndpoints() {
 
 func (prt paymentRoutes) InitEndpoints() {
 	prt.router.POST("/payment/pay/credit", prt.pc.HandlePayWithCredit, middleware.ValidateJWT)
-	prt.router.POST("/payment/pay/ovo",prt.pc.HandlePayWithOVO,middleware.ValidateJWT)
-	prt.router.POST("/payment/pay/dana",prt.pc.HandlePayWithDANA,middleware.ValidateJWT)
-	prt.router.POST("/payment/pay/shopeepay",prt.pc.HandlePayWithShopeePay,middleware.ValidateJWT)
+	prt.router.POST("/payment/pay/ovo", prt.pc.HandlePayWithOVO, middleware.ValidateJWT)
+	prt.router.POST("/payment/pay/dana", prt.pc.HandlePayWithDANA, middleware.ValidateJWT)
+	prt.router.POST("/payment/pay/shopeepay", prt.pc.HandlePayWithShopeePay, middleware.ValidateJWT)
 }
 
 func (trt transactionRoutes) InitEndpoints() {
