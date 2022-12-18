@@ -33,12 +33,18 @@ func main() {
 	case "up":
 		{
 			log.Println("Migrating Database Up...")
-			m.Up()
+			err := m.Up()
+			if err != nil {
+				fmt.Printf("migration(up): Error eccoured -> %v\n", err.Error())
+			}
 		}
 	case "down":
 		{
 			log.Println("Migrating Database Down...")
-			m.Down()
+			err := m.Down()
+			if err != nil {
+				fmt.Printf("migration(down): Error eccoured -> %v\n", err.Error())
+			}
 		}
 	default:
 		{
