@@ -131,7 +131,7 @@ CREATE TABLE faqs(
 
 CREATE TABLE transactions(
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	user_id VARCHAR(36) NOT NULL,
+	user_id VARCHAR(36),
 	status TEXT NOT NULL,
 	amount DOUBLE,
 	coins_earned BIGINT,
@@ -140,7 +140,11 @@ CREATE TABLE transactions(
 	updated_at DATETIME(3),
 	deleted_at DATETIME(3),
 	KEY (user_id, product_id, deleted_at),
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+	ON UPDATE CASCADE ON DELETE SET NULL,
+	FOREIGN KEY (product_id) REFERENCES products(id)
+	ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 -- CREATE TABLE payment_invoices(
