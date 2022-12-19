@@ -21,7 +21,7 @@ type ITransactionService interface {
 	GetTransactionByIDByUserID(ctx context.Context, user_id uuid.UUID, id uint64) (dto.TransactionResponse, error)
 	GetAllTransaction(ctx context.Context) (dto.TransactionResponses, error)
 	GetTransactionByID(ctx context.Context, id uint64) (dto.TransactionResponse, error)
-	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error
+	CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) (dto.TransactionResponse,error)
 	UpdateStatus(ctx context.Context, status string, id uint64) error
 	DeleteTransaction(ctx context.Context, id uint64) error
 	CheckCoinEligibility(ctx context.Context, userID uuid.UUID, transactionID uint64) error
@@ -197,7 +197,7 @@ func (ts transactionService) GetTransactionByID(ctx context.Context, id uint64) 
 	}
 	return transaction, err
 }
-func (ts transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) error {
+func (ts transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequest, id uuid.UUID) (dto.TransactionResponse,error) {
 	// Get user data
 	// user, err := ts.ur.GetUserByID(ctx, id)
 	// if err != nil {
@@ -208,7 +208,7 @@ func (ts transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 	product, err := ts.pr.GetProductByID(ctx, req.ProductID)
 	if err != nil {
 		errorMsg := "[product] " + err.Error()
-		return errors.New(errorMsg)
+		return dto.TransactionResponse{},errors.New(errorMsg)
 	}
 	// // Check if credit is enough
 	// sub := user.Credit.Amount - product.Price
@@ -227,8 +227,38 @@ func (ts transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 	}
 
 	// Insert transaction to database
-	_, err = ts.tr.InsertTransaction(ctx, transactionRequest)
-	return err
+	data, err := ts.tr.InsertTransaction(ctx, transactionRequest)
+	transaction := dto.TransactionResponse{
+		ID:        data.ID,
+		UserID:    data.UserID,
+		Status:    data.Status,
+		Amount:    data.Amount,
+		ProductID: data.ProductID,
+		CreatedAt: data.CreatedAt,
+		UpdatedAt: data.UpdatedAt,
+		DeletedAt: data.DeletedAt,
+		Product: dto.ProductResponse{
+			ID:                 data.Product.ID,
+			Name:               data.Product.Name,
+			Description:        data.Product.Description,
+			Provider:           data.Product.Provider,
+			ActivePeriod:       data.Product.ActivePeriod,
+			Price:              data.Product.Price,
+			MinimumTransaction: data.Product.MinimumTransaction,
+			Coins:              data.Product.Coins,
+			CreatedAt:          data.Product.CreatedAt,
+			UpdatedAt:          data.Product.UpdatedAt,
+			DeletedAt:          data.Product.DeletedAt,
+			Category: dto.CategoryResponse{
+				ID:        data.Product.Category.ID,
+				Name:      data.Product.Category.Name,
+				CreatedAt: data.Product.Category.CreatedAt,
+				UpdatedAt: data.Product.Category.UpdatedAt,
+				DeletedAt: data.Product.Category.DeletedAt,
+			},
+		},
+	}
+	return transaction, err
 
 	// Create xendit invoice
 	// invo, err := ts.pyr.CreateInvoice(ctx, transaction, user)
