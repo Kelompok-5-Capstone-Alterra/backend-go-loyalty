@@ -55,7 +55,12 @@ func (tr transactionRepository) GetTransactionByID(ctx context.Context, id uint6
 }
 func (tr transactionRepository) InsertTransaction(ctx context.Context, req entity.Transaction) (entity.Transaction, error) {
 	err := tr.db.Create(&req).Error
-	return req, err
+	if err != nil{
+		return entity.Transaction{}, err
+	}
+	var transaction entity.Transaction
+	err = tr.db.Model(&model.Transaction{}).Preload("Product").Preload("Product.Category").Preload("User").First(&transaction, req.ID).Error
+	return transaction, err
 }
 
 func (tr transactionRepository) UpdateTransaction(ctx context.Context, req entity.Transaction, id uint64) error {
