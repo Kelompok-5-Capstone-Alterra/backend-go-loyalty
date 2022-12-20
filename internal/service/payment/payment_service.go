@@ -96,7 +96,7 @@ func (ps paymentService) PayWithDANA(ctx context.Context, req dto.PayWithDANA, u
 		},
 		ChannelProperties: map[string]string{
 
-			"success_redirect_url": "https://kuroyamii.works",
+			"success_redirect_url": "https://digitaloutlet.page.link/jTpt",
 		},
 		Basket: []xendit.EWalletBasketItem{
 			{
@@ -134,7 +134,7 @@ func (ps paymentService) PayWithShopeePay(ctx context.Context, req dto.PayWithDA
 		},
 		ChannelProperties: map[string]string{
 
-			"success_redirect_url": "https://kuroyamii.works",
+			"success_redirect_url": "https://digitaloutlet.page.link/jTpt",
 		},
 		Basket: []xendit.EWalletBasketItem{
 			{
